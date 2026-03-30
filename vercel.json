@@ -1,0 +1,6 @@
+{
+  "routes": [
+    { "src": "/basvuru", "dest": "/basvuru.html" },
+    { "src": "/([^/]+)", "dest": "/site.html" }
+  ]
+}

@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApartYönet — Başvuru</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --page-bg: #f5f1eb;
+            --surface: #ffffff;
+            --surface-muted: #f0e7da;
+            --text: #0f172a;
+            --muted: #5b5a54;
+            --accent: #a3622d;
+            --accent-strong: #4f2d14;
+            --accent-dark: #794018;
+            --border: rgba(15, 23, 42, 0.15);
+            --shadow-soft: 0 25px 45px rgba(15, 23, 42, 0.12);
+            --danger: #b12222;
+            --danger-soft: rgba(177, 34, 34, 0.15);
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+            background: var(--page-bg);
+            color: var(--text);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: url("https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1400&q=60") center/cover;
+            filter: blur(14px) brightness(0.8);
+            opacity: 0.4;
+            z-index: -2;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(245, 241, 235, 0.9), rgba(245, 241, 235, 0.95));
+            z-index: -1;
+        }
+
+        .hero-shell {
+            background: linear-gradient(135deg, #312e81, #0f172a);
+            color: white;
+            padding: 28px 18px 32px;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-shell::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 45%);
+            pointer-events: none;
+        }
+
+        .hero-shell__container {
+            position: relative;
+            z-index: 1;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .hero-shell__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hero-shell__logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            color: inherit;
+            letter-spacing: 0.03em;
+        }
+
+        .hero-shell__logo-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            padding: 4px;
+        }
+
+        .hero-shell__logo-mark img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            display: block;
+        }
+
+        .hero-shell__logo-text {
+            font-size: 1rem;
+            letter-spacing: 0.01em;
+        }
+
+        .hero-shell__badge {
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.4px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 999px;
+            padding: 6px 18px;
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        .hero-shell__eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hero-shell h1 {
+            font-size: clamp(2.3rem, 4vw, 3rem);
+            line-height: 1.1;
+            margin: 0 0 12px;
+            font-weight: 600;
+        }
+
+        .hero-shell h1 strong {
+            color: #e0cfff;
+            font-weight: 700;
+        }
+
+        .hero-shell__lead {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85rem;
+            max-width: 520px;
+            line-height: 1.3;
+            margin: 0;
+        }
+
+        .hero-shell__chips {
+            display: none;
+        }
+
+        main.page {
+            padding: 0 16px 56px;
+            margin-top: -32px;
+        }
+
+        .wrap {
+            max-width: 840px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border);
+        }
+
+        .prog-bar {
+            height: 5px;
+            background: rgba(15, 23, 42, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        .prog-fill {
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .si {
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: var(--surface);
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .si.done {
+            background: rgba(124, 58, 237, 0.08);
+            border-color: rgba(124, 58, 237, 0.4);
+        }
+
+        .si.active {
+            background: rgba(124, 58, 237, 0.18);
+            border-color: var(--accent);
+            box-shadow: 0 6px 18px rgba(76, 29, 149, 0.25);
+        }
+
+        .sc {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid transparent;
+            margin: 0 auto 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            font-weight: 600;
+            background: rgba(15, 23, 42, 0.04);
+            color: var(--muted);
+            transition: all 0.3s;
+        }
+
+        .si.active .sc,
+        .si.done .sc {
+            background: var(--accent);
+            color: white;
+        }
+
+        .sl {
+            font-size: 0.78rem;
+            letter-spacing: 0.02em;
+            color: var(--muted);
+        }
+
+        .si.active .sl {
+            color: var(--accent-strong);
+            font-weight: 600;
+        }
+
+        .panel {
+            display: none;
+            animation: fadeUp 0.28s ease;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 22px 44px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .ch {
+            padding: 20px 26px;
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+        }
+
+        .ci {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--surface-muted);
+            color: var(--accent-strong);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .ct {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        .cs {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .cb {
+            padding: 24px 26px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .fr {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .f {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .f label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .f input,
+        .f select,
+        .f textarea {
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            font-size: 0.95rem;
+            padding: 12px 14px;
+            font-family: inherit;
+            background: #fff;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+
+        .f input:focus,
+        .f select:focus,
+        .f textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        }
+
+        .f input.err,
+        .f select.err {
+            border-color: var(--danger);
+        }
+
+        .ferr {
+            font-size: 0.75rem;
+            color: var(--danger);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .ferr.show {
+            display: block;
+        }
+
+        .req {
+            color: var(--accent);
+        }
+
+        .fhint {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        textarea {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        .blok-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .blok-header,
+        .blok-row {
+            display: grid;
+            grid-template-columns: 42px 2fr repeat(3, minmax(120px, 1fr)) 40px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .blok-header {
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .blok-row {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 10px 14px;
+            border: 1px solid rgba(15, 23, 42, 0.1);
+        }
+
+        .blok-row input {
+            width: 100%;
+        }
+
+        .blok-row input.err {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 2px var(--danger-soft);
+        }
+
+        .bb {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: #ffffff;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            color: var(--accent-strong);
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+        }
+
+        .bf {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .bf label {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .bf input {
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            background: #fff;
+            font-family: inherit;
+        }
+
+        .brm {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.2);
+            background: #fff;
+            cursor: pointer;
+            color: var(--danger);
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+
+        .brm:hover {
+            transform: translateY(-2px);
+        }
+
+        .add-blok {
+            align-self: flex-start;
+            border-radius: 12px;
+            border: 1px dashed rgba(15, 23, 42, 0.35);
+            background: #fff;
+            padding: 10px 18px;
+            font-weight: 600;
+            color: var(--accent-strong);
+            cursor: pointer;
+            transition: border 0.2s, color 0.2s;
+        }
+
+        .add-blok:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .dukkan-section {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(15, 23, 42, 0.1);
+            margin: 12px 0 6px;
+        }
+
+        .sum-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .sum-item {
+            background: #f8fafc;
+            border-radius: 14px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            padding: 12px 14px;
+        }
+
+        .sum-item label {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .sum-item .v {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .sum-bloklar {
+            border-radius: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border: 1px solid rgba(15, 23, 42, 0.1);
+        }
+
+        .sum-bloklar label {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pill {
+            border-radius: 999px;
+            background: rgba(124, 58, 237, 0.15);
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            color: var(--accent-strong);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            gap: 12px;
+        }
+
+        .btn-back,
+        .btn-next,
+        .btn-sub {
+            border-radius: 12px;
+            padding: 12px 22px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-back {
+            background: #fff;
+            border: 1px solid rgba(15, 23, 42, 0.2);
+            color: var(--text);
+        }
+
+        .btn-next {
+            background: var(--surface);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            color: var(--accent-strong);
+            box-shadow: 0 12px 24px rgba(124, 58, 237, 0.18);
+        }
+
+        .btn-next:hover,
+        .btn-back:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-sub {
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+            color: white;
+            box-shadow: 0 20px 35px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-sub:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .success {
+            display: none;
+            text-align: center;
+            padding: 52px 20px;
+        }
+
+        .scheck {
+            width: 72px;
+            height: 72px;
+            border-radius: 999px;
+            background: rgba(34, 197, 94, 0.18);
+            color: #16a34a;
+            font-size: 32px;
+            margin: 0 auto 20px;
+            display: grid;
+            place-items: center;
+        }
+
+        .success h2 {
+            font-size: 1.7rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .success p {
+            color: var(--muted);
+            max-width: 420px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .ssteps {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .sstep {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            color: var(--muted);
+        }
+
+        @media (max-width: 860px) {
+            .steps {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .hero-shell__header {
+                justify-content: space-between;
+            }
+
+            .wrap {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .hero-shell {
+                padding: 40px 18px 54px;
+            }
+
+            .blok-row {
+                grid-template-columns: 32px 1fr;
+            }
+
+            .nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-back,
+            .btn-next {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="hero-shell">
+        <div class="hero-shell__container">
+            <div class="hero-shell__header">
+                <a class="hero-shell__logo" href="#">
+                    <span class="hero-shell__logo-mark" aria-hidden="true">
+                        <img src="logo-removebg-preview.png" alt="">
+                    </span>
+                    <span class="hero-shell__logo-text">ApartYönet</span>
+                </a>
+                <span class="hero-shell__badge">Ücretsiz Başvuru</span>
+            </div>
+            <div class="hero-shell__eyebrow">Site yönetimi için modern başvuru</div>
+            <h1>Site yönetiminizi <strong>dijital</strong> hale getirin</h1>
+            <p class="hero-shell__lead">Birkaç adımda yetkili, site ve blok bilgilerinizi girin; özel panelimiz 1-2 iş günü içinde hazırlansın.</p>
+            <div class="hero-shell__chips">
+                <span class="hero-shell__chip">Hızlı → 10 dk</span>
+                <span class="hero-shell__chip">Gizli ve güvenli</span>
+                <span class="hero-shell__chip">Destek 7/24</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="page">
+        <div class="wrap">
+        <div class="prog-bar">
+            <div class="prog-fill" id="pf" style="width:20%"></div>
+        </div>
+
+        <div class="steps">
+            <div class="si active" id="si1">
+                <div class="sc">1</div>
+                <div class="sl">Yetkili</div>
+            </div>
+            <div class="si" id="si2">
+                <div class="sc">2</div>
+                <div class="sl">Site</div>
+            </div>
+            <div class="si" id="si3">
+                <div class="sc">3</div>
+                <div class="sl">Yapı</div>
+            </div>
+            <div class="si" id="si4">
+                <div class="sc">4</div>
+                <div class="sl">Aidat</div>
+            </div>
+            <div class="si" id="si5">
+                <div class="sc">5</div>
+                <div class="sl">Özet</div>
+            </div>
+        </div>
+
+        <form id="mf" action="https://formspree.io/f/mvzwlwny" method="POST">
+            <input type="hidden" name="blok_yapisi" id="byi">
+
+            <!-- ADIM 1 -->
+            <div class="panel active" id="p1">
+                <div class="card">
+                    <div class="ch">
+                        <div class="ci">👤</div>
+                        <div>
+                            <div class="ct">Yetkili Bilgileri</div>
+                            <div class="cs">Kimle iletişim kuracağımızı öğrenelim</div>
+                        </div>
+                    </div>
+                    <div class="cb">
+                        <div class="fr">
+                            <div class="f">
+                                <label>Ad Soyad <span class="req">*</span></label>
+                                <input type="text" id="f_ad" name="ad_soyad" placeholder="Ahmet Yılmaz">
+                                <span class="ferr" id="e_ad">Bu alan zorunludur.</span>
+                            </div>
+                            <div class="f">
+                                <label>Ünvan</label>
+                                <select name="unvan">
+                                    <option value="">Seçiniz</option>
+                                    <option>Site Yöneticisi</option>
+                                    <option>Yönetim Kurulu Başkanı</option>
+                                    <option>Apartman Görevlisi</option>
+                                    <option>Kat Maliki</option>
+                                    <option>Diğer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="fr">
+                            <div class="f">
+                                <label>E-posta <span class="req">*</span></label>
+                                <input type="email" id="f_email" name="email" placeholder="ornek@email.com">
+                                <span class="ferr" id="e_email">Geçerli bir e-posta girin.</span>
+                            </div>
+                            <div class="f">
+                                <label>Telefon <span class="req">*</span></label>
+                                <input type="tel" id="f_tel" name="telefon" placeholder="0532 000 00 00">
+                                <span class="ferr" id="e_tel">Bu alan zorunludur.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav"><span></span><button type="button" class="btn-next" onclick="go(1)">Devam →</button>
+                </div>
+            </div>
+
+            <!-- ADIM 2 -->
+            <div class="panel" id="p2">
+                <div class="card">
+                    <div class="ch">
+                        <div class="ci">🏢</div>
+                        <div>
+                            <div class="ct">Site Bilgileri</div>
+                            <div class="cs">Sitenizin adı ve konumu</div>
+                        </div>
+                    </div>
+                    <div class="cb">
+                        <div class="fr full">
+                            <div class="f">
+                                <label>Site / Apartman Adı <span class="req">*</span></label>
+                                <input type="text" id="f_site" name="site_adi"
+                                    placeholder="Örn: Güneş Apartmanı, Akasya Sitesi">
+                                <span class="ferr" id="e_site">Bu alan zorunludur.</span>
+                            </div>
+                        </div>
+                        <div class="fr">
+                            <div class="f">
+                                <label>İl <span class="req">*</span></label>
+                                <input type="text" id="f_il" name="il" placeholder="İzmir">
+                                <span class="ferr" id="e_il">Bu alan zorunludur.</span>
+                            </div>
+                            <div class="f">
+                                <label>İlçe</label>
+                                <input type="text" name="ilce" placeholder="Bornova">
+                            </div>
+                        </div>
+                        <div class="fr full">
+                            <div class="f">
+                                <label>Açık Adres</label>
+                                <input type="text" name="adres" placeholder="Mahalle, cadde, sokak...">
+                                <span class="fhint">İsteğe bağlı — teslim için gerekmiyor.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav"><button type="button" class="btn-back" onclick="bk(2)">← Geri</button><button
+                        type="button" class="btn-next" onclick="go(2)">Devam →</button></div>
+            </div>
+
+            <!-- ADIM 3 -->
+            <div class="panel" id="p3">
+                <div class="card">
+                    <div class="ch">
+                        <div class="ci">🏗️</div>
+                        <div>
+                            <div class="ct">Yapı Bilgileri</div>
+                            <div class="cs">Blok ve daire yapınızı tanımlayın</div>
+                        </div>
+                    </div>
+                    <div class="cb">
+                        <div class="blok-header">
+                            <span>Blok</span>
+                            <span>Blok Adı</span>
+                            <span>Daire Sayısı</span>
+                            <span>Kat Sayısı</span>
+                            <span>Dükkan Numarası</span>
+                            <span></span>
+                        </div>
+                        <div class="blok-list" id="bl"></div>
+                        <button type="button" class="add-blok" onclick="addBlok()">+ Blok Ekle</button>
+                    </div>
+                </div>
+                <div class="nav"><button type="button" class="btn-back" onclick="bk(3)">← Geri</button><button
+                        type="button" class="btn-next" onclick="go(3)">Devam →</button></div>
+            </div>
+
+            <!-- ADIM 4 -->
+            <div class="panel" id="p4">
+                <div class="card">
+                    <div class="ch">
+                        <div class="ci">💰</div>
+                        <div>
+                            <div class="ct">Aidat Bilgileri</div>
+                            <div class="cs">İsteğe bağlı — sonradan da girilebilir</div>
+                        </div>
+                    </div>
+                    <div class="cb">
+                        <div class="fr">
+                            <div class="f">
+                                <label>Yıl</label>
+                                <select name="aidat_yil">
+                                    <option value="">—</option>
+                                    <option>2024</option>
+                                    <option selected>2025</option>
+                                    <option>2026</option>
+                                </select>
+                            </div>
+                            <div class="f">
+                                <label>Aylık Daire Aidat (₺)</label>
+                                <input type="number" name="aylik_aidat" id="f_aidat" placeholder="1200" step="0.01"
+                                    min="0">
+                            </div>
+                            <div class="f dukkan-section" id="dukkan-row" style="display:none;">
+                                <label>Aylık Dükkan Aidat (₺)</label>
+                                <input type="number" name="dukkan_aidat" placeholder="2000" step="0.01" min="0">
+                                <span class="fhint">Dükkan numarası girilen bloklar varsa burayı doldurun.</span>
+                            </div>
+                        </div>
+                        <hr class="divider">
+                        <div class="fr full">
+                            <div class="f">
+                                <label>Ek Notlar</label>
+                                <textarea name="notlar"
+                                    placeholder="Özel istekler veya dikkat edilmesini istediğiniz hususlar..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav"><button type="button" class="btn-back" onclick="bk(4)">← Geri</button><button
+                        type="button" class="btn-next" onclick="go(4)">Özeti Gör →</button></div>
+            </div>
+
+            <!-- ADIM 5 -->
+            <div class="panel" id="p5">
+                <div class="card">
+                    <div class="ch">
+                        <div class="ci">✅</div>
+                        <div>
+                            <div class="ct">Başvuru Özeti</div>
+                            <div class="cs">Bilgileri kontrol edin, ardından gönderin</div>
+                        </div>
+                    </div>
+                    <div class="cb">
+                        <div class="sum-grid" id="sg"></div>
+                        <div class="sum-bloklar" id="sb"></div>
+                    </div>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn-back" onclick="bk(5)">← Düzenle</button>
+                    <button type="submit" class="btn-sub" id="subbtn">Başvuruyu Gönder ✓</button>
+                </div>
+            </div>
+
+        </form>
+
+        <div class="success" id="sc">
+            <div class="scheck">✓</div>
+            <h2>Başvurunuz Alındı!</h2>
+            <p>Teşekkürler! Bilgilerinizi inceleyip <strong>1-2 iş günü</strong> içinde sitenize özel paneli
+                hazırlayarak size ulaşacağız.</p>
+            <div class="ssteps">
+                <div class="sstep"><span>📬</span> Onay e-postası gönderildi</div>
+                <div class="sstep"><span>⚙️</span> Panel hazırlanıyor (1-2 iş günü)</div>
+                <div class="sstep"><span>📦</span> Panel dosyası e-posta ile teslim</div>
+            </div>
+        </div>
+        </div>
+    </main>
+
+    <script>
+        const HR = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let cur = 1;
+
+        function addBlok() {
+            const bl = document.getElementById('bl');
+            const idx = bl.querySelectorAll('.blok-row').length;
+            if (idx >= 26) return;
+            const h = HR[idx];
+            const r = document.createElement('div');
+            r.className = 'blok-row';
+            r.innerHTML = `
+        <div class="bb">${h}</div>
+        <div class="bf"><label>Blok Adı</label><input type="text" placeholder="${h} Blok" data-blok="${h}" data-t="name" required oninput="syncBlok()"></div>
+        <div class="bf"><label>Daire Sayısı</label><input type="number" min="1" max="60" value="14" data-blok="${h}" data-t="daire" oninput="syncBlok()"></div>
+        <div class="bf"><label>Kat Sayısı</label><input type="number" min="1" value="4" data-blok="${h}" data-t="kat" oninput="syncBlok()"></div>
+        <div class="bf"><label>Dükkan Numarası</label><input type="text" placeholder="Opsiyonel" data-blok="${h}" data-t="dukkan" oninput="syncBlok()"></div>
+        <button type="button" class="brm" onclick="rmBlok(this)">×</button>`;
+            bl.appendChild(r);
+            reHarf();
+            syncBlok();
+        }
+
+        function rmBlok(b) {
+            const rows = document.querySelectorAll('.blok-row');
+            if (rows.length <= 1) return;
+            b.closest('.blok-row').remove();
+            syncBlok();
+            reHarf();
+        }
+
+        function reHarf() {
+            document.querySelectorAll('.blok-row').forEach((r, i) => {
+                const h = HR[i];
+                r.querySelector('.bb').textContent = h;
+                r.querySelectorAll('input[data-blok]').forEach(x => x.dataset.blok = h);
+                const a = r.querySelector('input[data-t="name"]');
+                if (!a.value.trim()) a.placeholder = h + ' Blok';
+            });
+            syncBlok();
+        }
+
+        function syncBlok() {
+            const bl = [];
+            document.querySelectorAll('.blok-row').forEach((r, i) => {
+                const h = HR[i];
+                const nameInput = r.querySelector('input[data-t="name"]');
+                const daireInput = r.querySelector('input[data-t="daire"]');
+                const katInput = r.querySelector('input[data-t="kat"]');
+                const dukkanInput = r.querySelector('input[data-t="dukkan"]');
+                const nameValue = nameInput.value.trim();
+                if (!nameValue) nameInput.classList.add('err');
+                else nameInput.classList.remove('err');
+                bl.push({
+                    blok: h,
+                    ad: nameValue || h + ' Blok',
+                    daireAdet: parseInt(daireInput.value) || 0,
+                    katSayisi: parseInt(katInput.value) || 0,
+                    dukkan: dukkanInput.value.trim()
+                });
+            });
+            document.getElementById('byi').value = JSON.stringify(bl);
+            updateDukkanVisibility(bl.some(b => Boolean(b.dukkan)));
+        }
+
+        function updateDukkanVisibility(hasDukkan) {
+            const row = document.getElementById('dukkan-row');
+            if (!row) return;
+            row.style.display = hasDukkan ? 'flex' : 'none';
+            const dukkanAidat = document.querySelector('[name="dukkan_aidat"]');
+            if (!hasDukkan && dukkanAidat) dukkanAidat.value = '';
+        }
+        function updateUI() {
+            for (let i = 1; i <= 5; i++) {
+                const p = document.getElementById('p' + i);
+                const s = document.getElementById('si' + i);
+                p.classList.toggle('active', i === cur);
+                s.classList.remove('active', 'done');
+                if (i === cur) s.classList.add('active');
+                else if (i < cur) { s.classList.add('done'); s.querySelector('.sc').textContent = '✓'; }
+                else s.querySelector('.sc').textContent = i;
+            }
+            document.getElementById('pf').style.width = (cur / 5 * 100) + '%';
+            // no scroll
+        }
+
+        function validate(s) {
+            let ok = true;
+            const fail = (id, eid) => {
+                ok = false;
+                document.getElementById(id).classList.add('err');
+                document.getElementById(eid).classList.add('show');
+            };
+            const clear = (id, eid) => {
+                const el = document.getElementById(id);
+                if (el) { el.classList.remove('err'); }
+                const e = document.getElementById(eid);
+                if (e) e.classList.remove('show');
+            };
+            if (s === 1) {
+                clear('f_ad', 'e_ad'); clear('f_email', 'e_email'); clear('f_tel', 'e_tel');
+                if (!document.getElementById('f_ad').value.trim()) fail('f_ad', 'e_ad');
+                const em = document.getElementById('f_email').value;
+                if (!em || !em.includes('@')) fail('f_email', 'e_email');
+                if (!document.getElementById('f_tel').value.trim()) fail('f_tel', 'e_tel');
+            }
+            if (s === 2) {
+                clear('f_site', 'e_site'); clear('f_il', 'e_il');
+                if (!document.getElementById('f_site').value.trim()) fail('f_site', 'e_site');
+                if (!document.getElementById('f_il').value.trim()) fail('f_il', 'e_il');
+            }
+            if (s === 3) {
+                if (!document.querySelectorAll('.blok-row').length) { alert('En az bir blok ekleyin.'); return false; }
+            }
+            return ok;
+        }
+
+        function buildSummary() {
+            const g = id => { const el = document.getElementById(id) || document.querySelector('[name="' + id + '"]'); return el ? el.value : ''; };
+            const bl = JSON.parse(document.getElementById('byi').value || '[]');
+            const td = bl.reduce((s, b) => s + b.daireAdet, 0);
+            const totalKat = bl.reduce((s, b) => s + b.katSayisi, 0);
+            const items = [
+                { l: 'Ad Soyad', v: g('f_ad') }, { l: 'E-posta', v: g('f_email') }, { l: 'Telefon', v: g('f_tel') },
+                { l: 'Site Adı', v: g('f_site') }, { l: 'İl', v: g('f_il') },
+                { l: 'Blok Sayısı', v: bl.length + ' blok' }, { l: 'Toplam Daire', v: td + ' daire' },
+                { l: 'Toplam Kat', v: totalKat + ' kat' },
+                { l: 'Aylık Aidat', v: g('f_aidat') ? (g('f_aidat') + ' ₺') : '—' },
+                { l: 'Dükkan Aidatı', v: g('dukkan_aidat') ? (g('dukkan_aidat') + ' ₺') : '—' },
+            ];
+            document.getElementById('sg').innerHTML = items.map(x => `<div class="sum-item"><label>${x.l}</label><div class="v">${x.v || '—'}</div></div>`).join('');
+            const pills = bl.map(b => {
+                const dukkanLabel = b.dukkan ? ` • Dükkan ${b.dukkan}` : '';
+                return `<div class="pill">${b.ad} — ${b.daireAdet} daire / ${b.katSayisi} kat${dukkanLabel}</div>`;
+            }).join('');
+            document.getElementById('sb').innerHTML = `<label>Blok Yapısı</label><div class="pills">${pills}</div>`;
+        }
+
+        function go(from) {
+            if (!validate(from)) return;
+            if (from === 4) buildSummary();
+            cur = from + 1; updateUI();
+        }
+
+        function bk(from) { cur = from - 1; updateUI(); }
+
+        document.getElementById('mf').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('subbtn');
+            btn.disabled = true; btn.textContent = 'Gönderiliyor...';
+            try {
+                const r = await fetch(this.action, { method: 'POST', body: new FormData(this), headers: { Accept: 'application/json' } });
+                if (r.ok) {
+                    document.getElementById('mf').style.display = 'none';
+                    document.querySelector('.steps').style.display = 'none';
+                    document.querySelector('.prog-bar').style.display = 'none';
+                    document.getElementById('sc').style.display = 'block';
+                } else {
+                    btn.disabled = false; btn.textContent = 'Başvuruyu Gönder ✓';
+                    alert('Gönderim hatası. Lütfen tekrar deneyin.');
+                }
+            } catch {
+                btn.disabled = false; btn.textContent = 'Başvuruyu Gönder ✓';
+                alert('Bağlantı hatası.');
+            }
+        });
+
+        addBlok(); addBlok(); addBlok();
+    </script>
+</body>
+
+</html>
