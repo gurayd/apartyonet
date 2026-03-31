@@ -974,7 +974,7 @@
             r.className = 'blok-row';
             r.innerHTML = `
         <div class="bb">${h}</div>
-        <div class="bf"><label>Blok Adı</label><input type="text" placeholder="${h} Blok" data-blok="${h}" data-t="name" required oninput="syncBlok()"></div>
+        <div class="bf"><label>Blok Adı</label><input type="text" placeholder="${h} Blok" data-blok="${h}" data-t="name" oninput="syncBlok()"></div>
         <div class="bf"><label>Daire Sayısı</label><input type="number" min="1" max="60" value="14" data-blok="${h}" data-t="daire" oninput="syncBlok()"></div>
         <div class="bf"><label>Kat Sayısı</label><input type="number" min="1" value="4" data-blok="${h}" data-t="kat" oninput="syncBlok()"></div>
         <div class="bf"><label>Dükkan Numarası</label><input type="text" placeholder="Opsiyonel" data-blok="${h}" data-t="dukkan" oninput="syncBlok()"></div>
@@ -1074,6 +1074,14 @@
             }
             if (s === 3) {
                 if (!document.querySelectorAll('.blok-row').length) { alert('En az bir blok ekleyin.'); return false; }
+                const names = [...document.querySelectorAll('input[data-t="name"]')];
+                const invalid = names.filter(n => !n.value.trim());
+                names.forEach(n => n.classList.remove('err'));
+                if (invalid.length) {
+                    invalid.forEach(n => n.classList.add('err'));
+                    alert('Lütfen tüm blok adlarını girin.');
+                    return false;
+                }
             }
             return ok;
         }
