@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApartYönet | Giriş</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #090d14;
+      --line: rgba(152, 175, 214, 0.2);
+      --text: #e8eefc;
+      --muted: #9fb0cf;
+      --primary: #2ea0ff;
+      --primary-2: #1676d1;
+      --card: rgba(14, 22, 37, 0.78);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Manrope", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(1200px 600px at 10% -20%, rgba(46, 160, 255, 0.32), transparent 60%),
+        radial-gradient(1000px 520px at 90% -10%, rgba(92, 240, 210, 0.18), transparent 64%),
+        radial-gradient(900px 500px at 50% 120%, rgba(22, 118, 209, 0.26), transparent 66%),
+        linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(159, 176, 207, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(159, 176, 207, 0.06) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black, transparent 82%);
+      pointer-events: none;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .panel {
+      width: min(760px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 30px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.88), var(--card));
+      box-shadow: 0 24px 48px rgba(4, 8, 16, 0.45);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .brand img {
+      height: 40px;
+      width: auto;
+      display: block;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .actions {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+
+    .btn-ghost {
+      color: #d9e5ff;
+      border-color: rgba(152, 175, 214, 0.35);
+      background: rgba(17, 26, 43, 0.55);
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel">
+      <a class="brand" href="/index.html" aria-label="ApartYönet Anasayfa">
+        <img src="logo-removebg-preview.png" alt="ApartYönet logo" />
+        <span>ApartYönet</span>
+      </a>
+
+      <h1>Erken başvuru fırsatlarından yararlanın</h1>
+      <p>Yönetim paneli giriş ekranı çok yakında yayında. Şimdilik başvuru oluşturarak öncelikli kurulum sırasına dahil olabilirsiniz.</p>
+
+      <div class="actions">
+        <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
+        <a class="btn btn-ghost" href="/index.html">Anasayfaya Dön</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
