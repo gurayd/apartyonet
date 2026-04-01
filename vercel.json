@@ -1,4 +1,14 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "www.apartyonet.com" }
+      ],
+      "destination": "https://apartyonet.com/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/basvuru", "destination": "/basvuru.html" },
     { "source": "/:slug((?!.*\\.).+)", "destination": "/site.html" }
