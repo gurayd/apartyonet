@@ -183,7 +183,9 @@
       font-size: 0.8rem;
     }
 
-    .hero button {
+    .hero .cta-btn {
+      display: inline-block;
+      text-decoration: none;
       margin-top: 16px;
       background: var(--accent);
       color: white;
@@ -196,7 +198,7 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .hero button:hover {
+    .hero .cta-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15);
     }
@@ -288,7 +290,7 @@
           </div>
           <h1>Apartmanınız için modern ve kolay yönetim paneli</h1>
           <p>Aidat takibi, duyurular ve site yönetimi artık çok kolay.</p>
-          <button onclick="location.href='/basvuru'">Hemen başvurun →</button>
+          <a class="cta-btn" href="basvuru.html">Hemen başvurun →</a>
         </div>
       </section>
       <aside class="features">

@@ -29,6 +29,20 @@ const firebaseConfig = {
 };
 ```
 
+## Google Sheets Entegrasyonu (Opsiyonel)
+Mevcut form gorunumunu bozmadan Google Sheets'e veri yazmak icin:
+
+1. Google Sheets acin.
+2. `Extensions -> Apps Script` menusu ile script editore girin.
+3. Bu repodaki `google-sheets-apps-script.gs` icerigini yapistirin.
+4. `Deploy -> New deployment -> Web app`:
+   - Execute as: `Me`
+   - Who has access: `Anyone`
+5. Olusan Web App URL'sini kopyalayin.
+6. `basvuru.html` icinde `GOOGLE_SHEETS_WEB_APP_URL` sabitine bu URL'yi yazin.
+
+Not: Bu entegrasyon aktif olsa da form Formspree'ye gondermeye devam eder.
+
 ## GitHub Deploy Talimati
 1. GitHub repo olustur
 2. Bu klasoru repo icine yukle

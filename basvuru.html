@@ -703,6 +703,8 @@
             }
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
@@ -758,7 +760,7 @@
             </div>
         </div>
 
-        <form id="mf" action="https://formspree.io/f/mvzwlwny" method="POST">
+        <form id="mf" method="POST" novalidate>
             <input type="hidden" name="blok_yapisi" id="byi">
 
             <!-- ADIM 1 -->
@@ -965,6 +967,27 @@
         const HR = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let cur = 1;
 
+        const firebaseConfig = {
+            apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
+            authDomain: "apartyonet-af6d3.firebaseapp.com",
+            projectId: "apartyonet-af6d3",
+            storageBucket: "apartyonet-af6d3.firebasestorage.app",
+            messagingSenderId: "825430154124",
+            appId: "1:825430154124:web:7156fa0462fcfc222414a9"
+        };
+
+        const app = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+        const db = app.firestore();
+
+        function firebaseErrorText(err) {
+            const code = err && err.code ? err.code : '';
+            if (code === 'permission-denied') return 'Firestore yetki hatasi (rules kontrol edilmeli).';
+            if (code === 'failed-precondition') return 'Firestore henuz aktif olmayabilir veya index/rules eksik.';
+            if (code === 'unavailable') return 'Firestore su an ulasilamaz durumda (ag veya servis sorunu).';
+            if (code === 'invalid-argument') return 'Gonderilen veri formatinda bir sorun var.';
+            return err && err.message ? err.message : 'Bilinmeyen hata';
+        }
+
         function addBlok() {
             const bl = document.getElementById('bl');
             const idx = bl.querySelectorAll('.blok-row').length;
@@ -1120,19 +1143,29 @@
             const btn = document.getElementById('subbtn');
             btn.disabled = true; btn.textContent = 'Gönderiliyor...';
             try {
-                const r = await fetch(this.action, { method: 'POST', body: new FormData(this), headers: { Accept: 'application/json' } });
-                if (r.ok) {
-                    document.getElementById('mf').style.display = 'none';
-                    document.querySelector('.steps').style.display = 'none';
-                    document.querySelector('.prog-bar').style.display = 'none';
-                    document.getElementById('sc').style.display = 'block';
-                } else {
-                    btn.disabled = false; btn.textContent = 'Başvuruyu Gönder ✓';
-                    alert('Gönderim hatası. Lütfen tekrar deneyin.');
+                const formData = new FormData(this);
+                const payload = Object.fromEntries(formData.entries());
+                let blokYapisiJson = [];
+                try {
+                    blokYapisiJson = JSON.parse(payload.blok_yapisi || "[]");
+                } catch {
+                    blokYapisiJson = [];
                 }
-            } catch {
+
+                await db.collection('basvurular').add({
+                    ...payload,
+                    blok_yapisi_json: blokYapisiJson,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('mf').style.display = 'none';
+                document.querySelector('.steps').style.display = 'none';
+                document.querySelector('.prog-bar').style.display = 'none';
+                document.getElementById('sc').style.display = 'block';
+            } catch (err) {
+                console.error(err);
                 btn.disabled = false; btn.textContent = 'Başvuruyu Gönder ✓';
-                alert('Bağlantı hatası.');
+                alert('Gönderim hatası: ' + firebaseErrorText(err) + '\n\nKontrol: Firestore Database acik mi ve rules create izni veriyor mu?');
             }
         });
 
