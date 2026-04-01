@@ -3,309 +3,606 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Site Yönetimi Paneli – Hemen Başvurun</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap"
-    rel="stylesheet"
-  />
+  <title>ApartYönet | Modern Apartman Yönetimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --page-bg: #f5f1eb;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --muted: #5b5a54;
-      --accent: #a3622d;
-      --accent-soft: rgba(163, 98, 45, 0.18);
-      --border: rgba(15, 23, 42, 0.08);
+      --bg: #090d14;
+      --bg-soft: #0f1624;
+      --panel: rgba(12, 19, 33, 0.72);
+      --line: rgba(152, 175, 214, 0.2);
+      --text: #e8eefc;
+      --muted: #9fb0cf;
+      --primary: #2ea0ff;
+      --primary-2: #1676d1;
+      --accent: #5cf0d2;
+      --card: #111a2b;
+      --card-2: #0d1524;
+      --maxw: 1120px;
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html,
     body {
       margin: 0;
-      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
-      background: var(--page-bg);
+      padding: 0;
+      font-family: "Manrope", system-ui, -apple-system, Segoe UI, sans-serif;
       color: var(--text);
-      position: relative;
-      min-height: 100vh;
+      background: var(--bg);
     }
 
-    body::before {
-      content: "";
-      position: fixed;
-      inset: -8%;
-      background-image:
-        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.45), transparent 55%),
-        linear-gradient(160deg, rgba(31, 41, 55, 0.22), rgba(163, 98, 45, 0.2)),
-        url("indir.jpeg"),
-        url("indir (1).jpeg");
-      background-size: auto, auto, cover, cover;
-      background-position: center, center, left center, right center;
-      background-blend-mode: screen, multiply, normal, normal;
-      filter: blur(12px) saturate(0.85);
-      opacity: 0.72;
-      transform: scale(1.08);
-      z-index: -3;
-    }
-
+    body::before,
     body::after {
       content: "";
       position: fixed;
-      inset: -10%;
-      background-image:
-        linear-gradient(180deg, rgba(245, 241, 235, 0.86), rgba(245, 241, 235, 0.94)),
-        url("images.jpeg"),
-        url("ayt-04696-spacious-2-bedroom-apartment-with-pool-view-in-antalya-konyaalti-te.webp");
-      background-size: auto, cover, 120% auto;
-      background-position: center, center, 70% center;
-      background-blend-mode: normal, overlay, multiply;
-      filter: blur(10px) grayscale(0.25);
-      opacity: 0.52;
+      inset: 0;
+      pointer-events: none;
       z-index: -2;
     }
 
-    .page-shell::before {
-      content: "";
-      position: fixed;
-      inset: 0;
+    body::before {
       background:
-        repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0 2px, transparent 2px 8px);
-      pointer-events: none;
+        radial-gradient(1200px 600px at 10% -20%, rgba(46, 160, 255, 0.32), transparent 60%),
+        radial-gradient(1000px 520px at 90% -10%, rgba(92, 240, 210, 0.2), transparent 64%),
+        radial-gradient(900px 500px at 50% 120%, rgba(22, 118, 209, 0.26), transparent 66%),
+        linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
+    }
+
+    body::after {
+      background-image:
+        linear-gradient(rgba(159, 176, 207, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(159, 176, 207, 0.07) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black, transparent 80%);
       z-index: -1;
     }
 
-    .page-shell {
-      min-height: 100vh;
+    .container {
+      width: min(var(--maxw), calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(10px);
+      background: rgba(9, 13, 20, 0.72);
+      border-bottom: 1px solid rgba(152, 175, 214, 0.16);
+      z-index: 30;
+    }
+
+    .nav {
+      height: 74px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 32px 16px 64px;
+      justify-content: space-between;
+      gap: 16px;
     }
 
-    .content-card {
-      width: min(960px, 100%);
-      background: var(--card-bg);
-      border-radius: 28px;
-      border: 1px solid var(--border);
-      box-shadow: 0 25px 45px rgba(15, 23, 42, 0.12);
-      overflow: hidden;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      position: relative;
-    }
-
-    .login-btn {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      z-index: 4;
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
       text-decoration: none;
-      background: rgba(255, 255, 255, 0.9);
-      color: #1f2937;
-      border: 1px solid rgba(15, 23, 42, 0.12);
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      backdrop-filter: blur(6px);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      color: inherit;
+      font-weight: 700;
+      font-size: 1.06rem;
     }
 
-    .login-btn:hover {
+    .brand img {
+      height: 42px;
+      width: auto;
+      display: block;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.16);
+    }
+
+    .btn-ghost {
+      color: #d9e5ff;
+      border-color: rgba(152, 175, 214, 0.35);
+      background: rgba(17, 26, 43, 0.55);
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 14px 30px rgba(34, 130, 224, 0.3);
     }
 
     .hero {
-      position: relative;
-      padding: 36px 36px 44px;
-      background: linear-gradient(135deg, #2b2e3b, #0f172a);
-      color: white;
+      padding: 76px 0 52px;
     }
 
-    .hero-brand {
-      display: inline-flex;
+    .hero-wrap {
+      display: grid;
+      grid-template-columns: 1.06fr 0.94fr;
+      gap: 24px;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      padding: 8px 12px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(5px);
     }
 
-    .hero-brand img {
-      width: 38px;
-      height: 38px;
-      object-fit: contain;
-      object-position: center;
-      border-radius: 10px;
+    .hero-copy h1 {
+      margin: 12px 0 14px;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.06;
+      letter-spacing: -0.02em;
     }
 
-    .hero-brand span {
-      font-size: 0.95rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.35), transparent 45%);
-      pointer-events: none;
-      border-bottom-left-radius: 28px;
-    }
-
-    .hero h1 {
-      font-family: "Playfair Display", serif;
-      font-size: clamp(2.2rem, 3.5vw, 3rem);
-      margin: 0 0 10px;
-    }
-
-    .hero p {
-      color: rgba(255, 255, 255, 0.9);
-      margin: 0 0 24px;
-      max-width: 420px;
-    }
-
-    .hero .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 16px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.18);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      font-size: 0.8rem;
-    }
-
-    .hero .cta-btn {
-      display: inline-block;
-      text-decoration: none;
-      margin-top: 16px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 18px;
-      padding: 12px 24px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .hero .cta-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15);
-    }
-
-    .features {
-      padding: 40px 36px 48px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .features p {
+    .hero-copy p {
       margin: 0;
       color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.12rem);
+      max-width: 630px;
+      line-height: 1.68;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(92, 240, 210, 0.32);
+      background: rgba(92, 240, 210, 0.12);
+      color: #b9fff0;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .hero-actions {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-note {
+      margin-top: 16px;
+      color: #9cc7fa;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .hero-side {
+      border: 1px solid var(--line);
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.85), rgba(13, 21, 36, 0.75));
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 20px 40px rgba(4, 8, 16, 0.45);
+    }
+
+    .mini-card {
+      border: 1px solid rgba(152, 175, 214, 0.2);
+      background: rgba(9, 13, 20, 0.72);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .mini-card + .mini-card {
+      margin-top: 12px;
+    }
+
+    .mini-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .mini-label {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .mini-value {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .mini-muted {
+      color: #8ad8c8;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .bar {
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(152, 175, 214, 0.22);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .bar > span {
+      display: block;
+      width: 72%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #2ea0ff, #5cf0d2);
+    }
+
+    section.block {
+      padding: 32px 0;
+    }
+
+    .section-title {
+      font-size: clamp(1.4rem, 2vw, 2rem);
+      margin: 0 0 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-lead {
+      margin: 0 0 24px;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.65;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(92, 240, 210, 0.4);
+    }
+
+    .card h3 {
+      margin: 6px 0 8px;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.58;
+    }
+
+    .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      color: #90d8ff;
+      background: rgba(46, 160, 255, 0.14);
       font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .step {
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(14, 22, 37, 0.72);
+    }
+
+    .step span {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: rgba(46, 160, 255, 0.2);
+      color: #cbe6ff;
+      font-weight: 700;
+      font-size: 0.82rem;
+      margin-bottom: 10px;
+    }
+
+    .step h4 {
+      margin: 0 0 6px;
+      font-size: 0.98rem;
+    }
+
+    .step p {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.56;
+      color: var(--muted);
+    }
+
+    .cta {
+      padding: 52px 0 78px;
+    }
+
+    .cta-wrap {
+      border-radius: 20px;
+      border: 1px solid rgba(92, 240, 210, 0.25);
+      background:
+        radial-gradient(620px 260px at 90% 0%, rgba(92, 240, 210, 0.18), transparent 70%),
+        linear-gradient(180deg, rgba(12, 19, 33, 0.95), rgba(10, 16, 28, 0.98));
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .cta h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.4rem, 2.2vw, 2rem);
+      letter-spacing: -0.02em;
+    }
+
+    .cta p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 560px;
       line-height: 1.6;
     }
 
-    .features ul {
-      list-style: none;
-      padding: 0;
-      margin: 16px 0 0;
-      display: grid;
-      gap: 8px;
+    footer {
+      border-top: 1px solid rgba(152, 175, 214, 0.15);
+      color: #8ca0c2;
+      font-size: 0.82rem;
+      padding: 16px 0 24px;
     }
 
-    .features li {
-      padding-left: 26px;
-      position: relative;
-      font-weight: 500;
-    }
+    @media (max-width: 980px) {
+      .hero-wrap {
+        grid-template-columns: 1fr;
+      }
 
-    .features li::before {
-      content: "•";
-      position: absolute;
-      left: 0;
-      top: 0;
-      color: var(--accent);
-      font-size: 1.2rem;
-      line-height: 1;
-    }
+      .grid-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
 
-    .features-logo {
-      margin-top: 18px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-start;
-    }
-
-    .features-logo img {
-      width: clamp(130px, 34vw, 190px);
-      height: auto;
-      display: block;
-      filter: saturate(0.98) contrast(1.02);
+      .grid-3,
+      .steps {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 640px) {
-      .login-btn {
-        top: 10px;
-        right: 10px;
-        padding: 7px 12px;
-        font-size: 0.78rem;
+      .container {
+        width: calc(100% - 28px);
+      }
+
+      .nav {
+        height: 66px;
+      }
+
+      .brand img {
+        height: 36px;
+      }
+
+      .brand span {
+        font-size: 0.98rem;
+      }
+
+      .btn {
+        padding: 9px 12px;
+        font-size: 0.82rem;
       }
 
       .hero {
-        padding: 32px 24px 40px;
-      }
-
-      .features {
-        padding: 30px 24px 36px;
+        padding-top: 42px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="page-shell">
-    <div class="content-card">
-      <a class="login-btn" href="#" aria-label="Yönetim paneli giriş">
-        Giriş Yap
+  <header>
+    <div class="container nav">
+      <a class="brand" href="/index.html" aria-label="ApartYönet Anasayfa">
+        <img src="logo-removebg-preview.png" alt="ApartYönet logo" />
+        <span>ApartYönet</span>
       </a>
-      <section class="hero">
-        <div class="hero-content">
-          <div class="hero-brand">
-            <img src="logo-removebg-preview.png" alt="ApartYönet logo">
-            <span>ApartYönet</span>
-          </div>
-          <div class="hero-pill">
-            <span class="pill">Kurulum 1 gün içinde yapılır.</span>
-          </div>
-          <h1>Apartmanınız için modern ve kolay yönetim paneli</h1>
-          <p>Aidat takibi, duyurular ve site yönetimi artık çok kolay.</p>
-          <a class="cta-btn" href="basvuru.html">Hemen başvurun →</a>
-        </div>
-      </section>
-      <aside class="features">
-        <p>Panelimiz aşağıdaki başlıklar için hazırlandı:</p>
-        <ul>
-          <li>Aidat borç ve ödeme takibi</li>
-          <li>Duyuru paylaşımı</li>
-          <li>Yönetici iletişim paneli</li>
-          <li>Her daireye özel bilgi ekranı</li>
-        </ul>
-        <div class="features-logo">
-          <img src="logo-removebg-preview.png" alt="ApartYönet logo">
-        </div>
-      </aside>
+      <nav class="nav-actions" aria-label="Üst menü">
+        <a class="btn btn-ghost" href="/login.html">Giriş Yap</a>
+        <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
+      </nav>
     </div>
-  </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-wrap">
+        <div class="hero-copy">
+          <div class="hero-eyebrow">Kurulum 2 gün içinde tamamlanır</div>
+          <h1>Apartman yönetimi artık çok kolay</h1>
+          <p>Aidat takibi, duyurular ve site yönetimini tek panelde yönetin.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
+            <a class="btn btn-ghost" href="#nasil-calisir">Demo Gör</a>
+          </div>
+          <div class="hero-note">Yönetim ekibiniz için hızlı kurulum, sade arayüz, güvenli veri akışı.</div>
+        </div>
+        <div class="hero-side" aria-label="Önizleme paneli">
+          <div class="mini-card">
+            <div class="mini-top">
+              <div class="mini-label">Aidat Durumu</div>
+              <div class="mini-muted">Canlı takip</div>
+            </div>
+            <div class="mini-value">%72 tahsilat</div>
+            <div class="bar"><span></span></div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-top">
+              <div class="mini-label">Duyuru</div>
+              <div class="mini-muted">Tüm daireler</div>
+            </div>
+            <div class="mini-value">4 aktif duyuru</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-top">
+              <div class="mini-label">Kurulum</div>
+              <div class="mini-muted">Hızlı teslim</div>
+            </div>
+            <div class="mini-value">2 gün içinde tamamlanır</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="sorunlar">
+      <div class="container">
+        <h2 class="section-title">Sorunlar</h2>
+        <p class="section-lead">Dağınık WhatsApp yazışmaları, manuel aidat listeleri ve geç gelen duyurular yönetime zaman kaybettirir.</p>
+        <div class="grid-3">
+          <article class="card">
+            <div class="icon">01</div>
+            <h3>Manuel takip yükü</h3>
+            <p>Excel ve mesajlaşma ile borç ve ödeme takibi sürdürülemez hale gelir.</p>
+          </article>
+          <article class="card">
+            <div class="icon">02</div>
+            <h3>Geciken iletişim</h3>
+            <p>Duyurular herkese aynı anda ulaşmadığı için operasyon aksar.</p>
+          </article>
+          <article class="card">
+            <div class="icon">03</div>
+            <h3>Dağınık bilgi</h3>
+            <p>Her daireye ait geçmiş kayıtlar farklı kanallarda kaldığı için kontrol zorlaşır.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="cozum">
+      <div class="container">
+        <h2 class="section-title">Çözüm</h2>
+        <p class="section-lead">ApartYönet, apartmanınızın aidat, duyuru ve yönetim iletişimini tek panelde toplayarak operasyonu hızlandırır.</p>
+        <div class="grid-3">
+          <article class="card">
+            <div class="icon">A</div>
+            <h3>Tek merkezden yönetim</h3>
+            <p>Site, blok ve daire bilgileri düzenli bir yapı ile tek ekranda tutulur.</p>
+          </article>
+          <article class="card">
+            <div class="icon">B</div>
+            <h3>Anlık görünürlük</h3>
+            <p>Borç, ödeme ve duyuru süreçleri herkes için şeffaf ve takip edilebilir olur.</p>
+          </article>
+          <article class="card">
+            <div class="icon">C</div>
+            <h3>Hızlı kurulum</h3>
+            <p>Başvuru sonrası paneliniz 2 gün içinde hazırlanıp kullanıma açılır.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="ozellikler">
+      <div class="container">
+        <h2 class="section-title">Özellikler</h2>
+        <p class="section-lead">Modern SaaS yaklaşımıyla tasarlanmış temel yönetim modülleri hazır gelir.</p>
+        <div class="grid-4">
+          <article class="card">
+            <h3>Aidat borç ve ödeme takibi</h3>
+            <p>Daire bazlı tahsilat ve borç durumunu tek ekranda yönetin.</p>
+          </article>
+          <article class="card">
+            <h3>Duyuru paylaşımı</h3>
+            <p>Tüm siteye, bloğa veya hedefli gruplara hızlı duyuru gönderin.</p>
+          </article>
+          <article class="card">
+            <h3>Yönetici iletişim paneli</h3>
+            <p>Yönetim ve sakinler arasındaki iletişimi düzenli bir kanalda toplayın.</p>
+          </article>
+          <article class="card">
+            <h3>Her daireye özel ekran</h3>
+            <p>Daire sakinleri kendi bilgilerini sade bir panelden görebilir.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="nasil-calisir">
+      <div class="container">
+        <h2 class="section-title">Nasıl Çalışır</h2>
+        <p class="section-lead">Başvuru süreci kısa tutuldu; teknik kurulum ekibimiz tüm yapılandırmayı sizin adınıza tamamlar.</p>
+        <div class="steps">
+          <article class="step">
+            <span>1</span>
+            <h4>Başvuru Yapın</h4>
+            <p>Yetkili, site ve yapı bilgilerini formdan iletin.</p>
+          </article>
+          <article class="step">
+            <span>2</span>
+            <h4>Kurulum Tamamlansın</h4>
+            <p>Paneliniz en geç 2 gün içinde hazır hale getirilir.</p>
+          </article>
+          <article class="step">
+            <span>3</span>
+            <h4>Kullanıma Başlayın</h4>
+            <p>Duyuru, aidat ve yönetim süreçlerini tek panelden yönetin.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta" id="cta">
+      <div class="container cta-wrap">
+        <div>
+          <h2>ApartYönet ile yönetimi dijitale taşıyın</h2>
+          <p>Başvurunuzu gönderin, paneliniz 2 gün içinde hazır olsun.</p>
+        </div>
+        <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">ApartYönet • Modern apartman ve site yönetim sistemi</div>
+  </footer>
 </body>
 </html>

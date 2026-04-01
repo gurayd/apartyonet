@@ -86,9 +86,10 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 24px;
+            margin-bottom: 18px;
             gap: 12px;
             flex-wrap: wrap;
+            min-height: 92px;
         }
 
         .hero-shell__logo {
@@ -102,14 +103,14 @@
         }
 
         .hero-shell__logo-mark {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.2);
+            width: 88px;
+            height: 88px;
+            border-radius: 16px;
+            background: transparent;
             display: grid;
             place-items: center;
             overflow: hidden;
-            padding: 4px;
+            padding: 0;
         }
 
         .hero-shell__logo-mark img {
@@ -121,17 +122,18 @@
         }
 
         .hero-shell__logo-text {
-            font-size: 1rem;
+            font-size: 1.26rem;
+            font-weight: 700;
             letter-spacing: 0.01em;
         }
 
         .hero-shell__badge {
             text-transform: uppercase;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 0.4px;
             border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 999px;
-            padding: 6px 18px;
+            padding: 6px 14px;
             color: rgba(255, 255, 255, 0.92);
         }
 
@@ -687,6 +689,15 @@
                 padding: 40px 18px 54px;
             }
 
+            .hero-shell__logo-mark {
+                width: 64px;
+                height: 64px;
+            }
+
+            .hero-shell__logo-text {
+                font-size: 1.08rem;
+            }
+
             .blok-row {
                 grid-template-columns: 32px 1fr;
             }
@@ -718,11 +729,11 @@
                     </span>
                     <span class="hero-shell__logo-text">ApartYönet</span>
                 </a>
-                <span class="hero-shell__badge">Ücretsiz Başvuru</span>
+                <span class="hero-shell__badge">Kurulum 2 gün içinde tamamlanır</span>
             </div>
             <div class="hero-shell__eyebrow">Site yönetimi için modern başvuru</div>
             <h1>Site yönetiminizi <strong>dijital</strong> hale getirin</h1>
-            <p class="hero-shell__lead">Birkaç adımda yetkili, site ve blok bilgilerinizi girin; özel panelimiz 1-2 iş günü içinde hazırlansın.</p>
+            <p class="hero-shell__lead">Birkaç adımda yetkili, site ve blok bilgilerinizi girin; özel paneliniz 2 gün içinde hazırlansın.</p>
             <div class="hero-shell__chips">
                 <span class="hero-shell__chip">Hızlı → 10 dk</span>
                 <span class="hero-shell__chip">Gizli ve güvenli</span>
@@ -952,11 +963,11 @@
         <div class="success" id="sc">
             <div class="scheck">✓</div>
             <h2>Başvurunuz Alındı!</h2>
-            <p>Teşekkürler! Bilgilerinizi inceleyip <strong>1-2 iş günü</strong> içinde sitenize özel paneli
+            <p>Teşekkürler! Bilgilerinizi inceleyip <strong>2 gün içinde</strong> sitenize özel paneli
                 hazırlayarak size ulaşacağız.</p>
             <div class="ssteps">
                 <div class="sstep"><span>📬</span> Onay e-postası gönderildi</div>
-                <div class="sstep"><span>⚙️</span> Panel hazırlanıyor (1-2 iş günü)</div>
+                <div class="sstep"><span>⚙️</span> Panel hazırlanıyor (2 gün)</div>
                 <div class="sstep"><span>📦</span> Panel dosyası e-posta ile teslim</div>
             </div>
         </div>
