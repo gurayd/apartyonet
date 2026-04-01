@@ -7,6 +7,30 @@
       ],
       "destination": "https://apartyonet.com/:path*",
       "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "apartyonet.vercel.app" }
+      ],
+      "destination": "https://apartyonet.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "apartyonet-gurayds-projects.vercel.app" }
+      ],
+      "destination": "https://apartyonet.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "apartyonet-git-main-gurayds-projects.vercel.app" }
+      ],
+      "destination": "https://apartyonet.com/:path*",
+      "permanent": true
     }
   ],
   "rewrites": [

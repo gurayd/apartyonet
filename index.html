@@ -4,22 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ApartYönet | Modern Apartman Yönetimi</title>
-  <script>
-    (function () {
-      var host = window.location.hostname.toLowerCase();
-      var protocol = window.location.protocol;
-      var path = window.location.pathname + window.location.search + window.location.hash;
-      if (protocol === "file:") return;
-      if (host === "localhost" || host === "127.0.0.1") return;
-      if (host === "www.apartyonet.com") {
-        window.location.replace("https://apartyonet.com" + path);
-        return;
-      }
-      if (host.endsWith(".vercel.app")) {
-        window.location.replace("https://apartyonet.com" + path);
-      }
-    })();
-  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
