@@ -92,39 +92,10 @@
             min-height: 92px;
         }
 
-        .hero-shell__logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-            text-decoration: none;
-            color: inherit;
-            letter-spacing: 0.03em;
-        }
-
-        .hero-shell__logo-mark {
-            width: 88px;
-            height: 88px;
-            border-radius: 16px;
-            background: transparent;
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-            padding: 0;
-        }
-
-        .hero-shell__logo-mark img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            object-position: center;
+        .hero-shell__header-building {
+            height: 92px;
+            width: auto;
             display: block;
-        }
-
-        .hero-shell__logo-text {
-            font-size: 1.26rem;
-            font-weight: 700;
-            letter-spacing: 0.01em;
         }
 
         .hero-shell__badge {
@@ -689,13 +660,9 @@
                 padding: 40px 18px 54px;
             }
 
-            .hero-shell__logo-mark {
-                width: 64px;
-                height: 64px;
-            }
-
-            .hero-shell__logo-text {
-                font-size: 1.08rem;
+            .hero-shell__header-building {
+                width: 72px;
+                height: 72px;
             }
 
             .blok-row {
@@ -723,12 +690,7 @@
     <header class="hero-shell">
         <div class="hero-shell__container">
             <div class="hero-shell__header">
-                <a class="hero-shell__logo" href="#">
-                    <span class="hero-shell__logo-mark" aria-hidden="true">
-                        <img src="logo-removebg-preview.png" alt="">
-                    </span>
-                    <span class="hero-shell__logo-text">ApartYönet</span>
-                </a>
+                <img class="hero-shell__header-building" src="assets/apartyonet-building-mark-transparent.svg" alt="ApartYönet bina simgesi">
                 <span class="hero-shell__badge">Kurulum 2 gün içinde tamamlanır</span>
             </div>
             <div class="hero-shell__eyebrow">Site yönetimi için modern başvuru</div>

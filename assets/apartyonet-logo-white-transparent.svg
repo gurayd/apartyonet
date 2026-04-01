@@ -1,0 +1,58 @@
+<svg width="1200" height="700" viewBox="0 0 1200 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cyanGrad" x1="344" y1="64" x2="760" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1CC9E7"/>
+      <stop offset="1" stop-color="#0FA6D0"/>
+    </linearGradient>
+    <style>
+      .brand-text {
+        font-family: "Poppins", "Montserrat", "Arial", sans-serif;
+        font-size: 138px;
+        font-weight: 800;
+        fill: #FFFFFF;
+      }
+    </style>
+  </defs>
+
+  <!-- Building symbol: separable group -->
+  <g id="building-symbol" transform="translate(0,-12)">
+    <!-- Left tower -->
+    <polygon points="372,305 424,258 424,396 378,402" fill="#1562B3"/>
+    <polygon points="424,258 479,300 479,392 424,396" fill="url(#cyanGrad)"/>
+
+    <!-- Center tower -->
+    <polygon points="520,180 590,118 590,388 520,392" fill="#1750A2"/>
+    <polygon points="590,118 676,182 676,378 590,388" fill="#2A87D9"/>
+
+    <!-- Front center body -->
+    <polygon points="560,188 635,225 635,398 560,404" fill="#14B7DD"/>
+
+    <!-- Right tower -->
+    <polygon points="680,306 730,262 730,394 680,398" fill="#1656A8"/>
+    <polygon points="730,262 784,309 784,398 730,394" fill="url(#cyanGrad)"/>
+
+    <!-- Windows -->
+    <rect x="456" y="300" width="12" height="16" fill="#1770BE"/>
+    <rect x="474" y="306" width="12" height="16" fill="#1770BE"/>
+    <rect x="456" y="322" width="12" height="16" fill="#1770BE"/>
+    <rect x="474" y="328" width="12" height="16" fill="#1770BE"/>
+
+    <rect x="592" y="252" width="14" height="20" fill="#1770BE"/>
+    <rect x="612" y="259" width="14" height="20" fill="#1770BE"/>
+    <rect x="592" y="276" width="14" height="20" fill="#1770BE"/>
+    <rect x="612" y="283" width="14" height="20" fill="#1770BE"/>
+
+    <!-- Top hill-like line -->
+    <path id="hill-top" d="M300 442C398 404 509 383 620 383C731 383 842 404 940 442C853 428 737 421 620 421C503 421 387 428 300 442Z" fill="#16B9DD"/>
+  </g>
+
+  <!-- Brand text -->
+  <g id="wordmark-group">
+    <text id="wordmark" class="brand-text" x="600" y="574" text-anchor="middle">ApartYönet</text>
+  </g>
+
+  <!-- Symmetric curve under text (mirrored counterpart) -->
+  <g id="hill-bottom-group" transform="translate(0,1060) scale(1,-1)">
+    <path id="hill-bottom" d="M300 442C398 404 509 383 620 383C731 383 842 404 940 442C853 428 737 421 620 421C503 421 387 428 300 442Z" fill="#16B9DD"/>
+  </g>
+</svg>

@@ -1,0 +1,33 @@
+<svg width="600" height="420" viewBox="0 0 600 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cyanGradB" x1="157" y1="40" x2="465" y2="362" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1CC9E7"/>
+      <stop offset="1" stop-color="#0FA6D0"/>
+    </linearGradient>
+  </defs>
+
+  <g id="building-only">
+    <polygon points="170,210 206,178 206,300 174,304" fill="#1562B3"/>
+    <polygon points="206,178 244,208 244,296 206,300" fill="url(#cyanGradB)"/>
+
+    <polygon points="274,122 324,78 324,292 274,294" fill="#1750A2"/>
+    <polygon points="324,78 386,124 386,284 324,292" fill="#2A87D9"/>
+
+    <polygon points="302,128 356,154 356,298 302,302" fill="#14B7DD"/>
+
+    <polygon points="390,210 426,180 426,296 390,298" fill="#1656A8"/>
+    <polygon points="426,180 465,212 465,298 426,296" fill="url(#cyanGradB)"/>
+
+    <rect x="228" y="208" width="8" height="12" fill="#1770BE"/>
+    <rect x="240" y="213" width="8" height="12" fill="#1770BE"/>
+    <rect x="228" y="224" width="8" height="12" fill="#1770BE"/>
+    <rect x="240" y="229" width="8" height="12" fill="#1770BE"/>
+
+    <rect x="325" y="172" width="10" height="14" fill="#1770BE"/>
+    <rect x="339" y="177" width="10" height="14" fill="#1770BE"/>
+    <rect x="325" y="189" width="10" height="14" fill="#1770BE"/>
+    <rect x="339" y="194" width="10" height="14" fill="#1770BE"/>
+
+    <path d="M120 334C189 306 267 291 345 291C423 291 501 306 570 334C508 324 426 319 345 319C264 319 182 324 120 334Z" fill="#16B9DD"/>
+  </g>
+</svg>
