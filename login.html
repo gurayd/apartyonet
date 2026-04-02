@@ -224,13 +224,29 @@
     const db = app.firestore();
     let authChecked = false;
 
+    function withTimeout(promise, ms, message) {
+      let timer = null;
+      const timeout = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(message)), ms);
+      });
+      return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+    }
+
     function showError(message) {
       document.getElementById("error").textContent = message || "";
     }
 
     async function routeByProfile(user) {
-      await ensureBootstrapAdminProfile(db, user);
-      const profile = await getCurrentUserProfile(db, user.uid);
+      await withTimeout(
+        ensureBootstrapAdminProfile(db, user),
+        8000,
+        "Profil doğrulama zaman aşımına uğradı. Reklam engelleyiciyi kapatıp tekrar deneyin."
+      );
+      const profile = await withTimeout(
+        getCurrentUserProfile(db, user.uid),
+        8000,
+        "Kullanıcı profili okunamadı (ağ/izin problemi). Tekrar deneyin."
+      );
       if (!profile) {
         await auth.signOut();
         throw new Error("Bu hesap için kullanıcı profili bulunamadı. Yönetici ile iletişime geçin.");
@@ -289,6 +305,9 @@
         const waitStart = Date.now();
         while (!authChecked && Date.now() - waitStart < 4000) {
           await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+        if (!authChecked) {
+          showError("Giriş doğrulaması uzun sürdü. Ağ engeli veya eklenti engeli olabilir, tekrar deneyin.");
         }
       } catch (err) {
         let msg = "Giris basarisiz. Bilgileri kontrol edin.";
