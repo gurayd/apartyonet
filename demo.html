@@ -211,6 +211,8 @@
       cursor: pointer;
     }
     .sub-tab.active { border-color: rgba(46, 160, 255, 0.6); color: #b9dcff; }
+    .sub-pane { display: none; }
+    .sub-pane.active { display: block; }
 
     .card-grid {
       display: grid;
@@ -285,6 +287,34 @@
       margin: 2px 4px 0 0;
     }
 
+    .badge {
+      display: inline-block;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge.ok {
+      color: #ccffe0;
+      background: rgba(36, 109, 73, 0.35);
+      border-color: rgba(134, 239, 172, 0.55);
+    }
+
+    .badge.warn {
+      color: #fff3bf;
+      background: rgba(122, 95, 24, 0.35);
+      border-color: rgba(252, 211, 77, 0.55);
+    }
+
+    .badge.error {
+      color: #ffd7d7;
+      background: rgba(120, 40, 40, 0.35);
+      border-color: rgba(252, 165, 165, 0.55);
+    }
+
     .bars { display: grid; gap: 8px; margin-top: 8px; }
     .bar-row { display: grid; gap: 5px; }
     .bar-row label { font-size: 0.76rem; color: var(--muted); }
@@ -354,20 +384,36 @@
 
         <section id="tab-aidat" class="tab-pane">
           <h2 class="section-title">Aidat İşlemleri</h2>
-          <div class="muted">Aylık aidat değerlerini değiştirerek gelir projeksiyonunu canlı görebilirsin.</div>
+          <div class="muted">Yıl, ay, blok ve bağımsız bölüm seçip kısmi/tam ödeme kaydı oluştur.</div>
           <div class="inline-form">
-            <div class="f"><label>Aylık Daire Aidat (₺)</label><input id="daireAidatInput" type="number" step="0.01" min="0" /></div>
-            <div class="f"><label>Aylık Dükkan Aidat (₺)</label><input id="dukkanAidatInput" type="number" step="0.01" min="0" /></div>
-            <div class="f"><label>Tahsilat Oranı (%)</label><input id="tahsilatOraniInput" type="number" step="1" min="0" max="100" /></div>
+            <div class="f"><label>Yıl</label><select id="aidatYil"></select></div>
+            <div class="f"><label>Ay</label><select id="aidatAy"></select></div>
+            <div class="f"><label>Blok</label><select id="aidatBlok"></select></div>
+            <div class="f"><label>Daire</label><select id="aidatDaire"></select></div>
+            <div class="f"><label>Dükkan</label><select id="aidatDukkan"></select></div>
+            <div class="f"><label>Tarih</label><input id="aidatTarih" type="date" /></div>
+            <div class="f"><label>Beklenen Tutar (₺)</label><input id="aidatBeklenen" type="number" step="0.01" readonly /></div>
+            <div class="f"><label>Ödenen Tutar (₺)</label><input id="aidatOdenen" type="number" step="0.01" min="0" /></div>
+            <div class="f" style="display:flex;align-items:flex-end;"><button id="aidatKaydetBtn" class="btn btn-primary" type="button">Aidat Kaydet</button></div>
+          </div>
+          <div id="aidatInfo" class="muted" style="margin-top:8px;"></div>
+          <div class="inline-form">
+            <div class="f"><label>Filtre Yıl</label><select id="filterAidatYil"></select></div>
+            <div class="f"><label>Filtre Ay</label><select id="filterAidatAy"></select></div>
+            <div class="f"><label>Filtre Blok</label><select id="filterAidatBlok"></select></div>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Blok</th>
-                  <th>Daire</th>
-                  <th>Dükkan</th>
-                  <th>Aylık Beklenen (₺)</th>
+                  <th>Tarih</th>
+                  <th>Dönem</th>
+                  <th>Tip</th>
+                  <th>Bölüm</th>
+                  <th>Beklenen (₺)</th>
+                  <th>Ödenen (₺)</th>
+                  <th>Kalan (₺)</th>
+                  <th>Durum</th>
                 </tr>
               </thead>
               <tbody id="aidatBody"></tbody>
@@ -377,19 +423,47 @@
 
         <section id="tab-gider" class="tab-pane">
           <h2 class="section-title">Gelir / Gider</h2>
-          <div class="muted">Yıllık gider kalemlerini ekleyip çıkartabilirsin.</div>
+          <div class="muted">Ekstra gider (daire bazlı) ve sabit gider kayıtlarını ayrı ayrı yönet.</div>
+
+          <h3 class="section-title" style="margin-top:12px;">Ekstra Gider Ödeme</h3>
           <div class="inline-form">
-            <div class="f"><label>Gider Kalemi</label><input id="giderAdInput" type="text" placeholder="Asansör bakım" /></div>
-            <div class="f"><label>Yıllık Tutar (₺)</label><input id="giderTutarInput" type="number" step="0.01" min="0" /></div>
-            <div class="f" style="display:flex; align-items:flex-end;"><button id="giderEkleBtn" class="btn btn-primary" type="button">Kalem Ekle</button></div>
+            <div class="f"><label>Gider Kalemi</label><select id="giderKalemSelect"></select></div>
+            <div class="f"><label>Blok</label><select id="giderBlok"></select></div>
+            <div class="f"><label>Daire</label><select id="giderDaire"></select></div>
+            <div class="f"><label>Beklenen Tutar (₺)</label><input id="giderBeklenen" type="number" step="0.01" readonly /></div>
+            <div class="f"><label>Ödenen Tutar (₺)</label><input id="giderOdenen" type="number" step="0.01" min="0" /></div>
+            <div class="f"><label>Tarih</label><input id="giderTarih" type="date" /></div>
+            <div class="f"><label>Not</label><input id="giderNot" type="text" placeholder="Opsiyonel" /></div>
+            <div class="f" style="display:flex;align-items:flex-end;"><button id="giderKaydetBtn" class="btn btn-primary" type="button">Ödeme Ekle</button></div>
+          </div>
+          <div id="giderInfo" class="muted" style="margin-top:8px;"></div>
+
+          <h3 class="section-title" style="margin-top:14px;">Sabit Gider</h3>
+          <div class="inline-form">
+            <div class="f"><label>Gider Türü</label><input id="sabitTur" type="text" placeholder="Elektrik" /></div>
+            <div class="f"><label>Tutar (₺)</label><input id="sabitTutar" type="number" step="0.01" min="0" /></div>
+            <div class="f"><label>Tarih</label><input id="sabitTarih" type="date" /></div>
+            <div class="f"><label>Açıklama</label><input id="sabitAciklama" type="text" placeholder="Opsiyonel" /></div>
+            <div class="f" style="display:flex;align-items:flex-end;"><button id="sabitGiderKaydetBtn" class="btn btn-primary" type="button">Sabit Gider Kaydet</button></div>
+          </div>
+
+          <div class="inline-form">
+            <div class="f"><label>Filtre Tip</label><select id="filterGiderTip"></select></div>
+            <div class="f"><label>Filtre Kalem/Tür</label><select id="filterGiderKalem"></select></div>
+            <div class="f"><label>Filtre Blok</label><select id="filterGiderBlok"></select></div>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Kalem</th>
-                  <th>Tutar (₺)</th>
-                  <th></th>
+                  <th>Tarih</th>
+                  <th>Tip</th>
+                  <th>Kalem / Tür</th>
+                  <th>Bölüm</th>
+                  <th>Beklenen (₺)</th>
+                  <th>Ödenen / Tutar (₺)</th>
+                  <th>Kalan (₺)</th>
+                  <th>Durum</th>
                 </tr>
               </thead>
               <tbody id="giderBody"></tbody>
@@ -399,24 +473,88 @@
 
         <section id="tab-tablo" class="tab-pane">
           <h2 class="section-title">Genel Tablo</h2>
-          <div class="card-grid" id="genelKartlar"></div>
+          <div class="sub-tabs">
+            <button class="sub-tab active" data-tablo-tab="aidat">Aidat Ödeme Durumu</button>
+            <button class="sub-tab" data-tablo-tab="gider">Ekstra Gider Durumu</button>
+          </div>
+          <div id="tablo-aidat" class="sub-pane active">
+            <div class="inline-form">
+              <div class="f"><label>Yıl</label><select id="tabloAidatYil"></select></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Bölüm</th>
+                    <th>Beklenen (₺)</th>
+                    <th>Ödenen (₺)</th>
+                    <th>Kalan (₺)</th>
+                    <th>Durum</th>
+                  </tr>
+                </thead>
+                <tbody id="aidatTabloBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div id="tablo-gider" class="sub-pane">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Kalem</th>
+                    <th>Tanımlı Toplam (₺)</th>
+                    <th>Toplanan (₺)</th>
+                    <th>Kalan (₺)</th>
+                    <th>Durum</th>
+                  </tr>
+                </thead>
+                <tbody id="giderTabloBody"></tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
         <section id="tab-belirleme" class="tab-pane">
-          <h2 class="section-title">Aidat Belirleme</h2>
-          <div class="muted">Hedef bütçe ve güven payına göre önerilen daire aidatı hesaplanır.</div>
+          <h2 class="section-title">Aidat & Gider Belirleme</h2>
+          <div class="muted">Örnekteki akışa benzer şekilde yıllık aidat ve gider hiyerarşisini yönet.</div>
+
+          <h3 class="section-title" style="margin-top:12px;">Aylık Daire Aidatı</h3>
           <div class="inline-form">
-            <div class="f"><label>Hedef Yıllık Gider (₺)</label><input id="hedefGiderInput" type="number" step="0.01" min="0" /></div>
-            <div class="f"><label>Güven Payı (%)</label><input id="guvenPayiInput" type="number" step="1" min="0" max="100" /></div>
-            <div class="f"><label>Önerilen Daire Aidat (₺)</label><input id="onerilenAidatInput" type="text" readonly /></div>
+            <div class="f"><label>Yıl</label><select id="ayarAidatYil"></select></div>
+            <div class="f"><label>Aylık Aidat (₺)</label><input id="ayarAidatTutar" type="number" step="0.01" min="0" /></div>
+            <div class="f" style="display:flex;align-items:flex-end;"><button id="saveAidatAyarBtn" class="btn btn-primary" type="button">Kaydet</button></div>
           </div>
-          <div id="belirlemePills"></div>
+          <div id="aidatAyarList"></div>
+
+          <h3 class="section-title" style="margin-top:14px;">Aylık Dükkan Aidatı</h3>
+          <div class="inline-form">
+            <div class="f"><label>Yıl</label><select id="ayarDukkanYil"></select></div>
+            <div class="f"><label>Aylık Dükkan Aidat (₺)</label><input id="ayarDukkanTutar" type="number" step="0.01" min="0" /></div>
+            <div class="f" style="display:flex;align-items:flex-end;"><button id="saveDukkanAyarBtn" class="btn btn-primary" type="button">Kaydet</button></div>
+          </div>
+          <div id="dukkanAyarList"></div>
+
+          <h3 class="section-title" style="margin-top:14px;">Gider Kalemi Belirleme</h3>
+          <div class="inline-form">
+            <div class="f"><label>Kalem Adı</label><input id="giderKalemAd" type="text" placeholder="Hidrofor Bakımı" /></div>
+            <div class="f"><label>Toplam Tutar (₺)</label><input id="giderToplamTutar" type="number" step="0.01" min="0" /></div>
+            <div class="f"><label>Daire Seçimi</label><select id="giderDaireSecim"></select></div>
+            <div class="f"><label>Daire Başı Tutar (₺)</label><input id="giderDaireBasiTutar" type="number" step="0.01" readonly /></div>
+            <div class="f" style="display:flex;align-items:flex-end;"><button id="saveGiderKalemBtn" class="btn btn-primary" type="button">Kalem Ekle</button></div>
+          </div>
+          <div id="giderKalemList"></div>
         </section>
 
         <section id="tab-raporlar" class="tab-pane">
           <h2 class="section-title">Raporlar</h2>
-          <div class="muted">Tahmini gelir-gider dengesi ve tahsilat performansı.</div>
+          <div class="inline-form">
+            <div class="f"><label>Yıllık Özet (Yıl)</label><select id="raporYil"></select></div>
+            <div class="f"><label>Başlangıç Tarihi</label><input id="raporBaslangic" type="date" /></div>
+            <div class="f"><label>Bitiş Tarihi</label><input id="raporBitis" type="date" /></div>
+            <div class="f" style="display:flex;align-items:flex-end;"><button id="raporOlusturBtn" class="btn btn-primary" type="button">Rapor Oluştur</button></div>
+          </div>
           <div class="bars" id="raporBars"></div>
+          <div class="card-grid" id="raporKartlar"></div>
         </section>
 
         <div id="state" class="state"></div>
@@ -426,14 +564,22 @@
 
   <script>
     const ADMIN_EMAILS = ["guraydinsel@gmail.com"];
+    const MONTHS = [
+      { value: "01", label: "Ocak" }, { value: "02", label: "Şubat" }, { value: "03", label: "Mart" },
+      { value: "04", label: "Nisan" }, { value: "05", label: "Mayıs" }, { value: "06", label: "Haziran" },
+      { value: "07", label: "Temmuz" }, { value: "08", label: "Ağustos" }, { value: "09", label: "Eylül" },
+      { value: "10", label: "Ekim" }, { value: "11", label: "Kasım" }, { value: "12", label: "Aralık" }
+    ];
     const state = {
       row: null,
       bloklar: [],
       aktifBlok: null,
-      daireAidat: 0,
-      dukkanAidat: 0,
-      tahsilatOrani: 100,
-      giderler: []
+      aidatAyarlari: {},
+      dukkanAidatAyarlari: {},
+      aidatKayitlari: [],
+      giderKalemleri: [],
+      ekstraGiderKayitlari: [],
+      sabitGiderKayitlari: []
     };
 
     const firebaseConfig = {
@@ -458,8 +604,7 @@
     }
 
     function getQueryParam(name) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(name);
+      return new URLSearchParams(window.location.search).get(name);
     }
 
     function parseNumber(val, fallback = 0) {
@@ -467,26 +612,20 @@
       return Number.isFinite(n) ? n : fallback;
     }
 
-    function countDukkan(value) {
-      const raw = String(value || "").trim();
-      if (!raw) return 0;
-      const tokens = raw.split(/[\s,;]+/).filter(Boolean);
-      let total = 0;
-      for (const token of tokens) {
-        if (token.includes("-")) {
-          const [a, b] = token.split("-").map((x) => parseInt(x, 10));
-          if (Number.isInteger(a) && Number.isInteger(b) && b >= a) total += (b - a + 1);
-          else total += 1;
-        } else {
-          total += 1;
-        }
-      }
-      return total;
+    function formatMoney(value) {
+      return parseNumber(value, 0).toLocaleString("tr-TR", { maximumFractionDigits: 2 });
     }
 
-    function formatMoney(value) {
-      const n = parseNumber(value, 0);
-      return n.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
+    function todayIso() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function statusBadge(expected, paid) {
+      const kalan = Math.max(0, expected - paid);
+      if (expected <= 0) return '<span class="badge warn">Tanımsız</span>';
+      if (kalan <= 0.01) return '<span class="badge ok">Tam Ödendi</span>';
+      if (paid > 0) return '<span class="badge warn">Kısmi</span>';
+      return '<span class="badge error">Ödenmedi</span>';
     }
 
     function setStateMessage(msg, cls = "") {
@@ -495,28 +634,182 @@
       el.className = "state" + (cls ? " " + cls : "");
     }
 
-    function activeTotals() {
-      const totalDaire = state.bloklar.reduce((acc, b) => acc + parseNumber(b.daireAdet, 0), 0);
-      const totalDukkan = state.bloklar.reduce((acc, b) => acc + countDukkan(b.dukkan), 0);
-      const aylikBeklenen = totalDaire * state.daireAidat + totalDukkan * state.dukkanAidat;
-      const yillikBeklenen = aylikBeklenen * 12;
-      const yillikTahsilEdilen = yillikBeklenen * (state.tahsilatOrani / 100);
-      const yillikGider = state.giderler.reduce((acc, g) => acc + parseNumber(g.tutar, 0), 0);
-      const netBakiye = yillikTahsilEdilen - yillikGider;
-      return { totalDaire, totalDukkan, aylikBeklenen, yillikBeklenen, yillikTahsilEdilen, yillikGider, netBakiye };
+    function parseShopNumbers(rawValue) {
+      const raw = String(rawValue || "").trim();
+      if (!raw) return [];
+      const out = [];
+      raw.split(/[\s,;]+/).filter(Boolean).forEach((token) => {
+        if (token.includes("-")) {
+          const [a, b] = token.split("-").map((x) => parseInt(x, 10));
+          if (Number.isInteger(a) && Number.isInteger(b) && b >= a) {
+            for (let i = a; i <= b; i += 1) out.push(String(i));
+          } else {
+            out.push(token);
+          }
+        } else {
+          out.push(token);
+        }
+      });
+      return out;
+    }
+
+    function getAllUnits() {
+      const units = [];
+      state.bloklar.forEach((blok) => {
+        const blokKey = blok.blok || "A";
+        const daireAdet = parseNumber(blok.daireAdet, 0);
+        for (let i = 1; i <= daireAdet; i += 1) {
+          units.push({ key: `${blokKey}-D-${i}`, type: "daire", blok: blokKey, no: String(i), label: `${blokKey} Blok / Daire ${i}` });
+        }
+        parseShopNumbers(blok.dukkan).forEach((no) => {
+          units.push({ key: `${blokKey}-S-${no}`, type: "dukkan", blok: blokKey, no: String(no), label: `${blokKey} Blok / Dükkan ${no}` });
+        });
+      });
+      return units;
+    }
+
+    function getTotalDaire() {
+      return state.bloklar.reduce((acc, b) => acc + parseNumber(b.daireAdet, 0), 0);
+    }
+
+    function getTotalDukkan() {
+      return state.bloklar.reduce((acc, b) => acc + parseShopNumbers(b.dukkan).length, 0);
+    }
+
+    function getAidatAmount(year, type) {
+      if (type === "dukkan") return parseNumber(state.dukkanAidatAyarlari[year], 0);
+      return parseNumber(state.aidatAyarlari[year], 0);
+    }
+
+    function getYears() {
+      const y = new Date().getFullYear();
+      return [y - 1, y, y + 1, y + 2, y + 3].map(String);
+    }
+
+    function renderSelect(elId, options, selectedValue) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.innerHTML = options.map((o) => `<option value="${o.value}">${o.label}</option>`).join("");
+      if (selectedValue != null) el.value = selectedValue;
+    }
+
+    function refreshCommonSelectors() {
+      const years = getYears();
+      const yearOptions = years.map((y) => ({ value: y, label: y }));
+      const yearOptionsWithAll = [{ value: "", label: "Tümü" }, ...yearOptions];
+      const blockOptions = state.bloklar.map((b) => ({ value: b.blok, label: (b.ad || `${b.blok} Blok`) }));
+      const blockOptionsWithAll = [{ value: "", label: "Tümü" }, ...blockOptions];
+
+      renderSelect("aidatYil", yearOptions, String(new Date().getFullYear()));
+      renderSelect("filterAidatYil", yearOptionsWithAll, "");
+      renderSelect("tabloAidatYil", yearOptions, String(new Date().getFullYear()));
+      renderSelect("ayarAidatYil", yearOptions, String(new Date().getFullYear()));
+      renderSelect("ayarDukkanYil", yearOptions, String(new Date().getFullYear()));
+      renderSelect("raporYil", yearOptions, String(new Date().getFullYear()));
+
+      renderSelect("aidatAy", MONTHS, String(new Date().getMonth() + 1).padStart(2, "0"));
+      renderSelect("filterAidatAy", [{ value: "", label: "Tümü" }, ...MONTHS], "");
+
+      renderSelect("aidatBlok", blockOptions, blockOptions[0] ? blockOptions[0].value : "");
+      renderSelect("giderBlok", blockOptions, blockOptions[0] ? blockOptions[0].value : "");
+      renderSelect("filterAidatBlok", blockOptionsWithAll, "");
+      renderSelect("filterGiderBlok", blockOptionsWithAll, "");
+
+      renderSelect("filterGiderTip", [
+        { value: "", label: "Tümü" },
+        { value: "ekstra", label: "Ekstra Gider" },
+        { value: "sabit", label: "Sabit Gider" }
+      ], "");
+
+      const giderDaireSecimOps = [{ value: "all", label: `Tüm Daireler (${getTotalDaire()})` }]
+        .concat(state.bloklar.map((b) => ({ value: `blok:${b.blok}`, label: `${b.ad || `${b.blok} Blok`} Daireleri (${parseNumber(b.daireAdet, 0)})` })));
+      renderSelect("giderDaireSecim", giderDaireSecimOps, "all");
+    }
+
+    function populateAidatDaireDukkan() {
+      const blokKey = document.getElementById("aidatBlok").value;
+      const blok = state.bloklar.find((b) => b.blok === blokKey);
+      const daireOptions = [{ value: "", label: "Seçiniz" }];
+      const dukkanOptions = [{ value: "", label: "Seçiniz" }];
+      if (blok) {
+        const daireAdet = parseNumber(blok.daireAdet, 0);
+        for (let i = 1; i <= daireAdet; i += 1) daireOptions.push({ value: String(i), label: `Daire ${i}` });
+        parseShopNumbers(blok.dukkan).forEach((no) => dukkanOptions.push({ value: no, label: `Dükkan ${no}` }));
+      }
+      renderSelect("aidatDaire", daireOptions, "");
+      renderSelect("aidatDukkan", dukkanOptions, "");
+      updateAidatExpected();
+    }
+
+    function populateGiderDaire() {
+      const blokKey = document.getElementById("giderBlok").value;
+      const blok = state.bloklar.find((b) => b.blok === blokKey);
+      const daireOptions = [{ value: "", label: "Seçiniz" }];
+      if (blok) {
+        const daireAdet = parseNumber(blok.daireAdet, 0);
+        for (let i = 1; i <= daireAdet; i += 1) daireOptions.push({ value: String(i), label: `Daire ${i}` });
+      }
+      renderSelect("giderDaire", daireOptions, "");
+      updateGiderExpected();
+    }
+
+    function calcDaireSecimCount(val) {
+      if (val === "all") return getTotalDaire();
+      if (val.startsWith("blok:")) {
+        const blok = state.bloklar.find((b) => b.blok === val.split(":")[1]);
+        return parseNumber(blok && blok.daireAdet, 0);
+      }
+      return getTotalDaire();
+    }
+
+    function updateGiderDaireBasi() {
+      const toplam = parseNumber(document.getElementById("giderToplamTutar").value, 0);
+      const secim = document.getElementById("giderDaireSecim").value;
+      const adet = Math.max(1, calcDaireSecimCount(secim));
+      document.getElementById("giderDaireBasiTutar").value = (toplam / adet).toFixed(2);
+    }
+
+    function updateAidatExpected() {
+      const yil = document.getElementById("aidatYil").value;
+      const daireNo = document.getElementById("aidatDaire").value;
+      const dukkanNo = document.getElementById("aidatDukkan").value;
+      let expected = 0;
+      if (daireNo) expected += getAidatAmount(yil, "daire");
+      if (dukkanNo) expected += getAidatAmount(yil, "dukkan");
+      document.getElementById("aidatBeklenen").value = expected.toFixed(2);
+      if (!document.getElementById("aidatOdenen").value) {
+        document.getElementById("aidatOdenen").value = expected.toFixed(2);
+      }
+    }
+
+    function updateGiderExpected() {
+      const kalemId = document.getElementById("giderKalemSelect").value;
+      const kalem = state.giderKalemleri.find((g) => g.id === kalemId);
+      const expected = parseNumber(kalem && kalem.daireBasi, 0);
+      document.getElementById("giderBeklenen").value = expected.toFixed(2);
+      if (!document.getElementById("giderOdenen").value) {
+        document.getElementById("giderOdenen").value = expected.toFixed(2);
+      }
     }
 
     function renderHero() {
-      const row = state.row;
-      const totals = activeTotals();
-      document.getElementById("heroTitle").textContent = (row.site_adi || "Demo Site") + " • Yönetim Paneli Önizleme";
-      document.getElementById("heroSub").textContent = "Başvuruya göre otomatik oluşturuldu. Blok, aidat ve gider akışları canlı hesaplanır.";
+      const year = String(new Date().getFullYear());
+      const units = getAllUnits();
+      const expectedAidat = units.reduce((acc, u) => acc + (12 * getAidatAmount(year, u.type)), 0);
+      const paidAidat = state.aidatKayitlari.filter((r) => r.yil === year).reduce((acc, r) => acc + parseNumber(r.odenen, 0), 0);
+      const sabitGider = state.sabitGiderKayitlari.reduce((acc, g) => acc + parseNumber(g.tutar, 0), 0);
+      const ekstraTahsilat = state.ekstraGiderKayitlari.reduce((acc, g) => acc + parseNumber(g.odenen, 0), 0);
+      const net = paidAidat + ekstraTahsilat - sabitGider;
+
+      document.getElementById("heroTitle").textContent = `${state.row.site_adi || "Demo Site"} • Yönetim Simülasyonu`;
+      document.getElementById("heroSub").textContent = "Aidat, ekstra gider, tablo ve rapor hiyerarşisi örnek panel mantığına göre entegre edildi.";
       const stats = [
         ["Blok", state.bloklar.length],
-        ["Daire", totals.totalDaire],
-        ["Dükkan", totals.totalDukkan],
-        ["Aylık Beklenen Gelir", formatMoney(totals.aylikBeklenen) + " ₺"],
-        ["Yıllık Tahmini Gelir", formatMoney(totals.yillikBeklenen) + " ₺"]
+        ["Daire", getTotalDaire()],
+        ["Dükkan", getTotalDukkan()],
+        ["Yıllık Beklenen Aidat", `${formatMoney(expectedAidat)} ₺`],
+        ["Yıllık Tahsil Edilen Aidat", `${formatMoney(paidAidat)} ₺`],
+        ["Net Denge", `${formatMoney(net)} ₺`]
       ];
       document.getElementById("heroStats").innerHTML = stats.map((s) => `<div class="stat"><small>${s[0]}</small><strong>${s[1]}</strong></div>`).join("");
     }
@@ -524,10 +817,9 @@
     function renderBlokTabs() {
       const tabsEl = document.getElementById("blokTabs");
       tabsEl.innerHTML = state.bloklar.map((b, i) => {
-        const active = state.aktifBlok === b.blok || (state.aktifBlok == null && i === 0);
-        return `<button class="sub-tab ${active ? "active" : ""}" data-blok-tab="${b.blok}">${b.ad || b.blok + " Blok"}</button>`;
+        const active = state.aktifBlok === b.blok || (!state.aktifBlok && i === 0);
+        return `<button class="sub-tab ${active ? "active" : ""}" data-blok-tab="${b.blok}">${b.ad || `${b.blok} Blok`}</button>`;
       }).join("");
-
       tabsEl.querySelectorAll("[data-blok-tab]").forEach((btn) => {
         btn.addEventListener("click", () => {
           state.aktifBlok = btn.getAttribute("data-blok-tab");
@@ -538,116 +830,291 @@
 
     function renderDaireTab() {
       renderBlokTabs();
-      const target = state.aktifBlok || (state.bloklar[0] && state.bloklar[0].blok);
-      const blok = state.bloklar.find((b) => b.blok === target) || state.bloklar[0];
+      const blok = state.bloklar.find((b) => b.blok === state.aktifBlok) || state.bloklar[0];
       if (!blok) {
-        document.getElementById("blokContent").innerHTML = '<div class="muted">Blok verisi yok.</div>';
+        document.getElementById("blokContent").innerHTML = '<div class="muted">Blok verisi bulunamadı.</div>';
         return;
       }
       state.aktifBlok = blok.blok;
-
       const daireAdet = parseNumber(blok.daireAdet, 0);
-      const dairePills = Array.from({ length: daireAdet }, (_, idx) => `<span class="pill">${blok.blok}${idx + 1}</span>`).join("");
-      const dukkanCount = countDukkan(blok.dukkan);
-
+      const dukkanlar = parseShopNumbers(blok.dukkan);
+      const dairePills = Array.from({ length: daireAdet }, (_, idx) => `<span class="pill">${blok.blok} D${idx + 1}</span>`).join("");
+      const dukkanPills = dukkanlar.map((n) => `<span class="pill">${blok.blok} S${n}</span>`).join("");
       document.getElementById("blokContent").innerHTML = `
         <div class="card-grid">
-          <div class="mini"><small>Blok Adı</small><strong>${blok.ad || blok.blok + " Blok"}</strong></div>
+          <div class="mini"><small>Blok</small><strong>${blok.ad || `${blok.blok} Blok`}</strong></div>
           <div class="mini"><small>Daire Sayısı</small><strong>${daireAdet}</strong></div>
           <div class="mini"><small>Kat Sayısı</small><strong>${parseNumber(blok.katSayisi, 0)}</strong></div>
-          <div class="mini"><small>Dükkan Sayısı</small><strong>${dukkanCount}</strong></div>
+          <div class="mini"><small>Dükkan Sayısı</small><strong>${dukkanlar.length}</strong></div>
         </div>
-        <div style="margin-top:10px;" class="muted">Daire Dağılımı</div>
-        <div style="margin-top:4px;">${dairePills || '<span class="muted">Daire listesi bulunmuyor.</span>'}</div>
+        <div style="margin-top:10px;"><div class="muted">Daireler</div><div>${dairePills || "-"}</div></div>
+        <div style="margin-top:8px;"><div class="muted">Dükkanlar</div><div>${dukkanPills || '<span class="muted">Dükkan yok</span>'}</div></div>
       `;
+    }
+
+    function saveAidatRecord() {
+      const yil = document.getElementById("aidatYil").value;
+      const ay = document.getElementById("aidatAy").value;
+      const blok = document.getElementById("aidatBlok").value;
+      const daireNo = document.getElementById("aidatDaire").value;
+      const dukkanNo = document.getElementById("aidatDukkan").value;
+      const tarih = document.getElementById("aidatTarih").value || todayIso();
+      if (!daireNo && !dukkanNo) {
+        setStateMessage("Aidat kaydı için daire veya dükkan seçiniz.", "error");
+        return;
+      }
+      const expected = parseNumber(document.getElementById("aidatBeklenen").value, 0);
+      const paid = parseNumber(document.getElementById("aidatOdenen").value, expected);
+      state.aidatKayitlari.push({
+        id: `aidat_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+        tarih,
+        yil,
+        ay,
+        blok,
+        tip: daireNo ? "daire" : "dukkan",
+        no: daireNo || dukkanNo,
+        expected,
+        odenen: Math.max(0, paid)
+      });
+      document.getElementById("aidatInfo").textContent = `Kayıt eklendi: ${blok} Blok ${daireNo ? `Daire ${daireNo}` : `Dükkan ${dukkanNo}`}`;
+      setStateMessage("Aidat kaydı eklendi.", "ok");
+      renderAll();
     }
 
     function renderAidatTab() {
-      document.getElementById("daireAidatInput").value = state.daireAidat;
-      document.getElementById("dukkanAidatInput").value = state.dukkanAidat;
-      document.getElementById("tahsilatOraniInput").value = state.tahsilatOrani;
-
-      const rows = state.bloklar.map((b) => {
-        const daire = parseNumber(b.daireAdet, 0);
-        const dukkan = countDukkan(b.dukkan);
-        const aylik = daire * state.daireAidat + dukkan * state.dukkanAidat;
-        return `<tr><td>${b.ad || b.blok + " Blok"}</td><td>${daire}</td><td>${dukkan}</td><td>${formatMoney(aylik)} ₺</td></tr>`;
-      }).join("");
-      document.getElementById("aidatBody").innerHTML = rows || '<tr><td colspan="4">Veri yok</td></tr>';
+      const yilFilter = document.getElementById("filterAidatYil").value;
+      const ayFilter = document.getElementById("filterAidatAy").value;
+      const blokFilter = document.getElementById("filterAidatBlok").value;
+      const rows = state.aidatKayitlari
+        .filter((r) => (!yilFilter || r.yil === yilFilter) && (!ayFilter || r.ay === ayFilter) && (!blokFilter || r.blok === blokFilter))
+        .sort((a, b) => (a.tarih < b.tarih ? 1 : -1))
+        .map((r) => {
+          const kalan = Math.max(0, parseNumber(r.expected, 0) - parseNumber(r.odenen, 0));
+          const monthName = (MONTHS.find((m) => m.value === r.ay) || { label: r.ay }).label;
+          return `<tr>
+            <td>${r.tarih}</td>
+            <td>${monthName} ${r.yil}</td>
+            <td>${r.tip === "daire" ? "Daire Aidatı" : "Dükkan Aidatı"}</td>
+            <td>${r.blok} Blok / ${r.tip === "daire" ? "Daire" : "Dükkan"} ${r.no}</td>
+            <td>${formatMoney(r.expected)}</td>
+            <td>${formatMoney(r.odenen)}</td>
+            <td>${formatMoney(kalan)}</td>
+            <td>${statusBadge(parseNumber(r.expected, 0), parseNumber(r.odenen, 0))}</td>
+          </tr>`;
+        }).join("");
+      document.getElementById("aidatBody").innerHTML = rows || '<tr><td colspan="8">Aidat kaydı bulunamadı.</td></tr>';
     }
 
-    function renderGiderTab() {
-      const body = document.getElementById("giderBody");
-      body.innerHTML = state.giderler.map((g) => {
+    function renderGiderKalemSelect() {
+      const options = [{ value: "", label: "Seçiniz" }].concat(
+        state.giderKalemleri.map((g) => ({ value: g.id, label: `${g.ad} (${formatMoney(g.daireBasi)} ₺/daire)` }))
+      );
+      renderSelect("giderKalemSelect", options, options[1] ? options[1].value : "");
+      updateGiderExpected();
+      renderSelect("filterGiderKalem", [{ value: "", label: "Tümü" }]
+        .concat(state.giderKalemleri.map((g) => ({ value: g.ad, label: g.ad }))), "");
+    }
+
+    function saveEkstraGider() {
+      const kalemId = document.getElementById("giderKalemSelect").value;
+      const blok = document.getElementById("giderBlok").value;
+      const daireNo = document.getElementById("giderDaire").value;
+      const tarih = document.getElementById("giderTarih").value || todayIso();
+      const kalem = state.giderKalemleri.find((g) => g.id === kalemId);
+      if (!kalem || !blok || !daireNo) {
+        setStateMessage("Ekstra gider için kalem, blok ve daire seçiniz.", "error");
+        return;
+      }
+      const expected = parseNumber(document.getElementById("giderBeklenen").value, kalem.daireBasi);
+      const paid = parseNumber(document.getElementById("giderOdenen").value, expected);
+      const note = (document.getElementById("giderNot").value || "").trim();
+      state.ekstraGiderKayitlari.push({
+        id: `eg_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+        tip: "ekstra",
+        tarih,
+        kalemId: kalem.id,
+        kalemAd: kalem.ad,
+        blok,
+        daireNo,
+        expected,
+        odenen: Math.max(0, paid),
+        note
+      });
+      document.getElementById("giderInfo").textContent = `${kalem.ad} kaydı eklendi: ${blok} Blok Daire ${daireNo}`;
+      setStateMessage("Ekstra gider ödemesi eklendi.", "ok");
+      renderAll();
+    }
+
+    function saveSabitGider() {
+      const tur = (document.getElementById("sabitTur").value || "").trim();
+      const tutar = parseNumber(document.getElementById("sabitTutar").value, 0);
+      const tarih = document.getElementById("sabitTarih").value || todayIso();
+      const aciklama = (document.getElementById("sabitAciklama").value || "").trim();
+      if (!tur || tutar <= 0) {
+        setStateMessage("Sabit gider için tür ve tutar zorunlu.", "error");
+        return;
+      }
+      state.sabitGiderKayitlari.push({
+        id: `sg_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+        tip: "sabit",
+        tur,
+        tutar,
+        tarih,
+        aciklama
+      });
+      document.getElementById("sabitTur").value = "";
+      document.getElementById("sabitTutar").value = "";
+      document.getElementById("sabitAciklama").value = "";
+      setStateMessage("Sabit gider eklendi.", "ok");
+      renderAll();
+    }
+
+    function renderGiderTable() {
+      const tipFilter = document.getElementById("filterGiderTip").value;
+      const kalemFilter = document.getElementById("filterGiderKalem").value;
+      const blokFilter = document.getElementById("filterGiderBlok").value;
+      const rows = [];
+      state.ekstraGiderKayitlari.forEach((g) => rows.push({
+        tip: "ekstra",
+        tarih: g.tarih,
+        kalem: g.kalemAd,
+        bolum: `${g.blok} Blok / Daire ${g.daireNo}`,
+        expected: g.expected,
+        paid: g.odenen,
+        kalan: Math.max(0, parseNumber(g.expected, 0) - parseNumber(g.odenen, 0)),
+        status: statusBadge(parseNumber(g.expected, 0), parseNumber(g.odenen, 0)),
+        blok: g.blok
+      }));
+      state.sabitGiderKayitlari.forEach((g) => rows.push({
+        tip: "sabit",
+        tarih: g.tarih,
+        kalem: g.tur,
+        bolum: g.aciklama || "-",
+        expected: g.tutar,
+        paid: g.tutar,
+        kalan: 0,
+        status: '<span class="badge ok">Kaydedildi</span>',
+        blok: ""
+      }));
+      const html = rows
+        .filter((r) => (!tipFilter || r.tip === tipFilter) && (!kalemFilter || r.kalem === kalemFilter) && (!blokFilter || r.blok === blokFilter))
+        .sort((a, b) => (a.tarih < b.tarih ? 1 : -1))
+        .map((r) => `<tr>
+          <td>${r.tarih}</td>
+          <td>${r.tip === "ekstra" ? "Ekstra Gider" : "Sabit Gider"}</td>
+          <td>${r.kalem}</td>
+          <td>${r.bolum}</td>
+          <td>${formatMoney(r.expected)}</td>
+          <td>${formatMoney(r.paid)}</td>
+          <td>${formatMoney(r.kalan)}</td>
+          <td>${r.status}</td>
+        </tr>`)
+        .join("");
+      document.getElementById("giderBody").innerHTML = html || '<tr><td colspan="8">Gider kaydı bulunamadı.</td></tr>';
+    }
+
+    function renderAidatTableSummary() {
+      const year = document.getElementById("tabloAidatYil").value;
+      const units = getAllUnits();
+      const rows = units.map((u) => {
+        const expected = 12 * getAidatAmount(year, u.type);
+        const paid = state.aidatKayitlari
+          .filter((r) => r.yil === year && r.blok === u.blok && r.tip === u.type && String(r.no) === String(u.no))
+          .reduce((acc, r) => acc + parseNumber(r.odenen, 0), 0);
+        const kalan = Math.max(0, expected - paid);
         return `<tr>
-          <td>${g.ad}</td>
-          <td>${formatMoney(g.tutar)} ₺</td>
-          <td><button class="btn btn-ghost" data-gider-del="${g.id}" type="button">Sil</button></td>
+          <td>${u.label}</td>
+          <td>${formatMoney(expected)}</td>
+          <td>${formatMoney(paid)}</td>
+          <td>${formatMoney(kalan)}</td>
+          <td>${statusBadge(expected, paid)}</td>
         </tr>`;
       }).join("");
-
-      body.querySelectorAll("[data-gider-del]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const id = btn.getAttribute("data-gider-del");
-          state.giderler = state.giderler.filter((g) => g.id !== id);
-          renderAll();
-        });
-      });
+      document.getElementById("aidatTabloBody").innerHTML = rows || '<tr><td colspan="5">Kayıt bulunamadı.</td></tr>';
     }
 
-    function renderGenelTablo() {
-      const t = activeTotals();
-      const cards = [
-        ["Toplam Daire", t.totalDaire],
-        ["Toplam Dükkan", t.totalDukkan],
-        ["Aylık Beklenen Gelir", formatMoney(t.aylikBeklenen) + " ₺"],
-        ["Yıllık Beklenen Gelir", formatMoney(t.yillikBeklenen) + " ₺"],
-        ["Tahsilata Göre Yıllık Gelir", formatMoney(t.yillikTahsilEdilen) + " ₺"],
-        ["Yıllık Gider", formatMoney(t.yillikGider) + " ₺"],
-        ["Net Bakiye", formatMoney(t.netBakiye) + " ₺"]
-      ];
-      document.getElementById("genelKartlar").innerHTML = cards.map((c) => `<div class="mini"><small>${c[0]}</small><strong>${c[1]}</strong></div>`).join("");
+    function renderGiderTableSummary() {
+      const rows = state.giderKalemleri.map((k) => {
+        const paid = state.ekstraGiderKayitlari
+          .filter((r) => r.kalemId === k.id)
+          .reduce((acc, r) => acc + parseNumber(r.odenen, 0), 0);
+        const expected = parseNumber(k.toplamTutar, 0);
+        const kalan = Math.max(0, expected - paid);
+        return `<tr>
+          <td>${k.ad}</td>
+          <td>${formatMoney(expected)}</td>
+          <td>${formatMoney(paid)}</td>
+          <td>${formatMoney(kalan)}</td>
+          <td>${statusBadge(expected, paid)}</td>
+        </tr>`;
+      }).join("");
+      document.getElementById("giderTabloBody").innerHTML = rows || '<tr><td colspan="5">Gider kalemi bulunamadı.</td></tr>';
     }
 
-    function renderBelirleme() {
-      const t = activeTotals();
-      const hedef = parseNumber(document.getElementById("hedefGiderInput").value, t.yillikGider || 0);
-      const guvenPayi = parseNumber(document.getElementById("guvenPayiInput").value, 10);
-      const hedefToplam = hedef * (1 + guvenPayi / 100);
-      const onerilenDaireAidat = t.totalDaire > 0
-        ? Math.max(0, ((hedefToplam / 12) - (t.totalDukkan * state.dukkanAidat)) / t.totalDaire)
-        : 0;
-
-      document.getElementById("onerilenAidatInput").value = formatMoney(onerilenDaireAidat) + " ₺";
-      document.getElementById("belirlemePills").innerHTML = [
-        ["Hedef Yıllık Bütçe", formatMoney(hedef) + " ₺"],
-        ["Güven Payı", guvenPayi + " %"],
-        ["Güven Payı Dahil", formatMoney(hedefToplam) + " ₺"],
-        ["Mevcut Dükkan Katkısı (Aylık)", formatMoney(t.totalDukkan * state.dukkanAidat) + " ₺"]
-      ].map((p) => `<span class="pill">${p[0]}: ${p[1]}</span>`).join("");
+    function renderAidatAyarList() {
+      const html = Object.keys(state.aidatAyarlari).sort((a, b) => Number(b) - Number(a))
+        .map((y) => `<span class="pill">${y}: ${formatMoney(state.aidatAyarlari[y])} ₺</span>`).join("");
+      document.getElementById("aidatAyarList").innerHTML = html || '<div class="muted">Kayıtlı aidat ayarı yok.</div>';
     }
 
-    function renderRaporlar() {
-      const t = activeTotals();
-      const tahsilatBar = Math.max(0, Math.min(100, state.tahsilatOrani));
-      const giderGelirBar = t.yillikTahsilEdilen > 0 ? Math.max(0, Math.min(100, (t.yillikGider / t.yillikTahsilEdilen) * 100)) : 0;
-      const dolulukBar = t.totalDaire > 0 ? Math.max(0, Math.min(100, (t.totalDaire / (t.totalDaire + t.totalDukkan || 1)) * 100)) : 0;
+    function renderDukkanAyarList() {
+      const html = Object.keys(state.dukkanAidatAyarlari).sort((a, b) => Number(b) - Number(a))
+        .map((y) => `<span class="pill">${y}: ${formatMoney(state.dukkanAidatAyarlari[y])} ₺</span>`).join("");
+      document.getElementById("dukkanAyarList").innerHTML = html || '<div class="muted">Kayıtlı dükkan aidat ayarı yok.</div>';
+    }
+
+    function renderGiderKalemList() {
+      const html = state.giderKalemleri.map((g) => `<div class="pill">${g.ad}: ${formatMoney(g.toplamTutar)} ₺ / ${g.daireAdet} daire → ${formatMoney(g.daireBasi)} ₺</div>`).join("");
+      document.getElementById("giderKalemList").innerHTML = html || '<div class="muted">Tanımlı gider kalemi yok.</div>';
+    }
+
+    function generateReport() {
+      const year = document.getElementById("raporYil").value;
+      const units = getAllUnits();
+      const aidatExpected = units.reduce((acc, u) => acc + (12 * getAidatAmount(year, u.type)), 0);
+      const aidatPaid = state.aidatKayitlari.filter((r) => r.yil === year).reduce((acc, r) => acc + parseNumber(r.odenen, 0), 0);
+      const ekstraPaid = state.ekstraGiderKayitlari.reduce((acc, r) => acc + parseNumber(r.odenen, 0), 0);
+      const sabitToplam = state.sabitGiderKayitlari.reduce((acc, r) => acc + parseNumber(r.tutar, 0), 0);
+
+      const start = document.getElementById("raporBaslangic").value;
+      const end = document.getElementById("raporBitis").value;
+      const inRange = (dateStr) => (!start || dateStr >= start) && (!end || dateStr <= end);
+      const rangeAidat = state.aidatKayitlari.filter((r) => inRange(r.tarih)).reduce((acc, r) => acc + parseNumber(r.odenen, 0), 0);
+      const rangeEkstra = state.ekstraGiderKayitlari.filter((r) => inRange(r.tarih)).reduce((acc, r) => acc + parseNumber(r.odenen, 0), 0);
+      const rangeSabit = state.sabitGiderKayitlari.filter((r) => inRange(r.tarih)).reduce((acc, r) => acc + parseNumber(r.tutar, 0), 0);
+      const rangeNet = rangeAidat + rangeEkstra - rangeSabit;
+
+      const tahsilatYuzde = aidatExpected > 0 ? Math.min(100, (aidatPaid / aidatExpected) * 100) : 0;
+      const giderYukYuzde = (aidatPaid + ekstraPaid) > 0 ? Math.min(100, (sabitToplam / (aidatPaid + ekstraPaid)) * 100) : 0;
 
       document.getElementById("raporBars").innerHTML = `
-        <div class="bar-row"><label>Tahsilat Performansı (%${formatMoney(tahsilatBar)})</label><div class="bar"><span style="width:${tahsilatBar}%"></span></div></div>
-        <div class="bar-row"><label>Gider / Tahsilat Oranı (%${formatMoney(giderGelirBar)})</label><div class="bar"><span style="width:${giderGelirBar}%"></span></div></div>
-        <div class="bar-row"><label>Daire Ağırlığı (%${formatMoney(dolulukBar)})</label><div class="bar"><span style="width:${dolulukBar}%"></span></div></div>
+        <div class="bar-row"><label>Aidat Tahsilat Oranı (%${formatMoney(tahsilatYuzde)})</label><div class="bar"><span style="width:${tahsilatYuzde}%"></span></div></div>
+        <div class="bar-row"><label>Sabit Gider Yükü (%${formatMoney(giderYukYuzde)})</label><div class="bar"><span style="width:${giderYukYuzde}%"></span></div></div>
       `;
+      const cards = [
+        ["Yıllık Beklenen Aidat", `${formatMoney(aidatExpected)} ₺`],
+        ["Yıllık Tahsil Edilen Aidat", `${formatMoney(aidatPaid)} ₺`],
+        ["Ekstra Gider Tahsilatı", `${formatMoney(ekstraPaid)} ₺`],
+        ["Sabit Gider Toplamı", `${formatMoney(sabitToplam)} ₺`],
+        ["Aralık Gelir-Gider Net", `${formatMoney(rangeNet)} ₺`]
+      ];
+      document.getElementById("raporKartlar").innerHTML = cards.map((c) => `<div class="mini"><small>${c[0]}</small><strong>${c[1]}</strong></div>`).join("");
     }
 
     function renderAll() {
       renderHero();
       renderDaireTab();
+      populateAidatDaireDukkan();
+      populateGiderDaire();
       renderAidatTab();
-      renderGiderTab();
-      renderGenelTablo();
-      renderBelirleme();
-      renderRaporlar();
+      renderGiderKalemSelect();
+      renderGiderTable();
+      renderAidatTableSummary();
+      renderGiderTableSummary();
+      renderAidatAyarList();
+      renderDukkanAyarList();
+      renderGiderKalemList();
+      generateReport();
     }
 
     function setupEvents() {
@@ -657,44 +1124,92 @@
           btn.classList.add("active");
           const tab = btn.getAttribute("data-tab");
           document.querySelectorAll(".tab-pane").forEach((pane) => pane.classList.remove("active"));
-          const target = document.getElementById("tab-" + tab);
+          const target = document.getElementById(`tab-${tab}`);
           if (target) target.classList.add("active");
         });
       });
 
-      document.getElementById("daireAidatInput").addEventListener("input", (e) => {
-        state.daireAidat = parseNumber(e.target.value, state.daireAidat);
-        renderAll();
+      document.querySelectorAll("[data-tablo-tab]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-tablo-tab]").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const key = btn.getAttribute("data-tablo-tab");
+          document.querySelectorAll(".sub-pane").forEach((pane) => pane.classList.remove("active"));
+          const target = document.getElementById(`tablo-${key}`);
+          if (target) target.classList.add("active");
+        });
       });
 
-      document.getElementById("dukkanAidatInput").addEventListener("input", (e) => {
-        state.dukkanAidat = parseNumber(e.target.value, state.dukkanAidat);
-        renderAll();
+      document.getElementById("aidatBlok").addEventListener("change", populateAidatDaireDukkan);
+      document.getElementById("aidatYil").addEventListener("change", updateAidatExpected);
+      document.getElementById("aidatDaire").addEventListener("change", () => {
+        if (document.getElementById("aidatDaire").value) document.getElementById("aidatDukkan").value = "";
+        updateAidatExpected();
       });
-
-      document.getElementById("tahsilatOraniInput").addEventListener("input", (e) => {
-        state.tahsilatOrani = Math.max(0, Math.min(100, parseNumber(e.target.value, 100)));
-        renderAll();
+      document.getElementById("aidatDukkan").addEventListener("change", () => {
+        if (document.getElementById("aidatDukkan").value) document.getElementById("aidatDaire").value = "";
+        updateAidatExpected();
       });
+      document.getElementById("aidatKaydetBtn").addEventListener("click", saveAidatRecord);
+      document.getElementById("filterAidatYil").addEventListener("change", renderAidatTab);
+      document.getElementById("filterAidatAy").addEventListener("change", renderAidatTab);
+      document.getElementById("filterAidatBlok").addEventListener("change", renderAidatTab);
 
-      document.getElementById("giderEkleBtn").addEventListener("click", () => {
-        const adInput = document.getElementById("giderAdInput");
-        const tutarInput = document.getElementById("giderTutarInput");
-        const ad = (adInput.value || "").trim();
-        const tutar = parseNumber(tutarInput.value, 0);
-        if (!ad || tutar <= 0) {
-          setStateMessage("Gider kalemi ve tutarı giriniz.", "error");
+      document.getElementById("giderBlok").addEventListener("change", populateGiderDaire);
+      document.getElementById("giderKalemSelect").addEventListener("change", updateGiderExpected);
+      document.getElementById("giderKaydetBtn").addEventListener("click", saveEkstraGider);
+      document.getElementById("sabitGiderKaydetBtn").addEventListener("click", saveSabitGider);
+      document.getElementById("filterGiderTip").addEventListener("change", renderGiderTable);
+      document.getElementById("filterGiderKalem").addEventListener("change", renderGiderTable);
+      document.getElementById("filterGiderBlok").addEventListener("change", renderGiderTable);
+
+      document.getElementById("giderToplamTutar").addEventListener("input", updateGiderDaireBasi);
+      document.getElementById("giderDaireSecim").addEventListener("change", updateGiderDaireBasi);
+      document.getElementById("saveGiderKalemBtn").addEventListener("click", () => {
+        const ad = (document.getElementById("giderKalemAd").value || "").trim();
+        const toplam = parseNumber(document.getElementById("giderToplamTutar").value, 0);
+        const secim = document.getElementById("giderDaireSecim").value;
+        const adet = Math.max(1, calcDaireSecimCount(secim));
+        const daireBasi = toplam / adet;
+        if (!ad || toplam <= 0) {
+          setStateMessage("Gider kalemi adı ve toplam tutar zorunlu.", "error");
           return;
         }
-        state.giderler.push({ id: String(Date.now()) + Math.random().toString(16).slice(2), ad, tutar });
-        adInput.value = "";
-        tutarInput.value = "";
+        state.giderKalemleri.push({
+          id: `kalem_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+          ad,
+          toplamTutar: toplam,
+          daireSecim: secim,
+          daireAdet: adet,
+          daireBasi
+        });
+        document.getElementById("giderKalemAd").value = "";
+        document.getElementById("giderToplamTutar").value = "";
+        document.getElementById("giderDaireBasiTutar").value = "";
         setStateMessage("Gider kalemi eklendi.", "ok");
         renderAll();
       });
 
-      document.getElementById("hedefGiderInput").addEventListener("input", renderBelirleme);
-      document.getElementById("guvenPayiInput").addEventListener("input", renderBelirleme);
+      document.getElementById("saveAidatAyarBtn").addEventListener("click", () => {
+        const yil = document.getElementById("ayarAidatYil").value;
+        const tutar = parseNumber(document.getElementById("ayarAidatTutar").value, 0);
+        if (tutar <= 0) return setStateMessage("Aidat tutarı 0'dan büyük olmalı.", "error");
+        state.aidatAyarlari[yil] = tutar;
+        setStateMessage(`Daire aidatı kaydedildi (${yil}).`, "ok");
+        renderAll();
+      });
+
+      document.getElementById("saveDukkanAyarBtn").addEventListener("click", () => {
+        const yil = document.getElementById("ayarDukkanYil").value;
+        const tutar = parseNumber(document.getElementById("ayarDukkanTutar").value, 0);
+        if (tutar <= 0) return setStateMessage("Dükkan aidatı 0'dan büyük olmalı.", "error");
+        state.dukkanAidatAyarlari[yil] = tutar;
+        setStateMessage(`Dükkan aidatı kaydedildi (${yil}).`, "ok");
+        renderAll();
+      });
+
+      document.getElementById("tabloAidatYil").addEventListener("change", renderAidatTableSummary);
+      document.getElementById("raporOlusturBtn").addEventListener("click", generateReport);
 
       document.getElementById("logoutBtn").addEventListener("click", async () => {
         await auth.signOut();
@@ -704,28 +1219,32 @@
 
     async function loadDemoData(docId) {
       setStateMessage("Demo verisi yükleniyor...");
-      const doc = await db.collection("basvurular").doc(docId).get();
-      if (!doc.exists) throw new Error("Başvuru bulunamadı");
-      const row = { id: doc.id, ...doc.data() };
-
+      const docSnap = await db.collection("basvurular").doc(docId).get();
+      if (!docSnap.exists) throw new Error("Başvuru bulunamadı");
+      const row = { id: docSnap.id, ...docSnap.data() };
       state.row = row;
       state.bloklar = Array.isArray(row.blok_yapisi_json) ? row.blok_yapisi_json : [];
       state.aktifBlok = state.bloklar[0] ? state.bloklar[0].blok : null;
-      state.daireAidat = parseNumber(row.aylik_aidat, 1200);
-      state.dukkanAidat = parseNumber(row.dukkan_aidat, state.daireAidat);
-      state.tahsilatOrani = 100;
 
-      const totalDaire = state.bloklar.reduce((acc, b) => acc + parseNumber(b.daireAdet, 0), 0);
-      const base = Math.max(1, totalDaire);
-      state.giderler = [
-        { id: "g1", ad: "Personel", tutar: base * 220 },
-        { id: "g2", ad: "Temizlik / Sarf", tutar: base * 90 },
-        { id: "g3", ad: "Bakım Onarım", tutar: base * 130 }
+      const nowYear = String(new Date().getFullYear());
+      const daireAidatDefault = parseNumber(row.aylik_aidat, 1200);
+      const dukkanAidatDefault = parseNumber(row.dukkan_aidat, daireAidatDefault);
+      state.aidatAyarlari[nowYear] = daireAidatDefault;
+      state.dukkanAidatAyarlari[nowYear] = dukkanAidatDefault;
+      state.aidatAyarlari[String(Number(nowYear) + 1)] = daireAidatDefault * 1.1;
+      state.dukkanAidatAyarlari[String(Number(nowYear) + 1)] = dukkanAidatDefault * 1.1;
+
+      const totalDaire = Math.max(1, getTotalDaire());
+      state.giderKalemleri = [
+        { id: "kalem_1", ad: "Hidrofor Bakımı", toplamTutar: totalDaire * 220, daireSecim: "all", daireAdet: totalDaire, daireBasi: 220 },
+        { id: "kalem_2", ad: "Asansör Revizyon", toplamTutar: totalDaire * 160, daireSecim: "all", daireAdet: totalDaire, daireBasi: 160 }
       ];
 
-      document.getElementById("hedefGiderInput").value = (state.giderler.reduce((a, g) => a + g.tutar, 0)).toFixed(2);
-      document.getElementById("guvenPayiInput").value = "10";
-
+      refreshCommonSelectors();
+      document.getElementById("aidatTarih").value = todayIso();
+      document.getElementById("giderTarih").value = todayIso();
+      document.getElementById("sabitTarih").value = todayIso();
+      updateGiderDaireBasi();
       renderAll();
       setStateMessage("Demo verisi yüklendi.", "ok");
     }
@@ -740,20 +1259,18 @@
         window.location.href = "/login.html";
         return;
       }
-
       const docId = getQueryParam("id");
       if (!docId) {
-        setStateMessage("Demo için başvuru id parametresi eksik. (örnek: /demo.html?id=...)", "error");
+        setStateMessage("Demo için /demo.html?id=... parametresi gerekli.", "error");
         return;
       }
-
       try {
         setupEvents();
         await loadDemoData(docId);
       } catch (err) {
         console.error(err);
         setStateMessage(err && err.code === "permission-denied"
-          ? "Bu veriyi görüntüleme yetkiniz yok. Firestore kuralları kontrol edilmeli."
+          ? "Bu veriyi görüntüleme yetkiniz yok. Firestore kurallarını kontrol edin."
           : (err.message || "Demo yüklenemedi."), "error");
       }
     });
