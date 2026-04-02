@@ -344,6 +344,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="/js/authz.js"></script>
 </head>
 <body>
   <div class="container">
@@ -353,7 +354,7 @@
         <span>ApartYönet Demo Panel</span>
       </a>
       <div class="top-actions">
-        <a class="btn btn-ghost" href="/admin.html">Admin'e Dön</a>
+        <a id="adminBackBtn" class="btn btn-ghost" href="/admin.html">Admin'e Dön</a>
         <button id="logoutBtn" class="btn btn-primary" type="button">Çıkış Yap</button>
       </div>
     </header>
@@ -563,7 +564,10 @@
   </div>
 
   <script>
-    const ADMIN_EMAILS = ["guraydinsel@gmail.com"];
+    let currentProfile = null;
+    let currentRole = "";
+    let currentUnit = null;
+    let eventsBound = false;
     const MONTHS = [
       { value: "01", label: "Ocak" }, { value: "02", label: "Şubat" }, { value: "03", label: "Mart" },
       { value: "04", label: "Nisan" }, { value: "05", label: "Mayıs" }, { value: "06", label: "Haziran" },
@@ -595,12 +599,26 @@
     const auth = app.auth();
     const db = app.firestore();
 
-    function normalizeEmail(email) {
-      return (email || "").trim().toLowerCase();
-    }
-
-    function isAdminEmail(email) {
-      return ADMIN_EMAILS.includes(normalizeEmail(email));
+    function parseUnitId(unitId) {
+      const raw = String(unitId || "").trim().toUpperCase();
+      if (!raw) return null;
+      const m1 = raw.match(/^([A-Z0-9]+)-([DS])-([A-Z0-9]+)$/);
+      if (m1) {
+        return {
+          blok: m1[1],
+          tip: m1[2] === "D" ? "daire" : "dukkan",
+          no: String(m1[3])
+        };
+      }
+      const m2 = raw.match(/^([A-Z0-9]+)-([A-Z0-9]+)$/);
+      if (m2) {
+        return {
+          blok: m2[1],
+          tip: "daire",
+          no: String(m2[2])
+        };
+      }
+      return null;
     }
 
     function getQueryParam(name) {
@@ -632,6 +650,35 @@
       const el = document.getElementById("state");
       el.textContent = msg || "";
       el.className = "state" + (cls ? " " + cls : "");
+    }
+
+    function getAllowedTabsByRole(role) {
+      if (role === APARTYONET_ROLES.RESIDENT) return ["aidat"];
+      return ["daireler", "aidat", "gider", "tablo", "belirleme", "raporlar"];
+    }
+
+    function applyRoleUi() {
+      const allowed = getAllowedTabsByRole(currentRole);
+      const adminBackBtn = document.getElementById("adminBackBtn");
+      if (adminBackBtn) {
+        adminBackBtn.style.display = canAccess("admin_panel", currentRole) ? "inline-flex" : "none";
+      }
+
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        const tab = btn.getAttribute("data-tab");
+        btn.style.display = allowed.includes(tab) ? "" : "none";
+      });
+
+      if (currentRole === APARTYONET_ROLES.RESIDENT) {
+        const root = document.getElementById("tab-aidat");
+        root.querySelectorAll(".inline-form").forEach((el) => {
+          el.style.display = "none";
+        });
+        const info = root.querySelector(".muted");
+        if (info) info.textContent = "Sadece kendi bağımsız bölümünüze ait aidat kayıtlarını görüntülüyorsunuz.";
+        const firstTab = document.querySelector('.tab-btn[data-tab="aidat"]');
+        if (firstTab) firstTab.click();
+      }
     }
 
     function parseShopNumbers(rawValue) {
@@ -801,8 +848,8 @@
       const ekstraTahsilat = state.ekstraGiderKayitlari.reduce((acc, g) => acc + parseNumber(g.odenen, 0), 0);
       const net = paidAidat + ekstraTahsilat - sabitGider;
 
-      document.getElementById("heroTitle").textContent = `${state.row.site_adi || "Demo Site"} • Yönetim Simülasyonu`;
-      document.getElementById("heroSub").textContent = "Aidat, ekstra gider, tablo ve rapor hiyerarşisi örnek panel mantığına göre entegre edildi.";
+      document.getElementById("heroTitle").textContent = `${state.row.site_adi || "Demo Site"} • ${formatRoleLabel(currentRole)} Paneli`;
+      document.getElementById("heroSub").textContent = `Aktif site: ${currentProfile && currentProfile.siteId ? currentProfile.siteId : "-"}`;
       const stats = [
         ["Blok", state.bloklar.length],
         ["Daire", getTotalDaire()],
@@ -853,6 +900,10 @@
     }
 
     function saveAidatRecord() {
+      if (currentRole === APARTYONET_ROLES.RESIDENT) {
+        setStateMessage("Bu işlem için yetkiniz yok.", "error");
+        return;
+      }
       const yil = document.getElementById("aidatYil").value;
       const ay = document.getElementById("aidatAy").value;
       const blok = document.getElementById("aidatBlok").value;
@@ -886,7 +937,12 @@
       const ayFilter = document.getElementById("filterAidatAy").value;
       const blokFilter = document.getElementById("filterAidatBlok").value;
       const rows = state.aidatKayitlari
-        .filter((r) => (!yilFilter || r.yil === yilFilter) && (!ayFilter || r.ay === ayFilter) && (!blokFilter || r.blok === blokFilter))
+        .filter((r) => {
+          const baseMatch = (!yilFilter || r.yil === yilFilter) && (!ayFilter || r.ay === ayFilter) && (!blokFilter || r.blok === blokFilter);
+          if (!baseMatch) return false;
+          if (currentRole !== APARTYONET_ROLES.RESIDENT || !currentUnit) return true;
+          return r.blok === currentUnit.blok && r.tip === currentUnit.tip && String(r.no) === String(currentUnit.no);
+        })
         .sort((a, b) => (a.tarih < b.tarih ? 1 : -1))
         .map((r) => {
           const kalan = Math.max(0, parseNumber(r.expected, 0) - parseNumber(r.odenen, 0));
@@ -916,6 +972,10 @@
     }
 
     function saveEkstraGider() {
+      if (currentRole === APARTYONET_ROLES.RESIDENT) {
+        setStateMessage("Bu işlem için yetkiniz yok.", "error");
+        return;
+      }
       const kalemId = document.getElementById("giderKalemSelect").value;
       const blok = document.getElementById("giderBlok").value;
       const daireNo = document.getElementById("giderDaire").value;
@@ -946,6 +1006,10 @@
     }
 
     function saveSabitGider() {
+      if (currentRole === APARTYONET_ROLES.RESIDENT) {
+        setStateMessage("Bu işlem için yetkiniz yok.", "error");
+        return;
+      }
       const tur = (document.getElementById("sabitTur").value || "").trim();
       const tutar = parseNumber(document.getElementById("sabitTutar").value, 0);
       const tarih = document.getElementById("sabitTarih").value || todayIso();
@@ -1118,6 +1182,8 @@
     }
 
     function setupEvents() {
+      if (eventsBound) return;
+      eventsBound = true;
       document.querySelectorAll(".tab-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
           document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
@@ -1166,6 +1232,10 @@
       document.getElementById("giderToplamTutar").addEventListener("input", updateGiderDaireBasi);
       document.getElementById("giderDaireSecim").addEventListener("change", updateGiderDaireBasi);
       document.getElementById("saveGiderKalemBtn").addEventListener("click", () => {
+        if (currentRole === APARTYONET_ROLES.RESIDENT) {
+          setStateMessage("Bu işlem için yetkiniz yok.", "error");
+          return;
+        }
         const ad = (document.getElementById("giderKalemAd").value || "").trim();
         const toplam = parseNumber(document.getElementById("giderToplamTutar").value, 0);
         const secim = document.getElementById("giderDaireSecim").value;
@@ -1191,6 +1261,10 @@
       });
 
       document.getElementById("saveAidatAyarBtn").addEventListener("click", () => {
+        if (currentRole === APARTYONET_ROLES.RESIDENT) {
+          setStateMessage("Bu işlem için yetkiniz yok.", "error");
+          return;
+        }
         const yil = document.getElementById("ayarAidatYil").value;
         const tutar = parseNumber(document.getElementById("ayarAidatTutar").value, 0);
         if (tutar <= 0) return setStateMessage("Aidat tutarı 0'dan büyük olmalı.", "error");
@@ -1200,6 +1274,10 @@
       });
 
       document.getElementById("saveDukkanAyarBtn").addEventListener("click", () => {
+        if (currentRole === APARTYONET_ROLES.RESIDENT) {
+          setStateMessage("Bu işlem için yetkiniz yok.", "error");
+          return;
+        }
         const yil = document.getElementById("ayarDukkanYil").value;
         const tutar = parseNumber(document.getElementById("ayarDukkanTutar").value, 0);
         if (tutar <= 0) return setStateMessage("Dükkan aidatı 0'dan büyük olmalı.", "error");
@@ -1219,9 +1297,22 @@
 
     async function loadDemoData(docId) {
       setStateMessage("Demo verisi yükleniyor...");
-      const docSnap = await db.collection("basvurular").doc(docId).get();
-      if (!docSnap.exists) throw new Error("Başvuru bulunamadı");
-      const row = { id: docSnap.id, ...docSnap.data() };
+      let row = null;
+      if (docId) {
+        const docSnap = await db.collection("basvurular").doc(docId).get();
+        if (!docSnap.exists) throw new Error("Başvuru bulunamadı");
+        row = { id: docSnap.id, ...docSnap.data() };
+      } else {
+        const q = enforceSiteScope(db.collection("basvurular"), currentProfile.siteId)
+          .orderBy("createdAt", "desc")
+          .limit(1);
+        const snap = await q.get();
+        if (snap.empty) throw new Error("Bu site için başvuru verisi bulunamadı.");
+        row = { id: snap.docs[0].id, ...snap.docs[0].data() };
+      }
+      if (!row.siteId || row.siteId !== currentProfile.siteId) {
+        throw new Error("Bu site verisini görüntüleme yetkiniz yok.");
+      }
       state.row = row;
       state.bloklar = Array.isArray(row.blok_yapisi_json) ? row.blok_yapisi_json : [];
       state.aktifBlok = state.bloklar[0] ? state.bloklar[0].blok : null;
@@ -1246,6 +1337,7 @@
       document.getElementById("sabitTarih").value = todayIso();
       updateGiderDaireBasi();
       renderAll();
+      applyRoleUi();
       setStateMessage("Demo verisi yüklendi.", "ok");
     }
 
@@ -1254,17 +1346,21 @@
         window.location.href = "/login.html";
         return;
       }
-      if (!isAdminEmail(user.email)) {
-        await auth.signOut();
-        window.location.href = "/login.html";
-        return;
-      }
-      const docId = getQueryParam("id");
-      if (!docId) {
-        setStateMessage("Demo için /demo.html?id=... parametresi gerekli.", "error");
-        return;
-      }
       try {
+        currentProfile = await getCurrentUserProfile(db, user.uid);
+        if (!currentProfile || !isProfileActive(currentProfile)) {
+          await auth.signOut();
+          window.location.href = "/login.html";
+          return;
+        }
+        if (!canAccess("demo_panel", currentProfile.role)) {
+          await auth.signOut();
+          window.location.href = "/login.html";
+          return;
+        }
+        currentRole = currentProfile.role;
+        currentUnit = parseUnitId(currentProfile.unitId);
+        const docId = getQueryParam("id");
         setupEvents();
         await loadDemoData(docId);
       } catch (err) {

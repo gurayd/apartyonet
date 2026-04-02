@@ -177,6 +177,66 @@
       padding-bottom: 26px;
     }
 
+    .user-mgmt {
+      margin: 12px 0;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.88), var(--card));
+      padding: 12px;
+      display: none;
+    }
+
+    .user-mgmt.open {
+      display: block;
+    }
+
+    .user-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .user-form label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .user-form input,
+    .user-form select {
+      width: 100%;
+      border: 1px solid rgba(152, 175, 214, 0.34);
+      border-radius: 10px;
+      padding: 8px 9px;
+      background: rgba(10, 16, 27, 0.8);
+      color: #e8eefc;
+      font-size: 0.84rem;
+      font-family: inherit;
+    }
+
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .user-table th,
+    .user-table td {
+      border-bottom: 1px solid rgba(152, 175, 214, 0.22);
+      padding: 8px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .user-table th {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
     .card {
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -366,6 +426,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="/js/authz.js"></script>
 </head>
 <body>
   <main id="app" style="display:none;">
@@ -383,11 +444,78 @@
 
       <section class="meta">
         <div class="chip"><small>Yetkili Hesap</small><strong id="userEmail">-</strong></div>
+        <div class="chip"><small>Kullanıcı Rolü</small><strong id="userRole">-</strong></div>
+        <div class="chip"><small>Aktif Site</small><strong id="activeSite">-</strong></div>
         <div class="chip"><small>Toplam Başvuru</small><strong id="totalCount">0</strong></div>
         <div class="chip"><small>Son Güncelleme</small><strong id="lastSync">-</strong></div>
       </section>
 
       <div id="status" class="status"></div>
+      <section id="userMgmt" class="user-mgmt">
+        <h3 style="margin:0 0 8px; font-size:1rem;">Kullanıcı Yönetimi</h3>
+        <p style="margin:0 0 10px; color:#9fb0cf; font-size:0.84rem;">Bu bölümden site yöneticisi, yönetici yardımcısı ve kat sakini hesaplarını yönetebilirsiniz.</p>
+        <form id="userForm" class="user-form" novalidate>
+          <div>
+            <label for="u_email">E-posta</label>
+            <input id="u_email" type="email" placeholder="ornek@gunes.com" required />
+          </div>
+          <div>
+            <label for="u_password">Şifre</label>
+            <input id="u_password" type="password" placeholder="En az 6 karakter" required />
+          </div>
+          <div>
+            <label for="u_displayName">Ad Soyad</label>
+            <input id="u_displayName" type="text" placeholder="Kullanıcı adı" />
+          </div>
+          <div>
+            <label for="u_role">Rol</label>
+            <select id="u_role">
+              <option value="site_manager">Site Yöneticisi</option>
+              <option value="assistant_manager">Yönetici Yardımcısı</option>
+              <option value="resident">Kat Sakini</option>
+            </select>
+          </div>
+          <div>
+            <label for="u_siteId">Site ID</label>
+            <input id="u_siteId" type="text" placeholder="gunes-sitesi" />
+          </div>
+          <div>
+            <label for="u_unitId">Daire Kodu</label>
+            <input id="u_unitId" type="text" placeholder="A-D-1 (sakin için)" />
+          </div>
+          <div>
+            <label for="u_status">Durum</label>
+            <select id="u_status">
+              <option value="active">Aktif</option>
+              <option value="inactive">Pasif</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;">
+            <button id="createUserBtn" class="btn btn-primary" type="submit">Kullanıcı Oluştur</button>
+            <button id="seedSiteBtn" class="btn btn-ghost" type="button">Güneş Sitesi Kur</button>
+            <button id="sampleManagerBtn" class="btn btn-ghost" type="button">Yönetici Örneği</button>
+            <button id="sampleAssistantBtn" class="btn btn-ghost" type="button">Yardımcı Örneği</button>
+            <button id="sampleResidentBtn" class="btn btn-ghost" type="button">Sakin Örneği Doldur</button>
+          </div>
+        </form>
+        <div style="overflow:auto;">
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>E-posta</th>
+                <th>Ad Soyad</th>
+                <th>Rol</th>
+                <th>Daire</th>
+                <th>Durum</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody">
+              <tr><td colspan="6">Henüz kullanıcı yok.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
       <section id="list" class="list"></section>
     </div>
   </main>
@@ -430,8 +558,10 @@
   </section>
 
   <script>
-    const ADMIN_EMAILS = ["guraydinsel@gmail.com"];
     let applicationRows = [];
+    let currentUser = null;
+    let currentProfile = null;
+    let siteUsers = [];
 
     const firebaseConfig = {
       apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
@@ -451,14 +581,8 @@
     const listEl = document.getElementById("list");
     const statusEl = document.getElementById("status");
     const modalEl = document.getElementById("editModal");
-
-    function normalizeEmail(email) {
-      return (email || "").trim().toLowerCase();
-    }
-
-    function isAdminEmail(email) {
-      return ADMIN_EMAILS.includes(normalizeEmail(email));
-    }
+    const usersBodyEl = document.getElementById("usersBody");
+    const userMgmtEl = document.getElementById("userMgmt");
 
     function toMillis(value) {
       if (!value) return 0;
@@ -500,15 +624,23 @@
       return applicationRows.find((r) => r.id === id);
     }
 
+    function setMeta(profile, user) {
+      document.getElementById("userEmail").textContent = normalizeEmail(user && user.email);
+      document.getElementById("userRole").textContent = formatRoleLabel(profile.role);
+      document.getElementById("activeSite").textContent = profile.siteId || "-";
+      document.getElementById("u_siteId").value = profile.siteId || "";
+    }
+
     function renderCards(items) {
       document.getElementById("totalCount").textContent = String(items.length);
       document.getElementById("lastSync").textContent = formatDate(new Date());
 
       if (!items.length) {
-        listEl.innerHTML = '<div class="empty">Henüz başvuru kaydı bulunmuyor.</div>';
+        listEl.innerHTML = '<div class="empty">Bu site için başvuru kaydı bulunmuyor.</div>';
         return;
       }
 
+      const canEdit = canAccess("edit_application", currentProfile.role);
       listEl.innerHTML = items.map((item, index) => {
         const header = escapeHtml(item.site_adi || "Site adı yok");
         const sub = escapeHtml((item.ad_soyad || "İsim yok") + " • " + (item.telefon || "Telefon yok"));
@@ -523,8 +655,8 @@
                 <span>${sub}</span>
               </div>
               <div class="card-actions">
-                <button type="button" class="btn btn-edit" data-edit-id="${item.id}">Düzenle</button>
-                <button type="button" class="btn btn-demo" data-demo-id="${item.id}">Demo Oluştur</button>
+                ${canEdit ? `<button type="button" class="btn btn-edit" data-edit-id="${item.id}">Düzenle</button>` : ""}
+                <button type="button" class="btn btn-demo" data-demo-id="${item.id}">Panele Git</button>
                 <span>${createdAt}</span>
               </div>
             </div>
@@ -534,6 +666,7 @@
                 <div class="field"><small>E-posta</small><div>${escapeHtml(item.email || "-")}</div></div>
                 <div class="field"><small>Telefon</small><div>${escapeHtml(item.telefon || "-")}</div></div>
                 <div class="field"><small>Site Adı</small><div>${escapeHtml(item.site_adi || "-")}</div></div>
+                <div class="field"><small>Site ID</small><div>${escapeHtml(item.siteId || "-")}</div></div>
                 <div class="field"><small>İl / İlçe</small><div>${escapeHtml((item.il || "-") + " / " + (item.ilce || "-"))}</div></div>
                 <div class="field"><small>Adres</small><div>${escapeHtml(item.adres || "-")}</div></div>
                 <div class="field"><small>Aylık Daire Aidat</small><div>${escapeHtml(item.aylik_aidat || "-")}</div></div>
@@ -554,7 +687,6 @@
           const card = document.querySelector('.card[data-index="' + idx + '"]');
           if (card) card.classList.toggle("open");
         });
-
         el.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -576,8 +708,7 @@
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
           const id = btn.getAttribute("data-edit-id");
-          if (!id) return;
-          openEditModal(id);
+          if (id) openEditModal(id);
         });
       });
     }
@@ -609,7 +740,10 @@
     async function loadApplications() {
       setStatus("Başvurular yükleniyor...", "");
       try {
-        const snap = await db.collection("basvurular").orderBy("createdAt", "desc").limit(200).get();
+        const query = enforceSiteScope(db.collection("basvurular"), currentProfile.siteId)
+          .orderBy("createdAt", "desc")
+          .limit(200);
+        const snap = await query.get();
         const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         items.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
         applicationRows = items;
@@ -618,25 +752,215 @@
       } catch (err) {
         console.error(err);
         let msg = "Başvurular alınamadı.";
-        if (err && err.code === "permission-denied") msg = "Yetki hatası: Firestore kuralları admin okuma izni vermiyor.";
-        if (err && err.code === "failed-precondition") msg = "Sıralama için Firestore index veya ayar eksik olabilir.";
+        if (err && err.code === "permission-denied") msg = "Yetki hatası: Bu site verisini okuma izniniz yok.";
+        if (err && err.code === "failed-precondition") msg = "Firestore index gerekli olabilir (siteId + createdAt).";
         setStatus(msg, "error");
       }
     }
 
-    document.getElementById("refreshBtn").addEventListener("click", loadApplications);
+    async function ensureSiteDoc(siteId, siteName) {
+      if (!siteId) return;
+      await db.collection("sites").doc(siteId).set({
+        siteId,
+        siteName: siteName || siteId,
+        status: "active",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
 
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await auth.signOut();
-      window.location.href = "/login.html";
-    });
+    function renderUsersTable(users) {
+      if (!users.length) {
+        usersBodyEl.innerHTML = '<tr><td colspan="6">Bu site için kullanıcı yok.</td></tr>';
+        return;
+      }
+      usersBodyEl.innerHTML = users.map((u) => `
+        <tr>
+          <td>${escapeHtml(u.email || "-")}</td>
+          <td><input data-u-field="displayName" data-u-id="${u.uid}" value="${escapeHtml(u.displayName || "")}" /></td>
+          <td>
+            <select data-u-field="role" data-u-id="${u.uid}">
+              <option value="site_manager" ${u.role === "site_manager" ? "selected" : ""}>Site Yöneticisi</option>
+              <option value="assistant_manager" ${u.role === "assistant_manager" ? "selected" : ""}>Yönetici Yardımcısı</option>
+              <option value="resident" ${u.role === "resident" ? "selected" : ""}>Kat Sakini</option>
+            </select>
+          </td>
+          <td><input data-u-field="unitId" data-u-id="${u.uid}" value="${escapeHtml(u.unitId || "")}" /></td>
+          <td>
+            <select data-u-field="status" data-u-id="${u.uid}">
+              <option value="active" ${u.status === "active" ? "selected" : ""}>Aktif</option>
+              <option value="inactive" ${u.status === "inactive" ? "selected" : ""}>Pasif</option>
+            </select>
+          </td>
+          <td><button class="btn btn-ghost" data-user-save="${u.uid}" type="button">Kaydet</button></td>
+        </tr>
+      `).join("");
 
-    document.getElementById("closeModalBtn").addEventListener("click", closeEditModal);
-    document.getElementById("cancelBtn").addEventListener("click", closeEditModal);
+      document.querySelectorAll("[data-user-save]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const uid = btn.getAttribute("data-user-save");
+          if (!uid) return;
+          const row = siteUsers.find((u) => u.uid === uid);
+          if (!row) return;
+          const getVal = (field) => {
+            const el = document.querySelector(`[data-u-field="${field}"][data-u-id="${uid}"]`);
+            return el ? String(el.value || "").trim() : "";
+          };
+          const patch = {
+            displayName: getVal("displayName"),
+            role: getVal("role"),
+            unitId: getVal("unitId"),
+            status: getVal("status"),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          try {
+            await db.collection("users").doc(uid).update(patch);
+            setStatus("Kullanıcı güncellendi.", "ok");
+            await loadSiteUsers();
+          } catch (err) {
+            console.error(err);
+            setStatus("Kullanıcı güncellenemedi.", "error");
+          }
+        });
+      });
+    }
 
-    modalEl.addEventListener("click", (e) => {
-      if (e.target === modalEl) closeEditModal();
-    });
+    async function loadSiteUsers() {
+      if (!canAccess("user_management", currentProfile.role)) return;
+      try {
+        const snap = await enforceSiteScope(db.collection("users"), currentProfile.siteId).limit(200).get();
+        siteUsers = snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
+        renderUsersTable(siteUsers);
+      } catch (err) {
+        console.error(err);
+        usersBodyEl.innerHTML = '<tr><td colspan="6">Kullanıcılar yüklenemedi.</td></tr>';
+      }
+    }
+
+    async function createAuthUser(email, password) {
+      const appName = "user-create-" + Date.now();
+      const secondary = firebase.initializeApp(firebaseConfig, appName);
+      try {
+        const cred = await secondary.auth().createUserWithEmailAndPassword(email, password);
+        const uid = cred.user.uid;
+        await secondary.auth().signOut();
+        return uid;
+      } finally {
+        await secondary.delete().catch(() => {});
+      }
+    }
+
+    async function createUserFromForm(e) {
+      e.preventDefault();
+      const btn = document.getElementById("createUserBtn");
+      const email = normalizeEmail(document.getElementById("u_email").value);
+      const password = String(document.getElementById("u_password").value || "");
+      const displayName = document.getElementById("u_displayName").value.trim();
+      const role = document.getElementById("u_role").value;
+      const siteId = (document.getElementById("u_siteId").value || "").trim();
+      const unitId = (document.getElementById("u_unitId").value || "").trim();
+      const status = document.getElementById("u_status").value;
+
+      if (!email || !password || !siteId) {
+        setStatus("E-posta, şifre ve site ID zorunludur.", "error");
+        return;
+      }
+      if (password.length < 6) {
+        setStatus("Şifre en az 6 karakter olmalı.", "error");
+        return;
+      }
+      if (siteId !== currentProfile.siteId) {
+        setStatus("Sadece kendi siteniz için kullanıcı oluşturabilirsiniz.", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Oluşturuluyor...";
+      try {
+        await ensureSiteDoc(siteId, siteId);
+        const uid = await createAuthUser(email, password);
+        await db.collection("users").doc(uid).set({
+          email,
+          displayName,
+          role,
+          siteId,
+          unitId: role === "resident" ? unitId : "",
+          status,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        setStatus("Kullanıcı hesabı oluşturuldu.", "ok");
+        document.getElementById("userForm").reset();
+        document.getElementById("u_siteId").value = currentProfile.siteId || "";
+        await loadSiteUsers();
+      } catch (err) {
+        console.error(err);
+        let msg = "Kullanıcı oluşturulamadı.";
+        if (err && err.code === "auth/email-already-in-use") msg = "Bu e-posta zaten kayıtlı.";
+        else if (err && err.code === "auth/weak-password") msg = "Şifre çok zayıf.";
+        setStatus(msg, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Kullanıcı Oluştur";
+      }
+    }
+
+    async function seedGunesSite() {
+      const siteId = "gunes-sitesi";
+      try {
+        await ensureSiteDoc(siteId, "Güneş Sitesi");
+        document.getElementById("u_siteId").value = currentProfile.siteId || siteId;
+        document.getElementById("u_email").value = "sakin1@gunes-sitesi.com";
+        document.getElementById("u_displayName").value = "Güneş Sitesi Sakini";
+        document.getElementById("u_role").value = "resident";
+        document.getElementById("u_unitId").value = "A-D-1";
+        document.getElementById("u_status").value = "active";
+        setStatus("Güneş Sitesi hazırlandı. Şifre girip kullanıcı oluşturabilirsiniz.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus("Güneş Sitesi kurulumu başarısız.", "error");
+      }
+    }
+
+    function fillResidentTemplate() {
+      document.getElementById("u_role").value = "resident";
+      document.getElementById("u_unitId").value = "A-D-1";
+      if (!document.getElementById("u_displayName").value) {
+        document.getElementById("u_displayName").value = "Kat Sakini";
+      }
+    }
+
+    function fillManagerTemplate() {
+      document.getElementById("u_email").value = "yonetici@gunes-sitesi.com";
+      document.getElementById("u_displayName").value = "Güneş Sitesi Yöneticisi";
+      document.getElementById("u_role").value = "site_manager";
+      document.getElementById("u_unitId").value = "";
+      document.getElementById("u_status").value = "active";
+    }
+
+    function fillAssistantTemplate() {
+      document.getElementById("u_email").value = "yardimci@gunes-sitesi.com";
+      document.getElementById("u_displayName").value = "Yönetici Yardımcısı";
+      document.getElementById("u_role").value = "assistant_manager";
+      document.getElementById("u_unitId").value = "";
+      document.getElementById("u_status").value = "active";
+    }
+
+    function wireBaseEvents() {
+      document.getElementById("refreshBtn").addEventListener("click", loadApplications);
+      document.getElementById("logoutBtn").addEventListener("click", async () => {
+        await auth.signOut();
+        window.location.href = "/login.html";
+      });
+      document.getElementById("closeModalBtn").addEventListener("click", closeEditModal);
+      document.getElementById("cancelBtn").addEventListener("click", closeEditModal);
+      modalEl.addEventListener("click", (e) => { if (e.target === modalEl) closeEditModal(); });
+      document.getElementById("seedSiteBtn").addEventListener("click", seedGunesSite);
+      document.getElementById("sampleManagerBtn").addEventListener("click", fillManagerTemplate);
+      document.getElementById("sampleAssistantBtn").addEventListener("click", fillAssistantTemplate);
+      document.getElementById("sampleResidentBtn").addEventListener("click", fillResidentTemplate);
+      document.getElementById("userForm").addEventListener("submit", createUserFromForm);
+    }
 
     document.getElementById("editForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -664,11 +988,13 @@
         return;
       }
 
+      const siteName = document.getElementById("e_site_adi").value.trim();
       const payload = {
         ad_soyad: document.getElementById("e_ad_soyad").value.trim(),
         email: document.getElementById("e_email").value.trim(),
         telefon: document.getElementById("e_telefon").value.trim(),
-        site_adi: document.getElementById("e_site_adi").value.trim(),
+        site_adi: siteName,
+        siteId: slugifySiteId(siteName) || currentProfile.siteId,
         il: document.getElementById("e_il").value.trim(),
         ilce: document.getElementById("e_ilce").value.trim(),
         adres: document.getElementById("e_adres").value.trim(),
@@ -694,25 +1020,45 @@
       }
     });
 
+    wireBaseEvents();
+
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         appEl.style.display = "none";
         lockedEl.style.display = "grid";
         return;
       }
+      try {
+        const profile = await getCurrentUserProfile(db, user.uid);
+        if (!profile || !isProfileActive(profile)) {
+          await auth.signOut();
+          appEl.style.display = "none";
+          lockedEl.style.display = "grid";
+          return;
+        }
+        if (!canAccess("admin_panel", profile.role)) {
+          window.location.href = "/demo.html";
+          return;
+        }
 
-      const email = normalizeEmail(user.email);
-      if (!isAdminEmail(email)) {
-        await auth.signOut();
+        currentUser = user;
+        currentProfile = profile;
+        setMeta(profile, user);
+        lockedEl.style.display = "none";
+        appEl.style.display = "block";
+
+        if (canAccess("user_management", profile.role)) {
+          userMgmtEl.classList.add("open");
+          await loadSiteUsers();
+        } else {
+          userMgmtEl.classList.remove("open");
+        }
+        await loadApplications();
+      } catch (err) {
+        console.error(err);
         appEl.style.display = "none";
         lockedEl.style.display = "grid";
-        return;
       }
-
-      document.getElementById("userEmail").textContent = email;
-      lockedEl.style.display = "none";
-      appEl.style.display = "block";
-      loadApplications();
     });
   </script>
 </body>

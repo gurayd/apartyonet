@@ -1111,6 +1111,16 @@
 
         function bk(from) { cur = from - 1; updateUI(); }
 
+        function slugifySiteId(name) {
+            return String(name || '')
+                .trim()
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
         document.getElementById('mf').addEventListener('submit', async function (e) {
             e.preventDefault();
             const btn = document.getElementById('subbtn');
@@ -1124,9 +1134,13 @@
                 } catch {
                     blokYapisiJson = [];
                 }
+                const siteName = (payload.f_site || payload.site_adi || '').trim();
+                const siteId = slugifySiteId(siteName);
 
                 await db.collection('basvurular').add({
                     ...payload,
+                    site_adi: siteName || payload.site_adi || '',
+                    siteId: siteId || '',
                     blok_yapisi_json: blokYapisiJson,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });

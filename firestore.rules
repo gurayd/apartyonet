@@ -2,15 +2,89 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isAdmin() {
-      return request.auth != null
-        && request.auth.token.email != null
-        && request.auth.token.email in ["guraydinsel@gmail.com"];
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function myProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function hasProfile() {
+      return signedIn() && myProfile().data != null;
+    }
+
+    function isActive() {
+      return hasProfile() && myProfile().data.status == "active";
+    }
+
+    function myRole() {
+      return hasProfile() ? myProfile().data.role : "";
+    }
+
+    function mySiteId() {
+      return hasProfile() ? myProfile().data.siteId : "";
+    }
+
+    function isSiteManager() {
+      return isActive() && myRole() == "site_manager";
+    }
+
+    function isAssistantManager() {
+      return isActive() && myRole() == "assistant_manager";
+    }
+
+    function isResident() {
+      return isActive() && myRole() == "resident";
+    }
+
+    function isManager() {
+      return isSiteManager() || isAssistantManager();
+    }
+
+    function sameSite(resourceData) {
+      return resourceData.siteId == mySiteId();
+    }
+
+    function validRole(role) {
+      return role in ["site_manager", "assistant_manager", "resident"];
+    }
+
+    function validStatus(status) {
+      return status in ["active", "inactive"];
     }
 
     match /basvurular/{docId} {
       allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read: if isActive() && sameSite(resource.data);
+      allow update: if isManager() && sameSite(resource.data) && sameSite(request.resource.data);
+      allow delete: if isSiteManager() && sameSite(resource.data);
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (
+        request.auth.uid == uid ||
+        (isSiteManager() && sameSite(resource.data))
+      );
+
+      allow create: if isSiteManager()
+        && sameSite(request.resource.data)
+        && validRole(request.resource.data.role)
+        && validStatus(request.resource.data.status);
+
+      allow update: if isSiteManager()
+        && sameSite(resource.data)
+        && sameSite(request.resource.data)
+        && validRole(request.resource.data.role)
+        && validStatus(request.resource.data.status);
+
+      allow delete: if false;
+    }
+
+    match /sites/{siteId} {
+      allow read: if isActive() && siteId == mySiteId();
+      allow create, update: if isSiteManager() && siteId == mySiteId();
+      allow delete: if false;
     }
 
     match /{document=**} {
