@@ -1348,6 +1348,10 @@
       }
       try {
         currentProfile = await getCurrentUserProfile(db, user.uid);
+        if (!currentProfile) {
+          await ensureBootstrapAdminProfile(db, user);
+          currentProfile = await getCurrentUserProfile(db, user.uid);
+        }
         if (!currentProfile || !isProfileActive(currentProfile)) {
           await auth.signOut();
           window.location.href = "/login.html";

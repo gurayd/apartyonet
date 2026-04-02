@@ -1029,7 +1029,11 @@
         return;
       }
       try {
-        const profile = await getCurrentUserProfile(db, user.uid);
+        let profile = await getCurrentUserProfile(db, user.uid);
+        if (!profile) {
+          await ensureBootstrapAdminProfile(db, user);
+          profile = await getCurrentUserProfile(db, user.uid);
+        }
         if (!profile || !isProfileActive(profile)) {
           await auth.signOut();
           appEl.style.display = "none";

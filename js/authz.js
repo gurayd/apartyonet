@@ -1,4 +1,5 @@
 window.APARTYONET_ROLES = {
+  SUPER_ADMIN: "super_admin",
   SITE_MANAGER: "site_manager",
   ASSISTANT_MANAGER: "assistant_manager",
   RESIDENT: "resident"
@@ -41,6 +42,7 @@ window.getCurrentUserProfile = async function getCurrentUserProfile(db, uid) {
 
 window.canAccess = function canAccess(module, role) {
   const roles = window.APARTYONET_ROLES;
+  if (role === roles.SUPER_ADMIN) return true;
   const matrix = {
     admin_panel: [roles.SITE_MANAGER, roles.ASSISTANT_MANAGER],
     user_management: [roles.SITE_MANAGER],
@@ -52,11 +54,12 @@ window.canAccess = function canAccess(module, role) {
 };
 
 window.enforceSiteScope = function enforceSiteScope(query, siteId) {
-  if (!query || !siteId) return query;
+  if (!query || !siteId || siteId === "*") return query;
   return query.where("siteId", "==", siteId);
 };
 
 window.formatRoleLabel = function formatRoleLabel(role) {
+  if (role === "super_admin") return "Süper Yönetici";
   if (role === "site_manager") return "Site Yöneticisi";
   if (role === "assistant_manager") return "Yönetici Yardımcısı";
   if (role === "resident") return "Kat Sakini";
@@ -65,4 +68,27 @@ window.formatRoleLabel = function formatRoleLabel(role) {
 
 window.isProfileActive = function isProfileActive(profile) {
   return !!(profile && profile.status === "active");
+};
+
+window.isBootstrapAdminEmail = function isBootstrapAdminEmail(email) {
+  return normalizeEmail(email) === "guraydinsel@gmail.com";
+};
+
+window.ensureBootstrapAdminProfile = async function ensureBootstrapAdminProfile(db, user) {
+  if (!db || !user || !user.uid || !isBootstrapAdminEmail(user.email)) return null;
+  const ref = db.collection("users").doc(user.uid);
+  const snap = await ref.get();
+  if (snap.exists) return { uid: snap.id, ...snap.data() };
+  const payload = {
+    email: normalizeEmail(user.email),
+    displayName: user.displayName || "ApartYönet Admin",
+    role: APARTYONET_ROLES.SUPER_ADMIN,
+    siteId: "*",
+    unitId: "",
+    status: "active",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  await ref.set(payload, { merge: true });
+  return { uid: user.uid, ...payload };
 };

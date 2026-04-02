@@ -30,6 +30,10 @@ service cloud.firestore {
       return isActive() && myRole() == "site_manager";
     }
 
+    function isSuperAdmin() {
+      return isActive() && myRole() == "super_admin";
+    }
+
     function isAssistantManager() {
       return isActive() && myRole() == "assistant_manager";
     }
@@ -39,19 +43,73 @@ service cloud.firestore {
     }
 
     function isManager() {
-      return isSiteManager() || isAssistantManager();
+      return isSuperAdmin() || isSiteManager() || isAssistantManager();
     }
 
     function sameSite(resourceData) {
+      return isSuperAdmin() || resourceData.siteId == mySiteId();
+    }
+
+    function isBootstrapAdminEmail() {
+      return signedIn() && request.auth.token.email == "guraydinsel@gmail.com";
+    }
+
+    function isOwnUserDoc(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function sameSiteStrict(resourceData) {
       return resourceData.siteId == mySiteId();
     }
 
     function validRole(role) {
-      return role in ["site_manager", "assistant_manager", "resident"];
+      return role in ["super_admin", "site_manager", "assistant_manager", "resident"];
     }
 
     function validStatus(status) {
       return status in ["active", "inactive"];
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (
+        request.auth.uid == uid ||
+        (isManager() && sameSite(resource.data))
+      );
+
+      allow create: if (
+          isSiteManager()
+          && sameSiteStrict(request.resource.data)
+          && validRole(request.resource.data.role)
+          && validStatus(request.resource.data.status)
+        ) || (
+          isOwnUserDoc(uid)
+          && !hasProfile()
+          && isBootstrapAdminEmail()
+          && request.resource.data.email == request.auth.token.email
+          && request.resource.data.role == "super_admin"
+          && request.resource.data.siteId == "*"
+          && validStatus(request.resource.data.status)
+        );
+
+      allow update: if (
+          isSiteManager()
+          && sameSiteStrict(resource.data)
+          && sameSiteStrict(request.resource.data)
+          && validRole(request.resource.data.role)
+          && validStatus(request.resource.data.status)
+        ) || (
+          isSuperAdmin()
+          && validRole(request.resource.data.role)
+          && validStatus(request.resource.data.status)
+        );
+
+      allow delete: if isSuperAdmin();
+    }
+
+    match /sites/{siteId} {
+      allow read: if isActive() && (isSuperAdmin() || siteId == mySiteId());
+      allow create, update: if isSuperAdmin() || (isSiteManager() && siteId == mySiteId());
+      allow delete: if isSuperAdmin();
     }
 
     match /basvurular/{docId} {
@@ -59,32 +117,6 @@ service cloud.firestore {
       allow read: if isActive() && sameSite(resource.data);
       allow update: if isManager() && sameSite(resource.data) && sameSite(request.resource.data);
       allow delete: if isSiteManager() && sameSite(resource.data);
-    }
-
-    match /users/{uid} {
-      allow read: if signedIn() && (
-        request.auth.uid == uid ||
-        (isSiteManager() && sameSite(resource.data))
-      );
-
-      allow create: if isSiteManager()
-        && sameSite(request.resource.data)
-        && validRole(request.resource.data.role)
-        && validStatus(request.resource.data.status);
-
-      allow update: if isSiteManager()
-        && sameSite(resource.data)
-        && sameSite(request.resource.data)
-        && validRole(request.resource.data.role)
-        && validStatus(request.resource.data.status);
-
-      allow delete: if false;
-    }
-
-    match /sites/{siteId} {
-      allow read: if isActive() && siteId == mySiteId();
-      allow create, update: if isSiteManager() && siteId == mySiteId();
-      allow delete: if false;
     }
 
     match /{document=**} {

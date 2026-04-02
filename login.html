@@ -229,7 +229,11 @@
     }
 
     async function routeByProfile(user) {
-      const profile = await getCurrentUserProfile(db, user.uid);
+      let profile = await getCurrentUserProfile(db, user.uid);
+      if (!profile) {
+        await ensureBootstrapAdminProfile(db, user);
+        profile = await getCurrentUserProfile(db, user.uid);
+      }
       if (!profile) {
         await auth.signOut();
         throw new Error("Bu hesap için kullanıcı profili bulunamadı. Yönetici ile iletişime geçin.");
