@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApartYönet | Admin Paneli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #090d14;
+      --line: rgba(152, 175, 214, 0.22);
+      --text: #e8eefc;
+      --muted: #9fb0cf;
+      --primary: #2ea0ff;
+      --primary-2: #1676d1;
+      --card: rgba(14, 22, 37, 0.82);
+      --danger: #fca5a5;
+      --ok: #86efac;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Manrope", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(1200px 600px at 10% -20%, rgba(46, 160, 255, 0.32), transparent 60%),
+        radial-gradient(1000px 520px at 90% -10%, rgba(92, 240, 210, 0.16), transparent 64%),
+        radial-gradient(900px 500px at 50% 120%, rgba(22, 118, 209, 0.26), transparent 66%),
+        linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(159, 176, 207, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(159, 176, 207, 0.06) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black, transparent 82%);
+      pointer-events: none;
+    }
+
+    .container {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .top {
+      margin-top: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 700;
+    }
+
+    .brand img {
+      height: 34px;
+      width: auto;
+      display: block;
+    }
+
+    .top-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      border-radius: 11px;
+      border: 1px solid transparent;
+      padding: 9px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+
+    .btn-ghost {
+      color: #d9e5ff;
+      border-color: rgba(152, 175, 214, 0.35);
+      background: rgba(17, 26, 43, 0.55);
+    }
+
+    .meta {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 11px;
+      background: rgba(11, 18, 31, 0.72);
+    }
+
+    .chip small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.76rem;
+      margin-bottom: 2px;
+    }
+
+    .chip strong {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .status {
+      margin: 10px 0 14px;
+      min-height: 22px;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .status.error { color: var(--danger); }
+    .status.ok { color: var(--ok); }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      padding-bottom: 26px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.88), var(--card));
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .card-head strong {
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card-head span {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .card-body {
+      border-top: 1px solid rgba(152, 175, 214, 0.2);
+      display: none;
+      padding: 12px 14px 14px;
+      background: rgba(10, 16, 27, 0.72);
+    }
+
+    .card.open .card-body {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .field {
+      border: 1px solid rgba(152, 175, 214, 0.2);
+      border-radius: 10px;
+      padding: 8px 9px;
+      background: rgba(17, 26, 43, 0.55);
+    }
+
+    .field small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.74rem;
+      margin-bottom: 2px;
+    }
+
+    .field div {
+      font-size: 0.88rem;
+      word-break: break-word;
+    }
+
+    .json {
+      margin-top: 9px;
+      border: 1px solid rgba(152, 175, 214, 0.2);
+      border-radius: 10px;
+      padding: 8px;
+      background: rgba(8, 13, 22, 0.86);
+      color: #d6e4ff;
+      font-size: 0.8rem;
+      overflow: auto;
+      white-space: pre;
+    }
+
+    .locked {
+      min-height: 100vh;
+      display: none;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .locked .panel {
+      width: min(560px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+    }
+
+    .empty {
+      border: 1px dashed rgba(152, 175, 214, 0.3);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(11, 18, 31, 0.55);
+    }
+
+    @media (max-width: 680px) {
+      .container { width: calc(100% - 20px); }
+      .top { margin-top: 10px; }
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <main id="app" style="display:none;">
+    <div class="container">
+      <header class="top">
+        <a class="brand" href="/index.html" aria-label="ApartYönet Anasayfa">
+          <img src="assets/apartyonet-logo-white-transparent.svg" alt="ApartYönet" />
+          <span>ApartYönet Admin</span>
+        </a>
+        <div class="top-actions">
+          <button id="refreshBtn" class="btn btn-ghost" type="button">Yenile</button>
+          <button id="logoutBtn" class="btn btn-primary" type="button">Cikis Yap</button>
+        </div>
+      </header>
+
+      <section class="meta">
+        <div class="chip"><small>Yetkili Hesap</small><strong id="userEmail">-</strong></div>
+        <div class="chip"><small>Toplam Basvuru</small><strong id="totalCount">0</strong></div>
+        <div class="chip"><small>Son Guncelleme</small><strong id="lastSync">-</strong></div>
+      </section>
+
+      <div id="status" class="status"></div>
+      <section id="list" class="list"></section>
+    </div>
+  </main>
+
+  <section id="locked" class="locked">
+    <div class="panel">
+      <h1 style="margin:0; font-size:1.4rem;">Yetkisiz Erişim</h1>
+      <p style="color:#9fb0cf; line-height:1.6;">Bu sayfayi goruntulemek icin yetkili yonetici hesabi ile giris yapmalisiniz.</p>
+      <a class="btn btn-primary" href="/login.html">Giris Sayfasina Don</a>
+    </div>
+  </section>
+
+  <script>
+    const ADMIN_EMAILS = ["guraydinsel@gmail.com"];
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
+      authDomain: "apartyonet-af6d3.firebaseapp.com",
+      projectId: "apartyonet-af6d3",
+      storageBucket: "apartyonet-af6d3.firebasestorage.app",
+      messagingSenderId: "825430154124",
+      appId: "1:825430154124:web:7156fa0462fcfc222414a9"
+    };
+
+    const app = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+    const auth = app.auth();
+    const db = app.firestore();
+
+    const appEl = document.getElementById("app");
+    const lockedEl = document.getElementById("locked");
+    const listEl = document.getElementById("list");
+    const statusEl = document.getElementById("status");
+
+    function normalizeEmail(email) {
+      return (email || "").trim().toLowerCase();
+    }
+
+    function isAdminEmail(email) {
+      return ADMIN_EMAILS.includes(normalizeEmail(email));
+    }
+
+    function setStatus(message, type) {
+      statusEl.textContent = message || "";
+      statusEl.className = "status" + (type ? " " + type : "");
+    }
+
+    function formatDate(value) {
+      if (!value) return "-";
+      let date;
+      if (value.toDate) date = value.toDate();
+      else date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "-";
+      return date.toLocaleString("tr-TR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? "" : value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderCards(items) {
+      document.getElementById("totalCount").textContent = String(items.length);
+      document.getElementById("lastSync").textContent = formatDate(new Date());
+
+      if (!items.length) {
+        listEl.innerHTML = '<div class="empty">Henüz başvuru kaydı bulunmuyor.</div>';
+        return;
+      }
+
+      listEl.innerHTML = items.map((item, index) => {
+        const header = escapeHtml(item.site_adi || "Site adı yok");
+        const sub = escapeHtml((item.ad_soyad || "Isim yok") + " • " + (item.telefon || "Telefon yok"));
+        const createdAt = formatDate(item.createdAt);
+        const blokJson = JSON.stringify(item.blok_yapisi_json || [], null, 2);
+
+        return `
+          <article class="card" data-index="${index}">
+            <div class="card-head" role="button" tabindex="0" data-toggle="${index}">
+              <div>
+                <strong>${header}</strong>
+                <span>${sub}</span>
+              </div>
+              <span>${createdAt}</span>
+            </div>
+            <div class="card-body">
+              <div class="grid">
+                <div class="field"><small>Ad Soyad</small><div>${escapeHtml(item.ad_soyad || "-")}</div></div>
+                <div class="field"><small>E-posta</small><div>${escapeHtml(item.email || "-")}</div></div>
+                <div class="field"><small>Telefon</small><div>${escapeHtml(item.telefon || "-")}</div></div>
+                <div class="field"><small>Site Adı</small><div>${escapeHtml(item.site_adi || "-")}</div></div>
+                <div class="field"><small>İl / İlçe</small><div>${escapeHtml((item.il || "-") + " / " + (item.ilce || "-"))}</div></div>
+                <div class="field"><small>Adres</small><div>${escapeHtml(item.adres || "-")}</div></div>
+                <div class="field"><small>Aylık Daire Aidat</small><div>${escapeHtml(item.aylik_aidat || "-")}</div></div>
+                <div class="field"><small>Aylık Dükkan Aidat</small><div>${escapeHtml(item.dukkan_aidat || "-")}</div></div>
+                <div class="field"><small>Notlar</small><div>${escapeHtml(item.notlar || "-")}</div></div>
+                <div class="field"><small>Kayıt Zamanı</small><div>${createdAt}</div></div>
+              </div>
+              <div class="json">${escapeHtml(blokJson)}</div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      document.querySelectorAll("[data-toggle]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const idx = el.getAttribute("data-toggle");
+          const card = document.querySelector('.card[data-index="' + idx + '"]');
+          if (card) card.classList.toggle("open");
+        });
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            el.click();
+          }
+        });
+      });
+    }
+
+    async function loadApplications() {
+      setStatus("Başvurular yükleniyor...", "");
+      try {
+        const snap = await db.collection("basvurular").orderBy("createdAt", "desc").limit(200).get();
+        const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        renderCards(items);
+        setStatus("Başvurular başarıyla yüklendi.", "ok");
+      } catch (err) {
+        console.error(err);
+        let msg = "Başvurular alınamadı.";
+        if (err && err.code === "permission-denied") msg = "Yetki hatası: Firestore kuralları admin okuma izni vermiyor.";
+        if (err && err.code === "failed-precondition") msg = "Sıralama için Firestore index veya ayar eksik olabilir.";
+        setStatus(msg, "error");
+      }
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", loadApplications);
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await auth.signOut();
+      window.location.href = "/login.html";
+    });
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        appEl.style.display = "none";
+        lockedEl.style.display = "grid";
+        return;
+      }
+      const email = normalizeEmail(user.email);
+      if (!isAdminEmail(email)) {
+        await auth.signOut();
+        appEl.style.display = "none";
+        lockedEl.style.display = "grid";
+        return;
+      }
+      document.getElementById("userEmail").textContent = email;
+      lockedEl.style.display = "none";
+      appEl.style.display = "block";
+      loadApplications();
+    });
+  </script>
+</body>
+</html>

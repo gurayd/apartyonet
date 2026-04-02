@@ -35,6 +35,8 @@
   ],
   "rewrites": [
     { "source": "/basvuru", "destination": "/basvuru.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/admin", "destination": "/admin.html" },
     { "source": "/:slug((?!.*\\.).+)", "destination": "/site.html" }
   ]
 }

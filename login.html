@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ApartYönet | Giriş</title>
+  <title>ApartYönet | Yönetici Girişi</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -15,7 +15,8 @@
       --muted: #9fb0cf;
       --primary: #2ea0ff;
       --primary-2: #1676d1;
-      --card: rgba(14, 22, 37, 0.78);
+      --card: rgba(14, 22, 37, 0.82);
+      --danger: #f87171;
     }
 
     * { box-sizing: border-box; }
@@ -36,7 +37,7 @@
       z-index: -2;
       background:
         radial-gradient(1200px 600px at 10% -20%, rgba(46, 160, 255, 0.32), transparent 60%),
-        radial-gradient(1000px 520px at 90% -10%, rgba(92, 240, 210, 0.18), transparent 64%),
+        radial-gradient(1000px 520px at 90% -10%, rgba(92, 240, 210, 0.16), transparent 64%),
         radial-gradient(900px 500px at 50% 120%, rgba(22, 118, 209, 0.26), transparent 66%),
         linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
     }
@@ -62,11 +63,11 @@
     }
 
     .panel {
-      width: min(760px, 100%);
+      width: min(720px, 100%);
       border: 1px solid var(--line);
       border-radius: 22px;
       padding: 30px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.88), var(--card));
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
       box-shadow: 0 24px 48px rgba(4, 8, 16, 0.45);
     }
 
@@ -77,34 +78,74 @@
       text-decoration: none;
       color: inherit;
       font-weight: 700;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
     }
 
     .brand img {
-      height: 40px;
+      height: 42px;
       width: auto;
       display: block;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(1.6rem, 3.2vw, 2.4rem);
-      line-height: 1.12;
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      line-height: 1.14;
       letter-spacing: -0.02em;
     }
 
     p {
       margin: 12px 0 0;
       color: var(--muted);
-      font-size: 1rem;
       line-height: 1.6;
     }
 
+    .form {
+      margin-top: 22px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 0.86rem;
+      color: #cfddf7;
+      font-weight: 600;
+    }
+
+    .field input {
+      width: 100%;
+      border: 1px solid rgba(152, 175, 214, 0.35);
+      background: rgba(9, 14, 24, 0.72);
+      color: #f2f6ff;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 0.94rem;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: rgba(46, 160, 255, 0.9);
+      box-shadow: 0 0 0 3px rgba(46, 160, 255, 0.18);
+    }
+
+    .error {
+      min-height: 20px;
+      color: var(--danger);
+      font-size: 0.86rem;
+      margin-top: 4px;
+    }
+
     .actions {
-      margin-top: 24px;
+      margin-top: 4px;
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      align-items: center;
     }
 
     .btn {
@@ -118,6 +159,7 @@
       font-weight: 700;
       border: 1px solid transparent;
       transition: transform 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
     }
 
     .btn:hover { transform: translateY(-1px); }
@@ -133,6 +175,8 @@
       background: rgba(17, 26, 43, 0.55);
     }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 </head>
 <body>
   <main class="page">
@@ -142,14 +186,102 @@
         <span>ApartYönet</span>
       </a>
 
-      <h1>Erken başvuru fırsatlarından yararlanın</h1>
-      <p>Yönetim paneli giriş ekranı çok yakında yayında. Şimdilik başvuru oluşturarak öncelikli kurulum sırasına dahil olabilirsiniz.</p>
+      <h1>Yönetici paneli girişi</h1>
+      <p>Erken başvuru fırsatlarından yararlanın. Başvuruları görmek için yönetici hesabınızla giriş yapın.</p>
 
-      <div class="actions">
-        <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
-        <a class="btn btn-ghost" href="/index.html">Anasayfaya Dön</a>
-      </div>
+      <form id="loginForm" class="form" novalidate>
+        <div class="field">
+          <label for="email">E-posta</label>
+          <input type="email" id="email" autocomplete="username" required placeholder="yonetici@ornek.com" />
+        </div>
+        <div class="field">
+          <label for="password">Şifre</label>
+          <input type="password" id="password" autocomplete="current-password" required placeholder="••••••••" />
+        </div>
+        <div id="error" class="error"></div>
+        <div class="actions">
+          <button id="submitBtn" class="btn btn-primary" type="submit">Giriş Yap</button>
+          <a class="btn btn-ghost" href="/index.html">Anasayfaya Dön</a>
+        </div>
+      </form>
     </section>
   </main>
+
+  <script>
+    const ADMIN_EMAILS = ["guraydinsel@gmail.com"];
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
+      authDomain: "apartyonet-af6d3.firebaseapp.com",
+      projectId: "apartyonet-af6d3",
+      storageBucket: "apartyonet-af6d3.firebasestorage.app",
+      messagingSenderId: "825430154124",
+      appId: "1:825430154124:web:7156fa0462fcfc222414a9"
+    };
+
+    const app = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+    const auth = app.auth();
+
+    function showError(message) {
+      document.getElementById("error").textContent = message || "";
+    }
+
+    function normalizeEmail(email) {
+      return (email || "").trim().toLowerCase();
+    }
+
+    function isAdminEmail(email) {
+      return ADMIN_EMAILS.includes(normalizeEmail(email));
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) return;
+      const email = normalizeEmail(user.email);
+      if (!isAdminEmail(email)) {
+        await auth.signOut();
+        showError("Bu hesap admin paneline yetkili degil.");
+        return;
+      }
+      window.location.href = "/admin.html";
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      showError("");
+
+      const email = normalizeEmail(document.getElementById("email").value);
+      const password = document.getElementById("password").value;
+      const submitBtn = document.getElementById("submitBtn");
+
+      if (!email || !password) {
+        showError("E-posta ve sifre zorunludur.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Giris yapiliyor...";
+
+      try {
+        const cred = await auth.signInWithEmailAndPassword(email, password);
+        const signedEmail = normalizeEmail(cred.user && cred.user.email);
+        if (!isAdminEmail(signedEmail)) {
+          await auth.signOut();
+          throw new Error("Bu hesap admin paneline yetkili degil.");
+        }
+        window.location.href = "/admin.html";
+      } catch (err) {
+        let msg = "Giris basarisiz. Bilgileri kontrol edin.";
+        if (err && err.code === "auth/user-not-found") msg = "Bu e-posta ile bir hesap bulunamadi.";
+        else if (err && err.code === "auth/wrong-password") msg = "Sifre hatali.";
+        else if (err && err.code === "auth/invalid-credential") msg = "E-posta veya sifre hatali.";
+        else if (err && err.code === "auth/invalid-email") msg = "E-posta formati gecersiz.";
+        else if (err && err.message) msg = err.message;
+        showError(msg);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Giriş Yap";
+      }
+    });
+  </script>
 </body>
 </html>
