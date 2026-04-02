@@ -18,6 +18,7 @@
       --card: rgba(14, 22, 37, 0.82);
       --danger: #fca5a5;
       --ok: #86efac;
+      --warn: #fcd34d;
     }
 
     * { box-sizing: border-box; }
@@ -124,6 +125,16 @@
       background: rgba(17, 26, 43, 0.55);
     }
 
+    .btn-edit {
+      color: #061223;
+      background: linear-gradient(135deg, #fdd067, #f59e0b);
+    }
+
+    .btn-demo {
+      color: #fff;
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
     .meta {
       margin-top: 8px;
       display: grid;
@@ -186,11 +197,19 @@
     .card-head strong {
       font-size: 0.95rem;
       letter-spacing: -0.01em;
+      display: block;
     }
 
     .card-head span {
       color: var(--muted);
       font-size: 0.8rem;
+    }
+
+    .card-actions {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
     .card-body {
@@ -241,6 +260,15 @@
       white-space: pre;
     }
 
+    .empty {
+      border: 1px dashed rgba(152, 175, 214, 0.3);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(11, 18, 31, 0.55);
+    }
+
     .locked {
       min-height: 100vh;
       display: none;
@@ -256,18 +284,83 @@
       background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
     }
 
-    .empty {
-      border: 1px dashed rgba(152, 175, 214, 0.3);
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(3, 7, 15, 0.7);
+      z-index: 200;
+      padding: 18px;
+    }
+
+    .modal.open { display: grid; }
+
+    .modal-card {
+      width: min(860px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      border: 1px solid var(--line);
       border-radius: 14px;
-      padding: 20px;
-      text-align: center;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.96));
+      padding: 14px;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .modal-form {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .modal-form .full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-form label {
+      display: block;
+      font-size: 0.78rem;
       color: var(--muted);
-      background: rgba(11, 18, 31, 0.55);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .modal-form input,
+    .modal-form textarea {
+      width: 100%;
+      border: 1px solid rgba(152, 175, 214, 0.3);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: rgba(10, 16, 27, 0.75);
+      color: #e8eefc;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    .modal-form textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
     }
 
     @media (max-width: 680px) {
       .container { width: calc(100% - 20px); }
       .top { margin-top: 10px; }
+      .card-head { align-items: flex-start; }
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -284,14 +377,14 @@
         </a>
         <div class="top-actions">
           <button id="refreshBtn" class="btn btn-ghost" type="button">Yenile</button>
-          <button id="logoutBtn" class="btn btn-primary" type="button">Cikis Yap</button>
+          <button id="logoutBtn" class="btn btn-primary" type="button">Çıkış Yap</button>
         </div>
       </header>
 
       <section class="meta">
         <div class="chip"><small>Yetkili Hesap</small><strong id="userEmail">-</strong></div>
-        <div class="chip"><small>Toplam Basvuru</small><strong id="totalCount">0</strong></div>
-        <div class="chip"><small>Son Guncelleme</small><strong id="lastSync">-</strong></div>
+        <div class="chip"><small>Toplam Başvuru</small><strong id="totalCount">0</strong></div>
+        <div class="chip"><small>Son Güncelleme</small><strong id="lastSync">-</strong></div>
       </section>
 
       <div id="status" class="status"></div>
@@ -302,13 +395,43 @@
   <section id="locked" class="locked">
     <div class="panel">
       <h1 style="margin:0; font-size:1.4rem;">Yetkisiz Erişim</h1>
-      <p style="color:#9fb0cf; line-height:1.6;">Bu sayfayi goruntulemek icin yetkili yonetici hesabi ile giris yapmalisiniz.</p>
-      <a class="btn btn-primary" href="/login.html">Giris Sayfasina Don</a>
+      <p style="color:#9fb0cf; line-height:1.6;">Bu sayfayı görüntülemek için yetkili yönetici hesabı ile giriş yapmalısınız.</p>
+      <a class="btn btn-primary" href="/login.html">Giriş Sayfasına Dön</a>
+    </div>
+  </section>
+
+  <section id="editModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <strong>Başvuru Düzenle</strong>
+        <button id="closeModalBtn" type="button" class="btn btn-ghost">Kapat</button>
+      </div>
+      <form id="editForm" novalidate>
+        <input type="hidden" id="editId" />
+        <div class="modal-form">
+          <div><label>Ad Soyad</label><input id="e_ad_soyad" type="text" /></div>
+          <div><label>E-posta</label><input id="e_email" type="email" /></div>
+          <div><label>Telefon</label><input id="e_telefon" type="text" /></div>
+          <div><label>Site Adı</label><input id="e_site_adi" type="text" /></div>
+          <div><label>İl</label><input id="e_il" type="text" /></div>
+          <div><label>İlçe</label><input id="e_ilce" type="text" /></div>
+          <div><label>Aylık Daire Aidat</label><input id="e_aylik_aidat" type="number" step="0.01" min="0" /></div>
+          <div><label>Aylık Dükkan Aidat</label><input id="e_dukkan_aidat" type="number" step="0.01" min="0" /></div>
+          <div class="full"><label>Adres</label><textarea id="e_adres"></textarea></div>
+          <div class="full"><label>Notlar</label><textarea id="e_notlar"></textarea></div>
+          <div class="full"><label>Blok Yapısı JSON</label><textarea id="e_blok_json"></textarea></div>
+        </div>
+        <div class="modal-actions">
+          <button id="saveBtn" class="btn btn-primary" type="submit">Kaydet</button>
+          <button id="cancelBtn" class="btn btn-ghost" type="button">İptal</button>
+        </div>
+      </form>
     </div>
   </section>
 
   <script>
     const ADMIN_EMAILS = ["guraydinsel@gmail.com"];
+    let applicationRows = [];
 
     const firebaseConfig = {
       apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
@@ -327,6 +450,7 @@
     const lockedEl = document.getElementById("locked");
     const listEl = document.getElementById("list");
     const statusEl = document.getElementById("status");
+    const modalEl = document.getElementById("editModal");
 
     function normalizeEmail(email) {
       return (email || "").trim().toLowerCase();
@@ -334,6 +458,13 @@
 
     function isAdminEmail(email) {
       return ADMIN_EMAILS.includes(normalizeEmail(email));
+    }
+
+    function toMillis(value) {
+      if (!value) return 0;
+      if (value.toMillis) return value.toMillis();
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? 0 : d.getTime();
     }
 
     function setStatus(message, type) {
@@ -365,6 +496,10 @@
         .replaceAll("'", "&#039;");
     }
 
+    function byId(id) {
+      return applicationRows.find((r) => r.id === id);
+    }
+
     function renderCards(items) {
       document.getElementById("totalCount").textContent = String(items.length);
       document.getElementById("lastSync").textContent = formatDate(new Date());
@@ -376,7 +511,7 @@
 
       listEl.innerHTML = items.map((item, index) => {
         const header = escapeHtml(item.site_adi || "Site adı yok");
-        const sub = escapeHtml((item.ad_soyad || "Isim yok") + " • " + (item.telefon || "Telefon yok"));
+        const sub = escapeHtml((item.ad_soyad || "İsim yok") + " • " + (item.telefon || "Telefon yok"));
         const createdAt = formatDate(item.createdAt);
         const blokJson = JSON.stringify(item.blok_yapisi_json || [], null, 2);
 
@@ -387,7 +522,11 @@
                 <strong>${header}</strong>
                 <span>${sub}</span>
               </div>
-              <span>${createdAt}</span>
+              <div class="card-actions">
+                <button type="button" class="btn btn-edit" data-edit-id="${item.id}">Düzenle</button>
+                <button type="button" class="btn btn-demo" data-demo-id="${item.id}">Demo Oluştur</button>
+                <span>${createdAt}</span>
+              </div>
             </div>
             <div class="card-body">
               <div class="grid">
@@ -409,11 +548,13 @@
       }).join("");
 
       document.querySelectorAll("[data-toggle]").forEach((el) => {
-        el.addEventListener("click", () => {
+        el.addEventListener("click", (e) => {
+          if (e.target.closest("button")) return;
           const idx = el.getAttribute("data-toggle");
           const card = document.querySelector('.card[data-index="' + idx + '"]');
           if (card) card.classList.toggle("open");
         });
+
         el.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -421,6 +562,48 @@
           }
         });
       });
+
+      document.querySelectorAll("[data-demo-id]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-demo-id");
+          if (!id) return;
+          window.open("/demo.html?id=" + encodeURIComponent(id), "_blank", "noopener");
+        });
+      });
+
+      document.querySelectorAll("[data-edit-id]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-edit-id");
+          if (!id) return;
+          openEditModal(id);
+        });
+      });
+    }
+
+    function openEditModal(id) {
+      const row = byId(id);
+      if (!row) return;
+      document.getElementById("editId").value = id;
+      document.getElementById("e_ad_soyad").value = row.ad_soyad || "";
+      document.getElementById("e_email").value = row.email || "";
+      document.getElementById("e_telefon").value = row.telefon || "";
+      document.getElementById("e_site_adi").value = row.site_adi || "";
+      document.getElementById("e_il").value = row.il || "";
+      document.getElementById("e_ilce").value = row.ilce || "";
+      document.getElementById("e_adres").value = row.adres || "";
+      document.getElementById("e_notlar").value = row.notlar || "";
+      document.getElementById("e_aylik_aidat").value = row.aylik_aidat || "";
+      document.getElementById("e_dukkan_aidat").value = row.dukkan_aidat || "";
+      document.getElementById("e_blok_json").value = JSON.stringify(row.blok_yapisi_json || [], null, 2);
+      modalEl.classList.add("open");
+      modalEl.setAttribute("aria-hidden", "false");
+    }
+
+    function closeEditModal() {
+      modalEl.classList.remove("open");
+      modalEl.setAttribute("aria-hidden", "true");
     }
 
     async function loadApplications() {
@@ -428,6 +611,8 @@
       try {
         const snap = await db.collection("basvurular").orderBy("createdAt", "desc").limit(200).get();
         const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        items.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+        applicationRows = items;
         renderCards(items);
         setStatus("Başvurular başarıyla yüklendi.", "ok");
       } catch (err) {
@@ -446,12 +631,76 @@
       window.location.href = "/login.html";
     });
 
+    document.getElementById("closeModalBtn").addEventListener("click", closeEditModal);
+    document.getElementById("cancelBtn").addEventListener("click", closeEditModal);
+
+    modalEl.addEventListener("click", (e) => {
+      if (e.target === modalEl) closeEditModal();
+    });
+
+    document.getElementById("editForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById("saveBtn");
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Kaydediliyor...";
+
+      const id = document.getElementById("editId").value;
+      if (!id) {
+        setStatus("Düzenlenecek kayıt bulunamadı.", "error");
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Kaydet";
+        return;
+      }
+
+      let blokYapisi;
+      try {
+        const raw = document.getElementById("e_blok_json").value || "[]";
+        blokYapisi = JSON.parse(raw);
+        if (!Array.isArray(blokYapisi)) throw new Error("Geçersiz blok listesi");
+      } catch {
+        setStatus("Blok Yapısı JSON formatı geçersiz.", "error");
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Kaydet";
+        return;
+      }
+
+      const payload = {
+        ad_soyad: document.getElementById("e_ad_soyad").value.trim(),
+        email: document.getElementById("e_email").value.trim(),
+        telefon: document.getElementById("e_telefon").value.trim(),
+        site_adi: document.getElementById("e_site_adi").value.trim(),
+        il: document.getElementById("e_il").value.trim(),
+        ilce: document.getElementById("e_ilce").value.trim(),
+        adres: document.getElementById("e_adres").value.trim(),
+        notlar: document.getElementById("e_notlar").value.trim(),
+        aylik_aidat: document.getElementById("e_aylik_aidat").value.trim(),
+        dukkan_aidat: document.getElementById("e_dukkan_aidat").value.trim(),
+        blok_yapisi_json: blokYapisi,
+        blok_yapisi: JSON.stringify(blokYapisi),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        await db.collection("basvurular").doc(id).update(payload);
+        closeEditModal();
+        setStatus("Başvuru güncellendi.", "ok");
+        await loadApplications();
+      } catch (err) {
+        console.error(err);
+        setStatus("Güncelleme sırasında hata oluştu.", "error");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Kaydet";
+      }
+    });
+
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         appEl.style.display = "none";
         lockedEl.style.display = "grid";
         return;
       }
+
       const email = normalizeEmail(user.email);
       if (!isAdminEmail(email)) {
         await auth.signOut();
@@ -459,6 +708,7 @@
         lockedEl.style.display = "grid";
         return;
       }
+
       document.getElementById("userEmail").textContent = email;
       lockedEl.style.display = "none";
       appEl.style.display = "block";

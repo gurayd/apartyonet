@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApartYönet | Demo Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #090d14;
+      --line: rgba(152, 175, 214, 0.22);
+      --text: #e8eefc;
+      --muted: #9fb0cf;
+      --primary: #2ea0ff;
+      --primary-2: #1676d1;
+      --card: rgba(14, 22, 37, 0.84);
+      --panel: rgba(11, 18, 31, 0.78);
+      --ok: #86efac;
+      --warn: #fcd34d;
+      --danger: #fca5a5;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Manrope", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(1200px 600px at 10% -20%, rgba(46, 160, 255, 0.32), transparent 60%),
+        radial-gradient(1000px 520px at 90% -10%, rgba(92, 240, 210, 0.16), transparent 64%),
+        radial-gradient(900px 500px at 50% 120%, rgba(22, 118, 209, 0.26), transparent 66%),
+        linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(159, 176, 207, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(159, 176, 207, 0.06) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(circle at center, black, transparent 82%);
+      pointer-events: none;
+    }
+
+    .container {
+      width: min(1280px, calc(100% - 28px));
+      margin: 14px auto 24px;
+    }
+
+    .top {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.92), var(--card));
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 700;
+    }
+
+    .brand img { height: 34px; width: auto; display: block; }
+
+    .top-actions { display: inline-flex; gap: 8px; align-items: center; }
+
+    .btn {
+      border-radius: 10px;
+      border: 1px solid transparent;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { color: #fff; background: linear-gradient(135deg, var(--primary), var(--primary-2)); }
+    .btn-ghost { color: #d9e5ff; border-color: rgba(152, 175, 214, 0.35); background: rgba(17, 26, 43, 0.55); }
+
+    .hero {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.92), var(--card));
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 2.5vw, 1.9rem);
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .stats {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 8px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      padding: 9px 10px;
+    }
+
+    .stat small { color: var(--muted); display: block; font-size: 0.74rem; margin-bottom: 2px; }
+    .stat strong { font-size: 0.92rem; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 10px;
+    }
+
+    .sidebar {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+      padding: 8px;
+      height: fit-content;
+      position: sticky;
+      top: 12px;
+    }
+
+    .tab-btn {
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
+      color: #d8e5ff;
+      cursor: pointer;
+      text-align: left;
+      padding: 10px 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .tab-btn:hover { background: rgba(46, 160, 255, 0.12); }
+    .tab-btn.active {
+      background: rgba(46, 160, 255, 0.2);
+      border-color: rgba(46, 160, 255, 0.45);
+    }
+
+    .content {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+      padding: 12px;
+      min-height: 520px;
+    }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .section-title {
+      margin: 2px 0 10px;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .muted { color: var(--muted); font-size: 0.85rem; }
+
+    .sub-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .sub-tab {
+      border: 1px solid rgba(152, 175, 214, 0.3);
+      background: rgba(11, 18, 31, 0.8);
+      color: #d8e5ff;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .sub-tab.active { border-color: rgba(46, 160, 255, 0.6); color: #b9dcff; }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+    }
+
+    .mini {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      padding: 9px;
+    }
+
+    .mini small { display: block; color: var(--muted); font-size: 0.72rem; }
+    .mini strong { font-size: 0.9rem; }
+
+    .inline-form {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .f label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .f input,
+    .f select,
+    .f textarea {
+      width: 100%;
+      border: 1px solid rgba(152, 175, 214, 0.34);
+      border-radius: 10px;
+      padding: 8px 9px;
+      background: rgba(10, 16, 27, 0.8);
+      color: #e8eefc;
+      font-size: 0.84rem;
+      font-family: inherit;
+    }
+
+    .f textarea { min-height: 84px; resize: vertical; }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    table { width: 100%; border-collapse: collapse; min-width: 620px; }
+    th, td {
+      border-bottom: 1px solid rgba(152, 175, 214, 0.2);
+      padding: 8px;
+      font-size: 0.8rem;
+      text-align: left;
+    }
+    th { background: rgba(46, 160, 255, 0.15); color: #cde4ff; }
+
+    .pill {
+      display: inline-block;
+      border: 1px solid rgba(152, 175, 214, 0.3);
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.72rem;
+      color: #d8e5ff;
+      background: rgba(11, 18, 31, 0.78);
+      margin: 2px 4px 0 0;
+    }
+
+    .bars { display: grid; gap: 8px; margin-top: 8px; }
+    .bar-row { display: grid; gap: 5px; }
+    .bar-row label { font-size: 0.76rem; color: var(--muted); }
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(152, 175, 214, 0.22);
+      overflow: hidden;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--primary), #5cf0d2);
+    }
+
+    .state { margin-top: 10px; min-height: 20px; font-size: 0.83rem; }
+    .state.ok { color: var(--ok); }
+    .state.error { color: var(--danger); }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .tab-btn { margin-bottom: 4px; }
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="top">
+      <a class="brand" href="/index.html">
+        <img src="assets/apartyonet-logo-white-transparent.svg" alt="ApartYönet" />
+        <span>ApartYönet Demo Panel</span>
+      </a>
+      <div class="top-actions">
+        <a class="btn btn-ghost" href="/admin.html">Admin'e Dön</a>
+        <button id="logoutBtn" class="btn btn-primary" type="button">Çıkış Yap</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h1 id="heroTitle">Demo panel hazırlanıyor...</h1>
+      <p id="heroSub">Başvuru verisi okunuyor.</p>
+      <div class="stats" id="heroStats"></div>
+    </section>
+
+    <section class="layout">
+      <aside class="sidebar">
+        <button class="tab-btn active" data-tab="daireler">Daire Bilgileri</button>
+        <button class="tab-btn" data-tab="aidat">Aidat İşlemleri</button>
+        <button class="tab-btn" data-tab="gider">Gelir / Gider</button>
+        <button class="tab-btn" data-tab="tablo">Genel Tablo</button>
+        <button class="tab-btn" data-tab="belirleme">Aidat Belirleme</button>
+        <button class="tab-btn" data-tab="raporlar">Raporlar</button>
+      </aside>
+
+      <main class="content">
+        <section id="tab-daireler" class="tab-pane active">
+          <h2 class="section-title">Daire Bilgileri</h2>
+          <div class="muted">Blok yapısı başvuru verisinden otomatik oluşturuldu.</div>
+          <div class="sub-tabs" id="blokTabs"></div>
+          <div id="blokContent"></div>
+        </section>
+
+        <section id="tab-aidat" class="tab-pane">
+          <h2 class="section-title">Aidat İşlemleri</h2>
+          <div class="muted">Aylık aidat değerlerini değiştirerek gelir projeksiyonunu canlı görebilirsin.</div>
+          <div class="inline-form">
+            <div class="f"><label>Aylık Daire Aidat (₺)</label><input id="daireAidatInput" type="number" step="0.01" min="0" /></div>
+            <div class="f"><label>Aylık Dükkan Aidat (₺)</label><input id="dukkanAidatInput" type="number" step="0.01" min="0" /></div>
+            <div class="f"><label>Tahsilat Oranı (%)</label><input id="tahsilatOraniInput" type="number" step="1" min="0" max="100" /></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Blok</th>
+                  <th>Daire</th>
+                  <th>Dükkan</th>
+                  <th>Aylık Beklenen (₺)</th>
+                </tr>
+              </thead>
+              <tbody id="aidatBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="tab-gider" class="tab-pane">
+          <h2 class="section-title">Gelir / Gider</h2>
+          <div class="muted">Yıllık gider kalemlerini ekleyip çıkartabilirsin.</div>
+          <div class="inline-form">
+            <div class="f"><label>Gider Kalemi</label><input id="giderAdInput" type="text" placeholder="Asansör bakım" /></div>
+            <div class="f"><label>Yıllık Tutar (₺)</label><input id="giderTutarInput" type="number" step="0.01" min="0" /></div>
+            <div class="f" style="display:flex; align-items:flex-end;"><button id="giderEkleBtn" class="btn btn-primary" type="button">Kalem Ekle</button></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Kalem</th>
+                  <th>Tutar (₺)</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="giderBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="tab-tablo" class="tab-pane">
+          <h2 class="section-title">Genel Tablo</h2>
+          <div class="card-grid" id="genelKartlar"></div>
+        </section>
+
+        <section id="tab-belirleme" class="tab-pane">
+          <h2 class="section-title">Aidat Belirleme</h2>
+          <div class="muted">Hedef bütçe ve güven payına göre önerilen daire aidatı hesaplanır.</div>
+          <div class="inline-form">
+            <div class="f"><label>Hedef Yıllık Gider (₺)</label><input id="hedefGiderInput" type="number" step="0.01" min="0" /></div>
+            <div class="f"><label>Güven Payı (%)</label><input id="guvenPayiInput" type="number" step="1" min="0" max="100" /></div>
+            <div class="f"><label>Önerilen Daire Aidat (₺)</label><input id="onerilenAidatInput" type="text" readonly /></div>
+          </div>
+          <div id="belirlemePills"></div>
+        </section>
+
+        <section id="tab-raporlar" class="tab-pane">
+          <h2 class="section-title">Raporlar</h2>
+          <div class="muted">Tahmini gelir-gider dengesi ve tahsilat performansı.</div>
+          <div class="bars" id="raporBars"></div>
+        </section>
+
+        <div id="state" class="state"></div>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const ADMIN_EMAILS = ["guraydinsel@gmail.com"];
+    const state = {
+      row: null,
+      bloklar: [],
+      aktifBlok: null,
+      daireAidat: 0,
+      dukkanAidat: 0,
+      tahsilatOrani: 100,
+      giderler: []
+    };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
+      authDomain: "apartyonet-af6d3.firebaseapp.com",
+      projectId: "apartyonet-af6d3",
+      storageBucket: "apartyonet-af6d3.firebasestorage.app",
+      messagingSenderId: "825430154124",
+      appId: "1:825430154124:web:7156fa0462fcfc222414a9"
+    };
+
+    const app = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+    const auth = app.auth();
+    const db = app.firestore();
+
+    function normalizeEmail(email) {
+      return (email || "").trim().toLowerCase();
+    }
+
+    function isAdminEmail(email) {
+      return ADMIN_EMAILS.includes(normalizeEmail(email));
+    }
+
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    function parseNumber(val, fallback = 0) {
+      const n = Number(val);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function countDukkan(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return 0;
+      const tokens = raw.split(/[\s,;]+/).filter(Boolean);
+      let total = 0;
+      for (const token of tokens) {
+        if (token.includes("-")) {
+          const [a, b] = token.split("-").map((x) => parseInt(x, 10));
+          if (Number.isInteger(a) && Number.isInteger(b) && b >= a) total += (b - a + 1);
+          else total += 1;
+        } else {
+          total += 1;
+        }
+      }
+      return total;
+    }
+
+    function formatMoney(value) {
+      const n = parseNumber(value, 0);
+      return n.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
+    }
+
+    function setStateMessage(msg, cls = "") {
+      const el = document.getElementById("state");
+      el.textContent = msg || "";
+      el.className = "state" + (cls ? " " + cls : "");
+    }
+
+    function activeTotals() {
+      const totalDaire = state.bloklar.reduce((acc, b) => acc + parseNumber(b.daireAdet, 0), 0);
+      const totalDukkan = state.bloklar.reduce((acc, b) => acc + countDukkan(b.dukkan), 0);
+      const aylikBeklenen = totalDaire * state.daireAidat + totalDukkan * state.dukkanAidat;
+      const yillikBeklenen = aylikBeklenen * 12;
+      const yillikTahsilEdilen = yillikBeklenen * (state.tahsilatOrani / 100);
+      const yillikGider = state.giderler.reduce((acc, g) => acc + parseNumber(g.tutar, 0), 0);
+      const netBakiye = yillikTahsilEdilen - yillikGider;
+      return { totalDaire, totalDukkan, aylikBeklenen, yillikBeklenen, yillikTahsilEdilen, yillikGider, netBakiye };
+    }
+
+    function renderHero() {
+      const row = state.row;
+      const totals = activeTotals();
+      document.getElementById("heroTitle").textContent = (row.site_adi || "Demo Site") + " • Yönetim Paneli Önizleme";
+      document.getElementById("heroSub").textContent = "Başvuruya göre otomatik oluşturuldu. Blok, aidat ve gider akışları canlı hesaplanır.";
+      const stats = [
+        ["Blok", state.bloklar.length],
+        ["Daire", totals.totalDaire],
+        ["Dükkan", totals.totalDukkan],
+        ["Aylık Beklenen Gelir", formatMoney(totals.aylikBeklenen) + " ₺"],
+        ["Yıllık Tahmini Gelir", formatMoney(totals.yillikBeklenen) + " ₺"]
+      ];
+      document.getElementById("heroStats").innerHTML = stats.map((s) => `<div class="stat"><small>${s[0]}</small><strong>${s[1]}</strong></div>`).join("");
+    }
+
+    function renderBlokTabs() {
+      const tabsEl = document.getElementById("blokTabs");
+      tabsEl.innerHTML = state.bloklar.map((b, i) => {
+        const active = state.aktifBlok === b.blok || (state.aktifBlok == null && i === 0);
+        return `<button class="sub-tab ${active ? "active" : ""}" data-blok-tab="${b.blok}">${b.ad || b.blok + " Blok"}</button>`;
+      }).join("");
+
+      tabsEl.querySelectorAll("[data-blok-tab]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.aktifBlok = btn.getAttribute("data-blok-tab");
+          renderDaireTab();
+        });
+      });
+    }
+
+    function renderDaireTab() {
+      renderBlokTabs();
+      const target = state.aktifBlok || (state.bloklar[0] && state.bloklar[0].blok);
+      const blok = state.bloklar.find((b) => b.blok === target) || state.bloklar[0];
+      if (!blok) {
+        document.getElementById("blokContent").innerHTML = '<div class="muted">Blok verisi yok.</div>';
+        return;
+      }
+      state.aktifBlok = blok.blok;
+
+      const daireAdet = parseNumber(blok.daireAdet, 0);
+      const dairePills = Array.from({ length: daireAdet }, (_, idx) => `<span class="pill">${blok.blok}${idx + 1}</span>`).join("");
+      const dukkanCount = countDukkan(blok.dukkan);
+
+      document.getElementById("blokContent").innerHTML = `
+        <div class="card-grid">
+          <div class="mini"><small>Blok Adı</small><strong>${blok.ad || blok.blok + " Blok"}</strong></div>
+          <div class="mini"><small>Daire Sayısı</small><strong>${daireAdet}</strong></div>
+          <div class="mini"><small>Kat Sayısı</small><strong>${parseNumber(blok.katSayisi, 0)}</strong></div>
+          <div class="mini"><small>Dükkan Sayısı</small><strong>${dukkanCount}</strong></div>
+        </div>
+        <div style="margin-top:10px;" class="muted">Daire Dağılımı</div>
+        <div style="margin-top:4px;">${dairePills || '<span class="muted">Daire listesi bulunmuyor.</span>'}</div>
+      `;
+    }
+
+    function renderAidatTab() {
+      document.getElementById("daireAidatInput").value = state.daireAidat;
+      document.getElementById("dukkanAidatInput").value = state.dukkanAidat;
+      document.getElementById("tahsilatOraniInput").value = state.tahsilatOrani;
+
+      const rows = state.bloklar.map((b) => {
+        const daire = parseNumber(b.daireAdet, 0);
+        const dukkan = countDukkan(b.dukkan);
+        const aylik = daire * state.daireAidat + dukkan * state.dukkanAidat;
+        return `<tr><td>${b.ad || b.blok + " Blok"}</td><td>${daire}</td><td>${dukkan}</td><td>${formatMoney(aylik)} ₺</td></tr>`;
+      }).join("");
+      document.getElementById("aidatBody").innerHTML = rows || '<tr><td colspan="4">Veri yok</td></tr>';
+    }
+
+    function renderGiderTab() {
+      const body = document.getElementById("giderBody");
+      body.innerHTML = state.giderler.map((g) => {
+        return `<tr>
+          <td>${g.ad}</td>
+          <td>${formatMoney(g.tutar)} ₺</td>
+          <td><button class="btn btn-ghost" data-gider-del="${g.id}" type="button">Sil</button></td>
+        </tr>`;
+      }).join("");
+
+      body.querySelectorAll("[data-gider-del]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-gider-del");
+          state.giderler = state.giderler.filter((g) => g.id !== id);
+          renderAll();
+        });
+      });
+    }
+
+    function renderGenelTablo() {
+      const t = activeTotals();
+      const cards = [
+        ["Toplam Daire", t.totalDaire],
+        ["Toplam Dükkan", t.totalDukkan],
+        ["Aylık Beklenen Gelir", formatMoney(t.aylikBeklenen) + " ₺"],
+        ["Yıllık Beklenen Gelir", formatMoney(t.yillikBeklenen) + " ₺"],
+        ["Tahsilata Göre Yıllık Gelir", formatMoney(t.yillikTahsilEdilen) + " ₺"],
+        ["Yıllık Gider", formatMoney(t.yillikGider) + " ₺"],
+        ["Net Bakiye", formatMoney(t.netBakiye) + " ₺"]
+      ];
+      document.getElementById("genelKartlar").innerHTML = cards.map((c) => `<div class="mini"><small>${c[0]}</small><strong>${c[1]}</strong></div>`).join("");
+    }
+
+    function renderBelirleme() {
+      const t = activeTotals();
+      const hedef = parseNumber(document.getElementById("hedefGiderInput").value, t.yillikGider || 0);
+      const guvenPayi = parseNumber(document.getElementById("guvenPayiInput").value, 10);
+      const hedefToplam = hedef * (1 + guvenPayi / 100);
+      const onerilenDaireAidat = t.totalDaire > 0
+        ? Math.max(0, ((hedefToplam / 12) - (t.totalDukkan * state.dukkanAidat)) / t.totalDaire)
+        : 0;
+
+      document.getElementById("onerilenAidatInput").value = formatMoney(onerilenDaireAidat) + " ₺";
+      document.getElementById("belirlemePills").innerHTML = [
+        ["Hedef Yıllık Bütçe", formatMoney(hedef) + " ₺"],
+        ["Güven Payı", guvenPayi + " %"],
+        ["Güven Payı Dahil", formatMoney(hedefToplam) + " ₺"],
+        ["Mevcut Dükkan Katkısı (Aylık)", formatMoney(t.totalDukkan * state.dukkanAidat) + " ₺"]
+      ].map((p) => `<span class="pill">${p[0]}: ${p[1]}</span>`).join("");
+    }
+
+    function renderRaporlar() {
+      const t = activeTotals();
+      const tahsilatBar = Math.max(0, Math.min(100, state.tahsilatOrani));
+      const giderGelirBar = t.yillikTahsilEdilen > 0 ? Math.max(0, Math.min(100, (t.yillikGider / t.yillikTahsilEdilen) * 100)) : 0;
+      const dolulukBar = t.totalDaire > 0 ? Math.max(0, Math.min(100, (t.totalDaire / (t.totalDaire + t.totalDukkan || 1)) * 100)) : 0;
+
+      document.getElementById("raporBars").innerHTML = `
+        <div class="bar-row"><label>Tahsilat Performansı (%${formatMoney(tahsilatBar)})</label><div class="bar"><span style="width:${tahsilatBar}%"></span></div></div>
+        <div class="bar-row"><label>Gider / Tahsilat Oranı (%${formatMoney(giderGelirBar)})</label><div class="bar"><span style="width:${giderGelirBar}%"></span></div></div>
+        <div class="bar-row"><label>Daire Ağırlığı (%${formatMoney(dolulukBar)})</label><div class="bar"><span style="width:${dolulukBar}%"></span></div></div>
+      `;
+    }
+
+    function renderAll() {
+      renderHero();
+      renderDaireTab();
+      renderAidatTab();
+      renderGiderTab();
+      renderGenelTablo();
+      renderBelirleme();
+      renderRaporlar();
+    }
+
+    function setupEvents() {
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const tab = btn.getAttribute("data-tab");
+          document.querySelectorAll(".tab-pane").forEach((pane) => pane.classList.remove("active"));
+          const target = document.getElementById("tab-" + tab);
+          if (target) target.classList.add("active");
+        });
+      });
+
+      document.getElementById("daireAidatInput").addEventListener("input", (e) => {
+        state.daireAidat = parseNumber(e.target.value, state.daireAidat);
+        renderAll();
+      });
+
+      document.getElementById("dukkanAidatInput").addEventListener("input", (e) => {
+        state.dukkanAidat = parseNumber(e.target.value, state.dukkanAidat);
+        renderAll();
+      });
+
+      document.getElementById("tahsilatOraniInput").addEventListener("input", (e) => {
+        state.tahsilatOrani = Math.max(0, Math.min(100, parseNumber(e.target.value, 100)));
+        renderAll();
+      });
+
+      document.getElementById("giderEkleBtn").addEventListener("click", () => {
+        const adInput = document.getElementById("giderAdInput");
+        const tutarInput = document.getElementById("giderTutarInput");
+        const ad = (adInput.value || "").trim();
+        const tutar = parseNumber(tutarInput.value, 0);
+        if (!ad || tutar <= 0) {
+          setStateMessage("Gider kalemi ve tutarı giriniz.", "error");
+          return;
+        }
+        state.giderler.push({ id: String(Date.now()) + Math.random().toString(16).slice(2), ad, tutar });
+        adInput.value = "";
+        tutarInput.value = "";
+        setStateMessage("Gider kalemi eklendi.", "ok");
+        renderAll();
+      });
+
+      document.getElementById("hedefGiderInput").addEventListener("input", renderBelirleme);
+      document.getElementById("guvenPayiInput").addEventListener("input", renderBelirleme);
+
+      document.getElementById("logoutBtn").addEventListener("click", async () => {
+        await auth.signOut();
+        window.location.href = "/login.html";
+      });
+    }
+
+    async function loadDemoData(docId) {
+      setStateMessage("Demo verisi yükleniyor...");
+      const doc = await db.collection("basvurular").doc(docId).get();
+      if (!doc.exists) throw new Error("Başvuru bulunamadı");
+      const row = { id: doc.id, ...doc.data() };
+
+      state.row = row;
+      state.bloklar = Array.isArray(row.blok_yapisi_json) ? row.blok_yapisi_json : [];
+      state.aktifBlok = state.bloklar[0] ? state.bloklar[0].blok : null;
+      state.daireAidat = parseNumber(row.aylik_aidat, 1200);
+      state.dukkanAidat = parseNumber(row.dukkan_aidat, state.daireAidat);
+      state.tahsilatOrani = 100;
+
+      const totalDaire = state.bloklar.reduce((acc, b) => acc + parseNumber(b.daireAdet, 0), 0);
+      const base = Math.max(1, totalDaire);
+      state.giderler = [
+        { id: "g1", ad: "Personel", tutar: base * 220 },
+        { id: "g2", ad: "Temizlik / Sarf", tutar: base * 90 },
+        { id: "g3", ad: "Bakım Onarım", tutar: base * 130 }
+      ];
+
+      document.getElementById("hedefGiderInput").value = (state.giderler.reduce((a, g) => a + g.tutar, 0)).toFixed(2);
+      document.getElementById("guvenPayiInput").value = "10";
+
+      renderAll();
+      setStateMessage("Demo verisi yüklendi.", "ok");
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = "/login.html";
+        return;
+      }
+      if (!isAdminEmail(user.email)) {
+        await auth.signOut();
+        window.location.href = "/login.html";
+        return;
+      }
+
+      const docId = getQueryParam("id");
+      if (!docId) {
+        setStateMessage("Demo için başvuru id parametresi eksik. (örnek: /demo.html?id=...)", "error");
+        return;
+      }
+
+      try {
+        setupEvents();
+        await loadDemoData(docId);
+      } catch (err) {
+        console.error(err);
+        setStateMessage(err && err.code === "permission-denied"
+          ? "Bu veriyi görüntüleme yetkiniz yok. Firestore kuralları kontrol edilmeli."
+          : (err.message || "Demo yüklenemedi."), "error");
+      }
+    });
+  </script>
+</body>
+</html>
