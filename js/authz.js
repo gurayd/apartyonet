@@ -27,7 +27,7 @@ window.getCurrentUserProfile = async function getCurrentUserProfile(db, uid) {
   const data = snap.data() || {};
   const role = data.role || "";
   const siteId = data.siteId || "";
-  const status = data.status || "inactive";
+  const status = data.status || "active";
   return {
     uid: snap.id,
     email: normalizeEmail(data.email || ""),
@@ -78,7 +78,28 @@ window.ensureBootstrapAdminProfile = async function ensureBootstrapAdminProfile(
   if (!db || !user || !user.uid || !isBootstrapAdminEmail(user.email)) return null;
   const ref = db.collection("users").doc(user.uid);
   const snap = await ref.get();
-  if (snap.exists) return { uid: snap.id, ...snap.data() };
+  if (snap.exists) {
+    const data = snap.data() || {};
+    const needsPatch =
+      data.role !== APARTYONET_ROLES.SUPER_ADMIN ||
+      data.siteId !== "*" ||
+      data.status !== "active" ||
+      normalizeEmail(data.email || "") !== normalizeEmail(user.email);
+    if (needsPatch) {
+      await ref.set({
+        email: normalizeEmail(user.email),
+        displayName: data.displayName || user.displayName || "ApartYönet Admin",
+        role: APARTYONET_ROLES.SUPER_ADMIN,
+        siteId: "*",
+        unitId: "",
+        status: "active",
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      const patched = await ref.get();
+      return { uid: patched.id, ...patched.data() };
+    }
+    return { uid: snap.id, ...data };
+  }
   const payload = {
     email: normalizeEmail(user.email),
     displayName: user.displayName || "ApartYönet Admin",

@@ -101,6 +101,13 @@ service cloud.firestore {
           isSuperAdmin()
           && validRole(request.resource.data.role)
           && validStatus(request.resource.data.status)
+        ) || (
+          isOwnUserDoc(uid)
+          && isBootstrapAdminEmail()
+          && request.resource.data.email == request.auth.token.email
+          && request.resource.data.role == "super_admin"
+          && request.resource.data.siteId == "*"
+          && validStatus(request.resource.data.status)
         );
 
       allow delete: if isSuperAdmin();
