@@ -26,12 +26,12 @@ service cloud.firestore {
       return hasProfile() ? myProfile().data.siteId : "";
     }
 
-    function isSiteManager() {
-      return isActive() && myRole() == "site_manager";
-    }
-
     function isSuperAdmin() {
       return isActive() && myRole() == "super_admin";
+    }
+
+    function isSiteManager() {
+      return isActive() && myRole() == "site_manager";
     }
 
     function isAssistantManager() {
@@ -77,8 +77,7 @@ service cloud.firestore {
       );
 
       allow create: if (
-          isSiteManager()
-          && sameSiteStrict(request.resource.data)
+          isSuperAdmin()
           && validRole(request.resource.data.role)
           && validStatus(request.resource.data.status)
         ) || (
@@ -92,12 +91,6 @@ service cloud.firestore {
         );
 
       allow update: if (
-          isSiteManager()
-          && sameSiteStrict(resource.data)
-          && sameSiteStrict(request.resource.data)
-          && validRole(request.resource.data.role)
-          && validStatus(request.resource.data.status)
-        ) || (
           isSuperAdmin()
           && validRole(request.resource.data.role)
           && validStatus(request.resource.data.status)
@@ -122,8 +115,8 @@ service cloud.firestore {
     match /basvurular/{docId} {
       allow create: if true;
       allow read: if isActive() && sameSite(resource.data);
-      allow update: if isManager() && sameSite(resource.data) && sameSite(request.resource.data);
-      allow delete: if isSiteManager() && sameSite(resource.data);
+      allow update: if isSuperAdmin() && sameSite(resource.data) && sameSite(request.resource.data);
+      allow delete: if isSuperAdmin() && sameSite(resource.data);
     }
 
     match /{document=**} {

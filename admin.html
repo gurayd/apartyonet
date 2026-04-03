@@ -545,6 +545,8 @@
           <div><label>İlçe</label><input id="e_ilce" type="text" /></div>
           <div><label>Aylık Daire Aidat</label><input id="e_aylik_aidat" type="number" step="0.01" min="0" /></div>
           <div><label>Aylık Dükkan Aidat</label><input id="e_dukkan_aidat" type="number" step="0.01" min="0" /></div>
+          <div><label>Site Yöneticisi E-posta</label><input id="e_manager_email" type="email" placeholder="yonetici@site.com" required /></div>
+          <div><label>Site Yöneticisi Şifre</label><input id="e_manager_password" type="password" placeholder="Yeni hesap için en az 6 karakter" /></div>
           <div class="full"><label>Adres</label><textarea id="e_adres"></textarea></div>
           <div class="full"><label>Notlar</label><textarea id="e_notlar"></textarea></div>
           <div class="full"><label>Blok Yapısı JSON</label><textarea id="e_blok_json"></textarea></div>
@@ -628,7 +630,7 @@
       document.getElementById("userEmail").textContent = normalizeEmail(user && user.email);
       document.getElementById("userRole").textContent = formatRoleLabel(profile.role);
       document.getElementById("activeSite").textContent = profile.siteId || "-";
-      document.getElementById("u_siteId").value = profile.siteId || "";
+      document.getElementById("u_siteId").value = profile.siteId === "*" ? "" : (profile.siteId || "");
     }
 
     function renderCards(items) {
@@ -667,6 +669,7 @@
                 <div class="field"><small>Telefon</small><div>${escapeHtml(item.telefon || "-")}</div></div>
                 <div class="field"><small>Site Adı</small><div>${escapeHtml(item.site_adi || "-")}</div></div>
                 <div class="field"><small>Site ID</small><div>${escapeHtml(item.siteId || "-")}</div></div>
+                <div class="field"><small>Yönetici E-posta</small><div>${escapeHtml(item.manager_email || "-")}</div></div>
                 <div class="field"><small>İl / İlçe</small><div>${escapeHtml((item.il || "-") + " / " + (item.ilce || "-"))}</div></div>
                 <div class="field"><small>Adres</small><div>${escapeHtml(item.adres || "-")}</div></div>
                 <div class="field"><small>Aylık Daire Aidat</small><div>${escapeHtml(item.aylik_aidat || "-")}</div></div>
@@ -727,6 +730,8 @@
       document.getElementById("e_notlar").value = row.notlar || "";
       document.getElementById("e_aylik_aidat").value = row.aylik_aidat || "";
       document.getElementById("e_dukkan_aidat").value = row.dukkan_aidat || "";
+      document.getElementById("e_manager_email").value = row.manager_email || row.email || "";
+      document.getElementById("e_manager_password").value = "";
       document.getElementById("e_blok_json").value = JSON.stringify(row.blok_yapisi_json || [], null, 2);
       modalEl.classList.add("open");
       modalEl.setAttribute("aria-hidden", "false");
@@ -850,6 +855,74 @@
       }
     }
 
+    async function findUserByEmail(email) {
+      const snap = await db.collection("users")
+        .where("email", "==", normalizeEmail(email))
+        .limit(1)
+        .get();
+      if (snap.empty) return null;
+      const d = snap.docs[0];
+      return { uid: d.id, ...d.data() };
+    }
+
+    async function provisionManagerAccount(params) {
+      const managerEmail = normalizeEmail(params.managerEmail);
+      const managerPassword = String(params.managerPassword || "");
+      const managerName = (params.managerName || "").trim();
+      const siteId = params.siteId;
+      const siteName = params.siteName;
+
+      let uid = null;
+      let createdNew = false;
+
+      try {
+        if (managerPassword && managerPassword.length >= 6) {
+          uid = await createAuthUser(managerEmail, managerPassword);
+          createdNew = true;
+        } else {
+          const found = await findUserByEmail(managerEmail);
+          if (found && found.uid) uid = found.uid;
+        }
+      } catch (err) {
+        if (err && err.code === "auth/email-already-in-use") {
+          const found = await findUserByEmail(managerEmail);
+          if (found && found.uid) {
+            uid = found.uid;
+          } else {
+            throw new Error("Bu e-posta Auth'ta var ancak users kaydı yok. Önce users/{uid} eşlemesi yapılmalı.");
+          }
+        } else {
+          throw err;
+        }
+      }
+
+      if (!uid) {
+        if (!managerPassword || managerPassword.length < 6) {
+          throw new Error("Yeni yönetici hesabı için en az 6 karakter şifre girin.");
+        }
+        throw new Error("Yönetici hesabı eşleştirilemedi.");
+      }
+
+      await ensureSiteDoc(siteId, siteName);
+      const userRef = db.collection("users").doc(uid);
+      const userSnap = await userRef.get();
+      const userPayload = {
+        email: managerEmail,
+        displayName: managerName || "Site Yöneticisi",
+        role: "site_manager",
+        siteId,
+        unitId: "",
+        status: "active",
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      if (!userSnap.exists) {
+        userPayload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      }
+      await userRef.set(userPayload, { merge: true });
+
+      return { uid, createdNew };
+    }
+
     async function createUserFromForm(e) {
       e.preventDefault();
       const btn = document.getElementById("createUserBtn");
@@ -869,7 +942,11 @@
         setStatus("Şifre en az 6 karakter olmalı.", "error");
         return;
       }
-      if (siteId !== currentProfile.siteId) {
+      if (!siteId || siteId === "*") {
+        setStatus("Geçerli bir site ID girin.", "error");
+        return;
+      }
+      if (currentProfile.role !== APARTYONET_ROLES.SUPER_ADMIN && siteId !== currentProfile.siteId) {
         setStatus("Sadece kendi siteniz için kullanıcı oluşturabilirsiniz.", "error");
         return;
       }
@@ -989,12 +1066,28 @@
       }
 
       const siteName = document.getElementById("e_site_adi").value.trim();
+      const siteId = slugifySiteId(siteName) || currentProfile.siteId;
+      const managerEmail = normalizeEmail(document.getElementById("e_manager_email").value);
+      const managerPassword = String(document.getElementById("e_manager_password").value || "");
+      if (!managerEmail) {
+        setStatus("Site yöneticisi e-posta alanı zorunlu.", "error");
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Kaydet";
+        return;
+      }
+      if (managerPassword && managerPassword.length < 6) {
+        setStatus("Yönetici şifresi en az 6 karakter olmalı.", "error");
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Kaydet";
+        return;
+      }
+
       const payload = {
         ad_soyad: document.getElementById("e_ad_soyad").value.trim(),
         email: document.getElementById("e_email").value.trim(),
         telefon: document.getElementById("e_telefon").value.trim(),
         site_adi: siteName,
-        siteId: slugifySiteId(siteName) || currentProfile.siteId,
+        siteId,
         il: document.getElementById("e_il").value.trim(),
         ilce: document.getElementById("e_ilce").value.trim(),
         adres: document.getElementById("e_adres").value.trim(),
@@ -1007,13 +1100,24 @@
       };
 
       try {
+        const manager = await provisionManagerAccount({
+          managerEmail,
+          managerPassword,
+          managerName: payload.ad_soyad,
+          siteId,
+          siteName
+        });
+        payload.manager_email = managerEmail;
+        payload.manager_uid = manager.uid;
+        payload.manager_provisioned_at = firebase.firestore.FieldValue.serverTimestamp();
+
         await db.collection("basvurular").doc(id).update(payload);
         closeEditModal();
-        setStatus("Başvuru güncellendi.", "ok");
+        setStatus(manager.createdNew ? "Başvuru güncellendi, yönetici hesabı oluşturuldu." : "Başvuru güncellendi, yönetici hesabı eşleştirildi.", "ok");
         await loadApplications();
       } catch (err) {
         console.error(err);
-        setStatus("Güncelleme sırasında hata oluştu.", "error");
+        setStatus(err && err.message ? err.message : "Güncelleme sırasında hata oluştu.", "error");
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = "Kaydet";

@@ -42,12 +42,11 @@ window.getCurrentUserProfile = async function getCurrentUserProfile(db, uid) {
 
 window.canAccess = function canAccess(module, role) {
   const roles = window.APARTYONET_ROLES;
-  if (role === roles.SUPER_ADMIN) return true;
   const matrix = {
-    admin_panel: [roles.SITE_MANAGER, roles.ASSISTANT_MANAGER],
-    user_management: [roles.SITE_MANAGER],
+    admin_panel: [roles.SUPER_ADMIN],
+    user_management: [roles.SUPER_ADMIN],
     demo_panel: [roles.SITE_MANAGER, roles.ASSISTANT_MANAGER, roles.RESIDENT],
-    edit_application: [roles.SITE_MANAGER, roles.ASSISTANT_MANAGER],
+    edit_application: [roles.SUPER_ADMIN],
     resident_panel: [roles.RESIDENT]
   };
   return (matrix[module] || []).includes(role);

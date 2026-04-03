@@ -1310,7 +1310,7 @@
         if (snap.empty) throw new Error("Bu site için başvuru verisi bulunamadı.");
         row = { id: snap.docs[0].id, ...snap.docs[0].data() };
       }
-      if (!row.siteId || row.siteId !== currentProfile.siteId) {
+      if (!row.siteId || (currentProfile.role !== APARTYONET_ROLES.SUPER_ADMIN && row.siteId !== currentProfile.siteId)) {
         throw new Error("Bu site verisini görüntüleme yetkiniz yok.");
       }
       state.row = row;
