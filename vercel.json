@@ -37,7 +37,8 @@
     { "source": "/basvuru", "destination": "/basvuru.html" },
     { "source": "/login", "destination": "/login.html" },
     { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin-yonetimi", "destination": "/admin-yonetimi.html" },
     { "source": "/demo", "destination": "/demo.html" },
-    { "source": "/:slug((?!.*\\.).+)", "destination": "/site.html" }
+    { "source": "/:slug((?!.*\\.).+)", "destination": "/demo.html" }
   ]
 }

@@ -135,6 +135,16 @@
       background: linear-gradient(135deg, #10b981, #059669);
     }
 
+    .btn-publish {
+      color: #05211a;
+      background: linear-gradient(135deg, #86efac, #22c55e);
+    }
+
+    .btn-suspend {
+      color: #fff;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+    }
+
     .meta {
       margin-top: 8px;
       display: grid;
@@ -570,11 +580,26 @@
     </div>
   </section>
 
+  <section id="suspendModal" class="modal" aria-hidden="true">
+    <div class="modal-card" style="width:min(460px,100%);">
+      <div class="modal-head">
+        <strong>Askıya Al Modu</strong>
+        <button id="closeSuspendModalBtn" type="button" class="btn btn-ghost">Kapat</button>
+      </div>
+      <p class="muted" style="margin:0 0 12px;">Bu siteyi hangi modda askıya almak istiyorsunuz?</p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="suspendBlockedBtn" type="button" class="btn btn-suspend">Engelle</button>
+        <button id="suspendReadonlyBtn" type="button" class="btn btn-ghost">Salt Okunur</button>
+      </div>
+    </div>
+  </section>
+
   <script>
     let applicationRows = [];
     let currentUser = null;
     let currentProfile = null;
     let extraUsersDraft = [];
+    let publishedBySiteId = {};
 
     const EXTRA_SITE_ROLES = [
       { value: "assistant_manager", label: "Yönetici Yardımcısı" },
@@ -603,6 +628,7 @@
     const listEl = document.getElementById("list");
     const statusEl = document.getElementById("status");
     const modalEl = document.getElementById("editModal");
+    const suspendModalEl = document.getElementById("suspendModal");
 
     function toMillis(value) {
       if (!value) return 0;
@@ -644,6 +670,25 @@
       return applicationRows.find((r) => r.id === id);
     }
 
+    function isGlobalAdminProfile(profile) {
+      if (!profile) return false;
+      return [APARTYONET_ROLES.SUPER_ADMIN, APARTYONET_ROLES.ADMIN].includes(profile.role) && profile.siteId === "*";
+    }
+
+    async function loadPublishedSitesMap() {
+      const out = {};
+      let query = db.collection("published_sites").limit(300);
+      if (!isGlobalAdminProfile(currentProfile)) {
+        query = query.where("siteId", "==", currentProfile.siteId);
+      }
+      const snap = await query.get();
+      snap.docs.forEach((d) => {
+        const row = d.data() || {};
+        if (row.siteId) out[row.siteId] = { id: d.id, ...row };
+      });
+      publishedBySiteId = out;
+    }
+
     function setMeta(profile, user) {
       document.getElementById("userEmail").textContent = normalizeEmail(user && user.email);
       document.getElementById("userRole").textContent = formatRoleLabel(profile.role);
@@ -665,6 +710,12 @@
         const sub = escapeHtml((item.ad_soyad || "İsim yok") + " • " + (item.telefon || "Telefon yok"));
         const createdAt = formatDate(item.createdAt);
         const personelCount = Array.isArray(item.site_personel_list) ? item.site_personel_list.length : 0;
+        const publish = publishedBySiteId[item.siteId];
+        const publishState = publish
+          ? (publish.status === "suspended"
+            ? `Askıda (${publish.suspensionMode === "readonly" ? "Salt Okunur" : "Engelli"})`
+            : "Yayında")
+          : "Yayınlanmadı";
 
         return `
           <article class="card" data-index="${index}">
@@ -676,6 +727,9 @@
               <div class="card-actions">
                 ${canEdit ? `<button type="button" class="btn btn-edit" data-edit-id="${item.id}">Düzenle</button>` : ""}
                 <button type="button" class="btn btn-demo" data-demo-id="${item.id}">Panele Git</button>
+                ${canEdit ? `<button type="button" class="btn btn-publish" data-publish-id="${item.id}">${publish && publish.status === "suspended" ? "Yayına Al" : "Yayımla"}</button>` : ""}
+                ${canEdit && publish ? `<button type="button" class="btn btn-suspend" data-suspend-id="${item.id}">Askıya Al</button>` : ""}
+                <span>${publishState}</span>
                 <span>${createdAt}</span>
               </div>
             </div>
@@ -686,6 +740,7 @@
                 <div class="field"><small>Telefon</small><div>${escapeHtml(item.telefon || "-")}</div></div>
                 <div class="field"><small>Site Adı</small><div>${escapeHtml(item.site_adi || "-")}</div></div>
                 <div class="field"><small>Site ID</small><div>${escapeHtml(item.siteId || "-")}</div></div>
+                <div class="field"><small>Yayın URL</small><div>${publish && publish.slug ? `<a href="/${encodeURIComponent(publish.slug)}" target="_blank" rel="noopener">/${escapeHtml(publish.slug)}</a>` : "-"}</div></div>
                 <div class="field"><small>Yönetici E-posta</small><div>${escapeHtml(item.manager_email || "-")}</div></div>
                 <div class="field"><small>Ek Personel</small><div>${personelCount}</div></div>
                 <div class="field"><small>İl / İlçe</small><div>${escapeHtml((item.il || "-") + " / " + (item.ilce || "-"))}</div></div>
@@ -731,6 +786,26 @@
           if (id) openEditModal(id);
         });
       });
+
+      document.querySelectorAll("[data-publish-id]").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-publish-id");
+          const item = id ? byId(id) : null;
+          if (!item) return;
+          await publishApplication(item);
+        });
+      });
+
+      document.querySelectorAll("[data-suspend-id]").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-suspend-id");
+          const item = id ? byId(id) : null;
+          if (!item) return;
+          await suspendApplication(item);
+        });
+      });
     }
 
     function openEditModal(id) {
@@ -767,6 +842,37 @@
       modalEl.setAttribute("aria-hidden", "true");
       extraUsersDraft = [];
       renderExtraUsers();
+    }
+
+    function askSuspensionMode() {
+      return new Promise((resolve) => {
+        const close = () => {
+          suspendModalEl.classList.remove("open");
+          suspendModalEl.setAttribute("aria-hidden", "true");
+          resolve(null);
+        };
+        const choose = (mode) => {
+          suspendModalEl.classList.remove("open");
+          suspendModalEl.setAttribute("aria-hidden", "true");
+          resolve(mode);
+        };
+        const closeBtn = document.getElementById("closeSuspendModalBtn");
+        const blockedBtn = document.getElementById("suspendBlockedBtn");
+        const readonlyBtn = document.getElementById("suspendReadonlyBtn");
+        const onBg = (event) => {
+          if (event.target === suspendModalEl) close();
+        };
+        const onEsc = (event) => {
+          if (event.key === "Escape") close();
+        };
+        closeBtn.onclick = close;
+        blockedBtn.onclick = () => choose("blocked");
+        readonlyBtn.onclick = () => choose("readonly");
+        suspendModalEl.onclick = onBg;
+        window.addEventListener("keydown", onEsc, { once: true });
+        suspendModalEl.classList.add("open");
+        suspendModalEl.setAttribute("aria-hidden", "false");
+      });
     }
 
     function emptyExtraUser() {
@@ -831,9 +937,86 @@
         .filter((u) => u.ad_soyad || u.email);
     }
 
+    async function publishApplication(item) {
+      const siteId = item.siteId || slugifySiteId(item.site_adi || "");
+      if (!siteId) {
+        setStatus("Yayın için geçerli site ID bulunamadı.", "error");
+        return;
+      }
+      const slug = slugifySiteId(item.site_adi || siteId);
+      if (!slug) {
+        setStatus("Yayın için geçerli apartman adı/slug bulunamadı.", "error");
+        return;
+      }
+      try {
+        const existing = await db.collection("published_sites").where("slug", "==", slug).limit(1).get();
+        if (!existing.empty) {
+          const row = existing.docs[0].data() || {};
+          if (row.siteId && row.siteId !== siteId) {
+            setStatus("Bu slug zaten başka bir siteye ait.", "error");
+            return;
+          }
+        }
+        await db.collection("published_sites").doc(siteId).set({
+          siteId,
+          slug,
+          applicationId: item.id,
+          status: "published",
+          suspensionMode: null,
+          publishedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          publishedBy: normalizeEmail(currentUser && currentUser.email),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        await loadPublishedSitesMap();
+        renderCards(applicationRows);
+        setStatus(`Site yayımlandı: /${slug}`, "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus("Yayımlama sırasında hata oluştu.", "error");
+      }
+    }
+
+    async function suspendApplication(item) {
+      const siteId = item.siteId || slugifySiteId(item.site_adi || "");
+      if (!siteId) {
+        setStatus("Askıya almak için site ID bulunamadı.", "error");
+        return;
+      }
+      const mode = await askSuspensionMode();
+      if (!mode) return;
+      if (!["blocked", "readonly"].includes(mode)) {
+        setStatus("Geçersiz askı modu seçildi.", "error");
+        return;
+      }
+      try {
+        const existing = publishedBySiteId[siteId];
+        if (!existing) {
+          setStatus("Bu site henüz yayımlanmadı.", "error");
+          return;
+        }
+        await db.collection("published_sites").doc(siteId).set({
+          siteId,
+          slug: existing.slug,
+          applicationId: existing.applicationId || item.id,
+          status: "suspended",
+          suspensionMode: mode,
+          suspendedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          suspendedBy: normalizeEmail(currentUser && currentUser.email),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        await loadPublishedSitesMap();
+        renderCards(applicationRows);
+        setStatus(`Site askıya alındı (${mode === "readonly" ? "salt okunur" : "engelli"}).`, "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus("Askıya alma sırasında hata oluştu.", "error");
+      }
+    }
+
     async function loadApplications() {
       setStatus("Başvurular yükleniyor...", "");
       try {
+        await loadPublishedSitesMap();
         const query = enforceSiteScope(db.collection("basvurular"), currentProfile.siteId)
           .orderBy("createdAt", "desc")
           .limit(200);

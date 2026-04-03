@@ -74,6 +74,14 @@ service cloud.firestore {
       return status in ["active", "inactive"];
     }
 
+    function validPublishStatus(status) {
+      return status in ["published", "suspended"];
+    }
+
+    function validSuspensionMode(mode) {
+      return mode == null || mode in ["blocked", "readonly"];
+    }
+
     match /users/{uid} {
       allow read: if signedIn() && (
         request.auth.uid == uid ||
@@ -130,6 +138,33 @@ service cloud.firestore {
       allow read: if isActive() && (isSuperAdmin() || siteId == mySiteId());
       allow create, update: if isSuperAdmin() || (isAdmin() && siteId == mySiteId());
       allow delete: if isSuperAdmin();
+    }
+
+    match /published_sites/{siteId} {
+      allow read: if isActive() && (
+        isSuperAdmin()
+        || (isAdmin() && resource.data.siteId == mySiteId())
+        || resource.data.siteId == mySiteId()
+      );
+
+      allow create: if (
+          isSuperAdmin()
+          || (isAdmin() && request.resource.data.siteId == mySiteId())
+        )
+        && request.resource.data.siteId == siteId
+        && validPublishStatus(request.resource.data.status)
+        && validSuspensionMode(request.resource.data.suspensionMode);
+
+      allow update: if (
+          isSuperAdmin()
+          || (isAdmin() && resource.data.siteId == mySiteId() && request.resource.data.siteId == mySiteId())
+        )
+        && request.resource.data.siteId == resource.data.siteId
+        && request.resource.data.slug == resource.data.slug
+        && validPublishStatus(request.resource.data.status)
+        && validSuspensionMode(request.resource.data.suspensionMode);
+
+      allow delete: if isSuperAdmin() || (isAdmin() && resource.data.siteId == mySiteId());
     }
 
     match /basvurular/{docId} {

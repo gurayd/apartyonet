@@ -567,6 +567,8 @@
     let currentProfile = null;
     let currentRole = "";
     let currentUnit = null;
+    let currentPublication = null;
+    let isReadonlyMode = false;
     let eventsBound = false;
     const MONTHS = [
       { value: "01", label: "Ocak" }, { value: "02", label: "Şubat" }, { value: "03", label: "Mart" },
@@ -625,6 +627,31 @@
       return new URLSearchParams(window.location.search).get(name);
     }
 
+    function getPathSlug() {
+      const path = (window.location.pathname || "/").replace(/^\/+|\/+$/g, "");
+      if (!path) return "";
+      if (path.includes(".")) return "";
+      return path;
+    }
+
+    function isReservedSlug(slug) {
+      return ["demo", "admin", "login", "basvuru", "admin-yonetimi"].includes(String(slug || "").toLowerCase());
+    }
+
+    async function getPublicationBySlug(slug) {
+      if (!slug || isReservedSlug(slug)) return null;
+      const snap = await db.collection("published_sites").where("slug", "==", slug).limit(1).get();
+      if (snap.empty) return null;
+      return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    }
+
+    async function getPublicationBySiteId(siteId) {
+      if (!siteId || siteId === "*") return null;
+      const snap = await db.collection("published_sites").doc(siteId).get();
+      if (!snap.exists) return null;
+      return { id: snap.id, ...snap.data() };
+    }
+
     function parseNumber(val, fallback = 0) {
       const n = Number(val);
       return Number.isFinite(n) ? n : fallback;
@@ -650,6 +677,18 @@
       const el = document.getElementById("state");
       el.textContent = msg || "";
       el.className = "state" + (cls ? " " + cls : "");
+    }
+
+    function applyReadonlyUi() {
+      if (!isReadonlyMode) return;
+      const root = document.querySelector(".content");
+      if (!root) return;
+      root.querySelectorAll("input, select, textarea, button").forEach((el) => {
+        if (el.id === "logoutBtn") return;
+        if (el.classList.contains("tab-btn")) return;
+        el.disabled = true;
+      });
+      window.alert("Bu site şu anda askıda (salt okunur mod). Düzenleme işlemleri kapalı.");
     }
 
     function getAllowedTabsByRole(role) {
@@ -900,7 +939,7 @@
     }
 
     function saveAidatRecord() {
-      if (currentRole === APARTYONET_ROLES.RESIDENT) {
+      if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
         setStateMessage("Bu işlem için yetkiniz yok.", "error");
         return;
       }
@@ -972,7 +1011,7 @@
     }
 
     function saveEkstraGider() {
-      if (currentRole === APARTYONET_ROLES.RESIDENT) {
+      if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
         setStateMessage("Bu işlem için yetkiniz yok.", "error");
         return;
       }
@@ -1006,7 +1045,7 @@
     }
 
     function saveSabitGider() {
-      if (currentRole === APARTYONET_ROLES.RESIDENT) {
+      if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
         setStateMessage("Bu işlem için yetkiniz yok.", "error");
         return;
       }
@@ -1232,7 +1271,7 @@
       document.getElementById("giderToplamTutar").addEventListener("input", updateGiderDaireBasi);
       document.getElementById("giderDaireSecim").addEventListener("change", updateGiderDaireBasi);
       document.getElementById("saveGiderKalemBtn").addEventListener("click", () => {
-        if (currentRole === APARTYONET_ROLES.RESIDENT) {
+        if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
           setStateMessage("Bu işlem için yetkiniz yok.", "error");
           return;
         }
@@ -1261,7 +1300,7 @@
       });
 
       document.getElementById("saveAidatAyarBtn").addEventListener("click", () => {
-        if (currentRole === APARTYONET_ROLES.RESIDENT) {
+        if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
           setStateMessage("Bu işlem için yetkiniz yok.", "error");
           return;
         }
@@ -1274,7 +1313,7 @@
       });
 
       document.getElementById("saveDukkanAyarBtn").addEventListener("click", () => {
-        if (currentRole === APARTYONET_ROLES.RESIDENT) {
+        if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
           setStateMessage("Bu işlem için yetkiniz yok.", "error");
           return;
         }
@@ -1295,12 +1334,20 @@
       });
     }
 
-    async function loadDemoData(docId) {
+    async function loadDemoData(options) {
+      const params = options || {};
+      const docId = params.docId || "";
+      const publication = params.publication || null;
       setStateMessage("Demo verisi yükleniyor...");
       let row = null;
-      if (docId) {
+
+      if (publication && publication.applicationId) {
+        const pubDoc = await db.collection("basvurular").doc(publication.applicationId).get();
+        if (!pubDoc.exists) throw new Error("Yayınlı panele ait başvuru bulunamadı.");
+        row = { id: pubDoc.id, ...pubDoc.data() };
+      } else if (docId) {
         const docSnap = await db.collection("basvurular").doc(docId).get();
-        if (!docSnap.exists) throw new Error("Başvuru bulunamadı");
+        if (!docSnap.exists) throw new Error("Başvuru bulunamadı.");
         row = { id: docSnap.id, ...docSnap.data() };
       } else {
         const q = enforceSiteScope(db.collection("basvurular"), currentProfile.siteId)
@@ -1310,9 +1357,19 @@
         if (snap.empty) throw new Error("Bu site için başvuru verisi bulunamadı.");
         row = { id: snap.docs[0].id, ...snap.docs[0].data() };
       }
-      if (!row.siteId || (currentProfile.role !== APARTYONET_ROLES.SUPER_ADMIN && row.siteId !== currentProfile.siteId)) {
+
+      const isSuperAdmin = currentProfile.role === APARTYONET_ROLES.SUPER_ADMIN;
+      const isScopedAdmin = currentProfile.role === APARTYONET_ROLES.ADMIN;
+      if (!row.siteId) {
+        throw new Error("Başvuru site bilgisi eksik.");
+      }
+      if (!isSuperAdmin && row.siteId !== currentProfile.siteId) {
         throw new Error("Bu site verisini görüntüleme yetkiniz yok.");
       }
+      if (isScopedAdmin && currentProfile.siteId !== "*" && row.siteId !== currentProfile.siteId) {
+        throw new Error("Bu site verisini görüntüleme yetkiniz yok.");
+      }
+
       state.row = row;
       state.bloklar = Array.isArray(row.blok_yapisi_json) ? row.blok_yapisi_json : [];
       state.aktifBlok = state.bloklar[0] ? state.bloklar[0].blok : null;
@@ -1338,6 +1395,7 @@
       updateGiderDaireBasi();
       renderAll();
       applyRoleUi();
+      applyReadonlyUi();
       setStateMessage("Demo verisi yüklendi.", "ok");
     }
 
@@ -1362,8 +1420,48 @@
         currentRole = currentProfile.role;
         currentUnit = parseUnitId(currentProfile.unitId);
         const docId = getQueryParam("id");
+        const slug = getPathSlug();
+        const isSlugRoute = !!slug && !isReservedSlug(slug);
+
+        isReadonlyMode = false;
+        currentPublication = null;
+
+        if (isSlugRoute) {
+          const publication = await getPublicationBySlug(slug);
+          if (!publication) {
+            throw new Error("Bu apartman paneli henüz yayında değil.");
+          }
+          if (publication.siteId && currentProfile.siteId !== "*" && publication.siteId !== currentProfile.siteId) {
+            throw new Error("Bu apartman panelini görüntüleme yetkiniz yok.");
+          }
+          currentPublication = publication;
+          const isAdminViewer = canAccess("admin_panel", currentProfile.role);
+          if (publication.status === "suspended") {
+            const mode = String(publication.suspensionMode || "blocked");
+            if (mode === "blocked" && !isAdminViewer) {
+              window.alert("Bu site şu anda askıda. Yönetici ile iletişime geçin.");
+              throw new Error("Site askıya alındığı için erişim engellendi.");
+            }
+            if (mode === "readonly" && !isAdminViewer) {
+              isReadonlyMode = true;
+            }
+          } else if (publication.status !== "published") {
+            throw new Error("Site yayına uygun durumda değil.");
+          }
+        } else if (!docId && currentProfile.siteId !== "*") {
+          currentPublication = await getPublicationBySiteId(currentProfile.siteId);
+          if (currentPublication && currentPublication.status === "suspended") {
+            if (currentPublication.suspensionMode === "blocked") {
+              throw new Error("Bu site yayından askıya alınmıştır. Yönetici ile iletişime geçin.");
+            }
+            if (currentPublication.suspensionMode === "readonly") {
+              isReadonlyMode = true;
+            }
+          }
+        }
+
         setupEvents();
-        await loadDemoData(docId);
+        await loadDemoData({ docId, publication: currentPublication });
       } catch (err) {
         console.error(err);
         setStateMessage(err && err.code === "permission-denied"

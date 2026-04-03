@@ -236,6 +236,15 @@
       document.getElementById("error").textContent = message || "";
     }
 
+    async function resolvePublishedAccess(siteId) {
+      if (!siteId || siteId === "*") return null;
+      const snap = await db.collection("published_sites").doc(siteId).get();
+      if (!snap.exists) return null;
+      const row = snap.data() || {};
+      if (!row.slug) return null;
+      return row;
+    }
+
     async function routeByProfile(user) {
       await withTimeout(
         ensureBootstrapAdminProfile(db, user),
@@ -261,7 +270,18 @@
         return;
       }
       if (canAccess("demo_panel", profile.role)) {
-        window.location.href = "/demo.html";
+        const pub = await resolvePublishedAccess(profile.siteId);
+        if (!pub) {
+          throw new Error("Bu site henüz yayımlanmadı. Lütfen ApartYönet yönetimi ile iletişime geçin.");
+        }
+        if (pub.status === "suspended" && pub.suspensionMode === "blocked") {
+          window.alert("Bu site yayından askıya alınmıştır. Giriş geçici olarak kapalıdır.");
+          throw new Error("Bu site yayından askıya alınmıştır. Yöneticinizle iletişime geçin.");
+        }
+        if (pub.status !== "published" && pub.status !== "suspended") {
+          throw new Error("Site yayına uygun durumda değil. Yönetici ile iletişime geçin.");
+        }
+        window.location.href = "/" + encodeURIComponent(pub.slug);
         return;
       }
 
