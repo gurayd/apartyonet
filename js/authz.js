@@ -1,5 +1,6 @@
 window.APARTYONET_ROLES = {
   SUPER_ADMIN: "super_admin",
+  ADMIN: "admin",
   SITE_MANAGER: "site_manager",
   ASSISTANT_MANAGER: "assistant_manager",
   RESIDENT: "resident"
@@ -43,10 +44,10 @@ window.getCurrentUserProfile = async function getCurrentUserProfile(db, uid) {
 window.canAccess = function canAccess(module, role) {
   const roles = window.APARTYONET_ROLES;
   const matrix = {
-    admin_panel: [roles.SUPER_ADMIN],
-    user_management: [roles.SUPER_ADMIN],
-    demo_panel: [roles.SITE_MANAGER, roles.ASSISTANT_MANAGER, roles.RESIDENT],
-    edit_application: [roles.SUPER_ADMIN],
+    admin_panel: [roles.SUPER_ADMIN, roles.ADMIN],
+    user_management: [roles.SUPER_ADMIN, roles.ADMIN],
+    demo_panel: [roles.SUPER_ADMIN, roles.ADMIN, roles.SITE_MANAGER, roles.ASSISTANT_MANAGER, roles.RESIDENT],
+    edit_application: [roles.SUPER_ADMIN, roles.ADMIN],
     resident_panel: [roles.RESIDENT]
   };
   return (matrix[module] || []).includes(role);
@@ -59,6 +60,7 @@ window.enforceSiteScope = function enforceSiteScope(query, siteId) {
 
 window.formatRoleLabel = function formatRoleLabel(role) {
   if (role === "super_admin") return "Süper Yönetici";
+  if (role === "admin") return "Admin";
   if (role === "site_manager") return "Site Yöneticisi";
   if (role === "assistant_manager") return "Yönetici Yardımcısı";
   if (role === "resident") return "Kat Sakini";

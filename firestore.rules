@@ -34,6 +34,10 @@ service cloud.firestore {
       return isActive() && myRole() == "site_manager";
     }
 
+    function isAdmin() {
+      return isActive() && myRole() == "admin";
+    }
+
     function isAssistantManager() {
       return isActive() && myRole() == "assistant_manager";
     }
@@ -43,7 +47,7 @@ service cloud.firestore {
     }
 
     function isManager() {
-      return isSuperAdmin() || isSiteManager() || isAssistantManager();
+      return isSuperAdmin() || isAdmin() || isSiteManager() || isAssistantManager();
     }
 
     function sameSite(resourceData) {
@@ -63,7 +67,7 @@ service cloud.firestore {
     }
 
     function validRole(role) {
-      return role in ["super_admin", "site_manager", "assistant_manager", "resident"];
+      return role in ["super_admin", "admin", "site_manager", "assistant_manager", "resident"];
     }
 
     function validStatus(status) {
@@ -73,12 +77,17 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if signedIn() && (
         request.auth.uid == uid ||
-        (isManager() && sameSite(resource.data))
+        ((isSuperAdmin() || isAdmin()) && sameSite(resource.data))
       );
 
       allow create: if (
           isSuperAdmin()
           && validRole(request.resource.data.role)
+          && validStatus(request.resource.data.status)
+        ) || (
+          isAdmin()
+          && sameSiteStrict(request.resource.data)
+          && request.resource.data.role in ["site_manager", "assistant_manager", "resident"]
           && validStatus(request.resource.data.status)
         ) || (
           isOwnUserDoc(uid)
@@ -95,6 +104,12 @@ service cloud.firestore {
           && validRole(request.resource.data.role)
           && validStatus(request.resource.data.status)
         ) || (
+          isAdmin()
+          && sameSiteStrict(resource.data)
+          && sameSiteStrict(request.resource.data)
+          && request.resource.data.role in ["site_manager", "assistant_manager", "resident"]
+          && validStatus(request.resource.data.status)
+        ) || (
           isOwnUserDoc(uid)
           && isBootstrapAdminEmail()
           && request.resource.data.email == request.auth.token.email
@@ -103,20 +118,27 @@ service cloud.firestore {
           && validStatus(request.resource.data.status)
         );
 
-      allow delete: if isSuperAdmin();
+      allow delete: if isSuperAdmin()
+        || (
+          isAdmin()
+          && sameSiteStrict(resource.data)
+          && !(resource.data.role in ["super_admin", "admin"])
+        );
     }
 
     match /sites/{siteId} {
       allow read: if isActive() && (isSuperAdmin() || siteId == mySiteId());
-      allow create, update: if isSuperAdmin() || (isSiteManager() && siteId == mySiteId());
+      allow create, update: if isSuperAdmin() || (isAdmin() && siteId == mySiteId());
       allow delete: if isSuperAdmin();
     }
 
     match /basvurular/{docId} {
       allow create: if true;
       allow read: if isActive() && sameSite(resource.data);
-      allow update: if isSuperAdmin() && sameSite(resource.data) && sameSite(request.resource.data);
-      allow delete: if isSuperAdmin() && sameSite(resource.data);
+      allow update: if (isSuperAdmin() && sameSite(resource.data) && sameSite(request.resource.data))
+        || (isAdmin() && sameSiteStrict(resource.data) && sameSiteStrict(request.resource.data));
+      allow delete: if (isSuperAdmin() && sameSite(resource.data))
+        || (isAdmin() && sameSiteStrict(resource.data));
     }
 
     match /{document=**} {

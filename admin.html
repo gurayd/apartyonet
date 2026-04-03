@@ -384,6 +384,49 @@
       grid-column: 1 / -1;
     }
 
+    .manager-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .manager-row > div {
+      min-width: 0;
+    }
+
+    .extra-users-wrap {
+      grid-column: 1 / -1;
+      border: 1px solid rgba(152, 175, 214, 0.25);
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(11, 18, 31, 0.56);
+    }
+
+    .extra-users-title {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .extra-users-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .extra-user-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 160px) minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .extra-user-row .btn {
+      height: 38px;
+    }
+
     .modal-form label {
       display: block;
       font-size: 0.78rem;
@@ -393,6 +436,7 @@
     }
 
     .modal-form input,
+    .modal-form select,
     .modal-form textarea {
       width: 100%;
       border: 1px solid rgba(152, 175, 214, 0.3);
@@ -421,6 +465,12 @@
       .container { width: calc(100% - 20px); }
       .top { margin-top: 10px; }
       .card-head { align-items: flex-start; }
+      .manager-row {
+        grid-template-columns: 1fr;
+      }
+      .extra-user-row {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -453,7 +503,7 @@
       <div id="status" class="status"></div>
       <section id="userMgmt" class="user-mgmt">
         <h3 style="margin:0 0 8px; font-size:1rem;">Kullanıcı Yönetimi</h3>
-        <p style="margin:0 0 10px; color:#9fb0cf; font-size:0.84rem;">Bu bölümden site yöneticisi, yönetici yardımcısı ve kat sakini hesaplarını yönetebilirsiniz.</p>
+        <p style="margin:0 0 10px; color:#9fb0cf; font-size:0.84rem;">Bu bölümden ApartYönet adminleri ve site kullanıcılarını yönetebilirsiniz.</p>
         <form id="userForm" class="user-form" novalidate>
           <div>
             <label for="u_email">E-posta</label>
@@ -470,6 +520,8 @@
           <div>
             <label for="u_role">Rol</label>
             <select id="u_role">
+              <option value="super_admin">Süper Yönetici</option>
+              <option value="admin">Admin</option>
               <option value="site_manager">Site Yöneticisi</option>
               <option value="assistant_manager">Yönetici Yardımcısı</option>
               <option value="resident">Kat Sakini</option>
@@ -493,6 +545,7 @@
           <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;">
             <button id="createUserBtn" class="btn btn-primary" type="submit">Kullanıcı Oluştur</button>
             <button id="seedSiteBtn" class="btn btn-ghost" type="button">Güneş Sitesi Kur</button>
+            <button id="sampleAdminBtn" class="btn btn-ghost" type="button">Admin Örneği</button>
             <button id="sampleManagerBtn" class="btn btn-ghost" type="button">Yönetici Örneği</button>
             <button id="sampleAssistantBtn" class="btn btn-ghost" type="button">Yardımcı Örneği</button>
             <button id="sampleResidentBtn" class="btn btn-ghost" type="button">Sakin Örneği Doldur</button>
@@ -505,13 +558,14 @@
                 <th>E-posta</th>
                 <th>Ad Soyad</th>
                 <th>Rol</th>
+                <th>Site ID</th>
                 <th>Daire</th>
                 <th>Durum</th>
                 <th>İşlem</th>
               </tr>
             </thead>
             <tbody id="usersBody">
-              <tr><td colspan="6">Henüz kullanıcı yok.</td></tr>
+              <tr><td colspan="7">Henüz kullanıcı yok.</td></tr>
             </tbody>
           </table>
         </div>
@@ -545,8 +599,15 @@
           <div><label>İlçe</label><input id="e_ilce" type="text" /></div>
           <div><label>Aylık Daire Aidat</label><input id="e_aylik_aidat" type="number" step="0.01" min="0" /></div>
           <div><label>Aylık Dükkan Aidat</label><input id="e_dukkan_aidat" type="number" step="0.01" min="0" /></div>
-          <div><label>Site Yöneticisi E-posta</label><input id="e_manager_email" type="email" placeholder="yonetici@site.com" required /></div>
-          <div><label>Site Yöneticisi Şifre</label><input id="e_manager_password" type="password" placeholder="Yeni hesap için en az 6 karakter" /></div>
+          <div class="manager-row">
+            <div><label>Site Yöneticisi E-posta</label><input id="e_manager_email" type="email" placeholder="yonetici@site.com" required /></div>
+            <div><label>Site Yöneticisi Şifre</label><input id="e_manager_password" type="password" placeholder="Yeni hesap için en az 6 karakter" /></div>
+            <div><button id="addExtraUserBtn" class="btn btn-primary" type="button">+ Kullanıcı Ekle</button></div>
+          </div>
+          <div class="extra-users-wrap">
+            <p class="extra-users-title">Başvuran Site Ek Personel Listesi (hesap açılmaz, kayıt amaçlıdır)</p>
+            <div id="extraUsersList" class="extra-users-list"></div>
+          </div>
           <div class="full"><label>Adres</label><textarea id="e_adres"></textarea></div>
           <div class="full"><label>Notlar</label><textarea id="e_notlar"></textarea></div>
           <div class="full"><label>Blok Yapısı JSON</label><textarea id="e_blok_json"></textarea></div>
@@ -564,6 +625,16 @@
     let currentUser = null;
     let currentProfile = null;
     let siteUsers = [];
+    let extraUsersDraft = [];
+
+    const EXTRA_SITE_ROLES = [
+      { value: "assistant_manager", label: "Yönetici Yardımcısı" },
+      { value: "sayman", label: "Sayman" },
+      { value: "yazman", label: "Yazman" },
+      { value: "kapici", label: "Kapıcı" },
+      { value: "guvenlik_gorevlisi", label: "Güvenlik Görevlisi" },
+      { value: "temizlikci", label: "Temizlikçi" }
+    ];
 
     const firebaseConfig = {
       apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
@@ -626,6 +697,43 @@
       return applicationRows.find((r) => r.id === id);
     }
 
+    function canAssignRole(targetRole) {
+      const roles = APARTYONET_ROLES;
+      if (!currentProfile) return false;
+      if (currentProfile.role === roles.SUPER_ADMIN) return true;
+      if (currentProfile.role === roles.ADMIN) {
+        return [roles.SITE_MANAGER, roles.ASSISTANT_MANAGER, roles.RESIDENT].includes(targetRole);
+      }
+      return false;
+    }
+
+    function userRoleOptions(selectedRole) {
+      const roles = APARTYONET_ROLES;
+      const options = [
+        { value: roles.SUPER_ADMIN, label: "Süper Yönetici" },
+        { value: roles.ADMIN, label: "Admin" },
+        { value: roles.SITE_MANAGER, label: "Site Yöneticisi" },
+        { value: roles.ASSISTANT_MANAGER, label: "Yönetici Yardımcısı" },
+        { value: roles.RESIDENT, label: "Kat Sakini" }
+      ];
+      return options
+        .filter((opt) => canAssignRole(opt.value) || opt.value === selectedRole)
+        .map((opt) => `<option value="${opt.value}" ${opt.value === selectedRole ? "selected" : ""}>${opt.label}</option>`)
+        .join("");
+    }
+
+    function syncCreateRoleOptions() {
+      const select = document.getElementById("u_role");
+      if (!select) return;
+      const current = select.value || APARTYONET_ROLES.SITE_MANAGER;
+      select.innerHTML = userRoleOptions(current);
+      if (!select.value) {
+        select.value = canAssignRole(APARTYONET_ROLES.ADMIN)
+          ? APARTYONET_ROLES.ADMIN
+          : APARTYONET_ROLES.SITE_MANAGER;
+      }
+    }
+
     function setMeta(profile, user) {
       document.getElementById("userEmail").textContent = normalizeEmail(user && user.email);
       document.getElementById("userRole").textContent = formatRoleLabel(profile.role);
@@ -648,6 +756,7 @@
         const sub = escapeHtml((item.ad_soyad || "İsim yok") + " • " + (item.telefon || "Telefon yok"));
         const createdAt = formatDate(item.createdAt);
         const blokJson = JSON.stringify(item.blok_yapisi_json || [], null, 2);
+        const personelCount = Array.isArray(item.site_personel_list) ? item.site_personel_list.length : 0;
 
         return `
           <article class="card" data-index="${index}">
@@ -670,6 +779,7 @@
                 <div class="field"><small>Site Adı</small><div>${escapeHtml(item.site_adi || "-")}</div></div>
                 <div class="field"><small>Site ID</small><div>${escapeHtml(item.siteId || "-")}</div></div>
                 <div class="field"><small>Yönetici E-posta</small><div>${escapeHtml(item.manager_email || "-")}</div></div>
+                <div class="field"><small>Ek Personel</small><div>${personelCount}</div></div>
                 <div class="field"><small>İl / İlçe</small><div>${escapeHtml((item.il || "-") + " / " + (item.ilce || "-"))}</div></div>
                 <div class="field"><small>Adres</small><div>${escapeHtml(item.adres || "-")}</div></div>
                 <div class="field"><small>Aylık Daire Aidat</small><div>${escapeHtml(item.aylik_aidat || "-")}</div></div>
@@ -732,6 +842,15 @@
       document.getElementById("e_dukkan_aidat").value = row.dukkan_aidat || "";
       document.getElementById("e_manager_email").value = row.manager_email || row.email || "";
       document.getElementById("e_manager_password").value = "";
+      extraUsersDraft = Array.isArray(row.site_personel_list)
+        ? row.site_personel_list.map((u) => ({
+          ad_soyad: String(u.ad_soyad || ""),
+          email: String(u.email || ""),
+          rol: EXTRA_SITE_ROLES.some((r) => r.value === u.rol) ? String(u.rol) : "assistant_manager",
+          telefon: String(u.telefon || "")
+        }))
+        : [];
+      renderExtraUsers();
       document.getElementById("e_blok_json").value = JSON.stringify(row.blok_yapisi_json || [], null, 2);
       modalEl.classList.add("open");
       modalEl.setAttribute("aria-hidden", "false");
@@ -740,6 +859,70 @@
     function closeEditModal() {
       modalEl.classList.remove("open");
       modalEl.setAttribute("aria-hidden", "true");
+      extraUsersDraft = [];
+      renderExtraUsers();
+    }
+
+    function emptyExtraUser() {
+      return { ad_soyad: "", email: "", rol: "assistant_manager", telefon: "" };
+    }
+
+    function renderExtraUsers() {
+      const list = document.getElementById("extraUsersList");
+      if (!list) return;
+      if (!extraUsersDraft.length) {
+        list.innerHTML = '<div class="field"><small>Ek personel</small><div>Henüz personel eklenmedi.</div></div>';
+        return;
+      }
+      list.innerHTML = extraUsersDraft.map((item, index) => `
+        <div class="extra-user-row" data-extra-index="${index}">
+          <div><label>Ad Soyad</label><input type="text" data-extra-field="ad_soyad" data-extra-index="${index}" value="${escapeHtml(item.ad_soyad || "")}" placeholder="Ad Soyad" /></div>
+          <div><label>E-posta</label><input type="email" data-extra-field="email" data-extra-index="${index}" value="${escapeHtml(item.email || "")}" placeholder="ornek@site.com" /></div>
+          <div><label>Rol</label>
+            <select data-extra-field="rol" data-extra-index="${index}">
+              ${EXTRA_SITE_ROLES.map((r) => `<option value="${r.value}" ${r.value === item.rol ? "selected" : ""}>${r.label}</option>`).join("")}
+            </select>
+          </div>
+          <div><label>Telefon</label><input type="text" data-extra-field="telefon" data-extra-index="${index}" value="${escapeHtml(item.telefon || "")}" placeholder="Opsiyonel" /></div>
+          <div><button type="button" class="btn btn-ghost" data-extra-remove="${index}">Sil</button></div>
+        </div>
+      `).join("");
+
+      list.querySelectorAll("[data-extra-field]").forEach((el) => {
+        el.addEventListener("input", () => {
+          const idx = Number(el.getAttribute("data-extra-index"));
+          const field = el.getAttribute("data-extra-field");
+          if (!Number.isInteger(idx) || !field || !extraUsersDraft[idx]) return;
+          extraUsersDraft[idx][field] = String(el.value || "");
+        });
+        el.addEventListener("change", () => {
+          const idx = Number(el.getAttribute("data-extra-index"));
+          const field = el.getAttribute("data-extra-field");
+          if (!Number.isInteger(idx) || !field || !extraUsersDraft[idx]) return;
+          extraUsersDraft[idx][field] = String(el.value || "");
+        });
+      });
+
+      list.querySelectorAll("[data-extra-remove]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.getAttribute("data-extra-remove"));
+          if (!Number.isInteger(idx)) return;
+          extraUsersDraft.splice(idx, 1);
+          renderExtraUsers();
+        });
+      });
+    }
+
+    function normalizeExtraUsers() {
+      const allowed = new Set(EXTRA_SITE_ROLES.map((r) => r.value));
+      return extraUsersDraft
+        .map((u) => ({
+          ad_soyad: String(u.ad_soyad || "").trim(),
+          email: normalizeEmail(u.email || ""),
+          rol: allowed.has(String(u.rol || "").trim()) ? String(u.rol || "").trim() : "assistant_manager",
+          telefon: String(u.telefon || "").trim()
+        }))
+        .filter((u) => u.ad_soyad || u.email);
     }
 
     async function loadApplications() {
@@ -776,7 +959,7 @@
 
     function renderUsersTable(users) {
       if (!users.length) {
-        usersBodyEl.innerHTML = '<tr><td colspan="6">Bu site için kullanıcı yok.</td></tr>';
+        usersBodyEl.innerHTML = '<tr><td colspan="7">Bu site için kullanıcı yok.</td></tr>';
         return;
       }
       usersBodyEl.innerHTML = users.map((u) => `
@@ -785,11 +968,10 @@
           <td><input data-u-field="displayName" data-u-id="${u.uid}" value="${escapeHtml(u.displayName || "")}" /></td>
           <td>
             <select data-u-field="role" data-u-id="${u.uid}">
-              <option value="site_manager" ${u.role === "site_manager" ? "selected" : ""}>Site Yöneticisi</option>
-              <option value="assistant_manager" ${u.role === "assistant_manager" ? "selected" : ""}>Yönetici Yardımcısı</option>
-              <option value="resident" ${u.role === "resident" ? "selected" : ""}>Kat Sakini</option>
+              ${userRoleOptions(u.role || "")}
             </select>
           </td>
+          <td><input data-u-field="siteId" data-u-id="${u.uid}" value="${escapeHtml(u.siteId || "")}" /></td>
           <td><input data-u-field="unitId" data-u-id="${u.uid}" value="${escapeHtml(u.unitId || "")}" /></td>
           <td>
             <select data-u-field="status" data-u-id="${u.uid}">
@@ -814,10 +996,31 @@
           const patch = {
             displayName: getVal("displayName"),
             role: getVal("role"),
+            siteId: getVal("siteId"),
             unitId: getVal("unitId"),
             status: getVal("status"),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           };
+          if (!canAssignRole(patch.role)) {
+            setStatus("Bu rolü atama yetkiniz yok.", "error");
+            return;
+          }
+          if (currentProfile.role === APARTYONET_ROLES.ADMIN) {
+            if (patch.siteId !== currentProfile.siteId) {
+              setStatus("Admin sadece kendi site ID değeri üzerinde işlem yapabilir.", "error");
+              return;
+            }
+          }
+          if (!patch.siteId && patch.role !== APARTYONET_ROLES.SUPER_ADMIN) {
+            setStatus("Site ID zorunludur.", "error");
+            return;
+          }
+          if (patch.role === APARTYONET_ROLES.SUPER_ADMIN) {
+            patch.siteId = "*";
+            patch.unitId = "";
+          } else if (patch.role !== APARTYONET_ROLES.RESIDENT) {
+            patch.unitId = "";
+          }
           try {
             await db.collection("users").doc(uid).update(patch);
             setStatus("Kullanıcı güncellendi.", "ok");
@@ -838,7 +1041,7 @@
         renderUsersTable(siteUsers);
       } catch (err) {
         console.error(err);
-        usersBodyEl.innerHTML = '<tr><td colspan="6">Kullanıcılar yüklenemedi.</td></tr>';
+        usersBodyEl.innerHTML = '<tr><td colspan="7">Kullanıcılar yüklenemedi.</td></tr>';
       }
     }
 
@@ -934,33 +1137,46 @@
       const unitId = (document.getElementById("u_unitId").value || "").trim();
       const status = document.getElementById("u_status").value;
 
-      if (!email || !password || !siteId) {
-        setStatus("E-posta, şifre ve site ID zorunludur.", "error");
+      if (!email || !password) {
+        setStatus("E-posta ve şifre zorunludur.", "error");
         return;
       }
       if (password.length < 6) {
         setStatus("Şifre en az 6 karakter olmalı.", "error");
         return;
       }
-      if (!siteId || siteId === "*") {
-        setStatus("Geçerli bir site ID girin.", "error");
+      if (!canAssignRole(role)) {
+        setStatus("Bu rolü oluşturma yetkiniz yok.", "error");
         return;
+      }
+      if (!siteId || siteId === "*") {
+        if (role !== APARTYONET_ROLES.SUPER_ADMIN) {
+          setStatus("Geçerli bir site ID girin.", "error");
+          return;
+        }
       }
       if (currentProfile.role !== APARTYONET_ROLES.SUPER_ADMIN && siteId !== currentProfile.siteId) {
         setStatus("Sadece kendi siteniz için kullanıcı oluşturabilirsiniz.", "error");
+        return;
+      }
+      if (currentProfile.role === APARTYONET_ROLES.ADMIN && [APARTYONET_ROLES.ADMIN, APARTYONET_ROLES.SUPER_ADMIN].includes(role)) {
+        setStatus("Admin rolü, admin veya süper admin hesabı oluşturamaz.", "error");
         return;
       }
 
       btn.disabled = true;
       btn.textContent = "Oluşturuluyor...";
       try {
-        await ensureSiteDoc(siteId, siteId);
+        const targetSiteId = role === APARTYONET_ROLES.SUPER_ADMIN ? "*" : siteId;
+        if (targetSiteId !== "*") {
+          await ensureSiteDoc(targetSiteId, targetSiteId);
+        }
         const uid = await createAuthUser(email, password);
         await db.collection("users").doc(uid).set({
           email,
           displayName,
           role,
-          siteId,
+          siteId: targetSiteId,
           unitId: role === "resident" ? unitId : "",
           status,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -968,7 +1184,8 @@
         }, { merge: true });
         setStatus("Kullanıcı hesabı oluşturuldu.", "ok");
         document.getElementById("userForm").reset();
-        document.getElementById("u_siteId").value = currentProfile.siteId || "";
+        document.getElementById("u_siteId").value = currentProfile.siteId === "*" ? "" : (currentProfile.siteId || "");
+        syncCreateRoleOptions();
         await loadSiteUsers();
       } catch (err) {
         console.error(err);
@@ -1015,6 +1232,19 @@
       document.getElementById("u_status").value = "active";
     }
 
+    function fillAdminTemplate() {
+      document.getElementById("u_email").value = "admin@gunes-sitesi.com";
+      document.getElementById("u_displayName").value = "ApartYönet Admin";
+      document.getElementById("u_role").value = "admin";
+      if (!document.getElementById("u_siteId").value) {
+        document.getElementById("u_siteId").value = currentProfile && currentProfile.siteId && currentProfile.siteId !== "*"
+          ? currentProfile.siteId
+          : "gunes-sitesi";
+      }
+      document.getElementById("u_unitId").value = "";
+      document.getElementById("u_status").value = "active";
+    }
+
     function fillAssistantTemplate() {
       document.getElementById("u_email").value = "yardimci@gunes-sitesi.com";
       document.getElementById("u_displayName").value = "Yönetici Yardımcısı";
@@ -1032,7 +1262,12 @@
       document.getElementById("closeModalBtn").addEventListener("click", closeEditModal);
       document.getElementById("cancelBtn").addEventListener("click", closeEditModal);
       modalEl.addEventListener("click", (e) => { if (e.target === modalEl) closeEditModal(); });
+      document.getElementById("addExtraUserBtn").addEventListener("click", () => {
+        extraUsersDraft.push(emptyExtraUser());
+        renderExtraUsers();
+      });
       document.getElementById("seedSiteBtn").addEventListener("click", seedGunesSite);
+      document.getElementById("sampleAdminBtn").addEventListener("click", fillAdminTemplate);
       document.getElementById("sampleManagerBtn").addEventListener("click", fillManagerTemplate);
       document.getElementById("sampleAssistantBtn").addEventListener("click", fillAssistantTemplate);
       document.getElementById("sampleResidentBtn").addEventListener("click", fillResidentTemplate);
@@ -1075,6 +1310,12 @@
         saveBtn.textContent = "Kaydet";
         return;
       }
+      if (currentProfile.role === APARTYONET_ROLES.ADMIN && siteId !== currentProfile.siteId) {
+        setStatus("Admin sadece kendi site kaydını güncelleyebilir.", "error");
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Kaydet";
+        return;
+      }
       if (managerPassword && managerPassword.length < 6) {
         setStatus("Yönetici şifresi en az 6 karakter olmalı.", "error");
         saveBtn.disabled = false;
@@ -1094,6 +1335,7 @@
         notlar: document.getElementById("e_notlar").value.trim(),
         aylik_aidat: document.getElementById("e_aylik_aidat").value.trim(),
         dukkan_aidat: document.getElementById("e_dukkan_aidat").value.trim(),
+        site_personel_list: normalizeExtraUsers(),
         blok_yapisi_json: blokYapisi,
         blok_yapisi: JSON.stringify(blokYapisi),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1125,6 +1367,7 @@
     });
 
     wireBaseEvents();
+    renderExtraUsers();
 
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
@@ -1149,6 +1392,7 @@
         currentUser = user;
         currentProfile = profile;
         setMeta(profile, user);
+        syncCreateRoleOptions();
         lockedEl.style.display = "none";
         appEl.style.display = "block";
 
