@@ -473,7 +473,7 @@
       margin-top: 12px;
       display: flex;
       gap: 8px;
-      justify-content: flex-end;
+      justify-content: space-between;
       flex-wrap: wrap;
     }
 
@@ -560,8 +560,11 @@
           <div class="full"><label>Notlar</label><textarea id="e_notlar"></textarea></div>
         </div>
         <div class="modal-actions">
-          <button id="saveBtn" class="btn btn-primary" type="submit">Kaydet</button>
-          <button id="cancelBtn" class="btn btn-ghost" type="button">İptal</button>
+          <button id="deleteBtn" class="btn btn-edit" type="button">Kaydı Sil</button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button id="saveBtn" class="btn btn-primary" type="submit">Kaydet</button>
+            <button id="cancelBtn" class="btn btn-ghost" type="button">İptal</button>
+          </div>
         </div>
       </form>
     </div>
@@ -953,6 +956,30 @@
       document.getElementById("addExtraUserBtn").addEventListener("click", () => {
         extraUsersDraft.push(emptyExtraUser());
         renderExtraUsers();
+      });
+      document.getElementById("deleteBtn").addEventListener("click", async () => {
+        const id = document.getElementById("editId").value;
+        if (!id) {
+          setStatus("Silinecek kayıt bulunamadı.", "error");
+          return;
+        }
+        const ok = window.confirm("Bu başvuru kaydını tamamen silmek istediğine emin misin?");
+        if (!ok) return;
+        const btn = document.getElementById("deleteBtn");
+        btn.disabled = true;
+        btn.textContent = "Siliniyor...";
+        try {
+          await db.collection("basvurular").doc(id).delete();
+          closeEditModal();
+          setStatus("Başvuru kaydı silindi.", "ok");
+          await loadApplications();
+        } catch (err) {
+          console.error(err);
+          setStatus("Başvuru silinemedi.", "error");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Kaydı Sil";
+        }
       });
     }
 
