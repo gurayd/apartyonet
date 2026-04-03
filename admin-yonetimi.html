@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApartYönet | Admin Yönetimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #090d14;
+      --line: rgba(152, 175, 214, 0.22);
+      --text: #e8eefc;
+      --muted: #9fb0cf;
+      --primary: #2ea0ff;
+      --primary-2: #1676d1;
+      --card: rgba(14, 22, 37, 0.82);
+      --ok: #86efac;
+      --danger: #fca5a5;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Manrope", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(1200px 600px at 10% -20%, rgba(46, 160, 255, 0.32), transparent 60%),
+        radial-gradient(1000px 520px at 90% -10%, rgba(92, 240, 210, 0.16), transparent 64%),
+        radial-gradient(900px 500px at 50% 120%, rgba(22, 118, 209, 0.26), transparent 66%),
+        linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
+    }
+
+    .container {
+      width: min(1000px, calc(100% - 30px));
+      margin: 16px auto;
+    }
+
+    .top {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 700;
+    }
+
+    .brand img { height: 32px; width: auto; display: block; }
+
+    .top-actions { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+
+    .btn {
+      border-radius: 10px;
+      border: 1px solid transparent;
+      padding: 8px 12px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+
+    .btn-ghost {
+      color: #d9e5ff;
+      border-color: rgba(152, 175, 214, 0.35);
+      background: rgba(17, 26, 43, 0.55);
+    }
+
+    .panel {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.88), var(--card));
+      padding: 12px;
+    }
+
+    .status {
+      min-height: 22px;
+      margin: 8px 0 10px;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .status.ok { color: var(--ok); }
+    .status.error { color: var(--danger); }
+
+    .form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid rgba(152, 175, 214, 0.34);
+      border-radius: 10px;
+      padding: 9px;
+      background: rgba(10, 16, 27, 0.8);
+      color: #e8eefc;
+      font-size: 0.86rem;
+      font-family: inherit;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid rgba(152, 175, 214, 0.2);
+      padding: 8px 6px;
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .locked {
+      min-height: 100vh;
+      display: none;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .locked .box {
+      width: min(560px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="/js/authz.js"></script>
+</head>
+<body>
+  <main id="app" style="display:none;">
+    <div class="container">
+      <header class="top">
+        <a class="brand" href="/index.html" aria-label="ApartYönet Anasayfa">
+          <img src="assets/apartyonet-logo-white-transparent.svg" alt="ApartYönet" />
+          <span>ApartYönet Admin Yönetimi</span>
+        </a>
+        <div class="top-actions">
+          <a class="btn btn-ghost" href="/admin.html">Admin Panele Dön</a>
+          <button id="logoutBtn" class="btn btn-primary" type="button">Çıkış Yap</button>
+        </div>
+      </header>
+
+      <section class="panel">
+        <h2 style="margin:0 0 6px; font-size:1rem;">Platform Admin Hesapları</h2>
+        <p style="margin:0; color:#9fb0cf; font-size:0.84rem;">Bu ekran yalnızca süper admin içindir. Buradan admin ekleyebilir veya admin yetkisi kaldırabilirsiniz.</p>
+        <div id="status" class="status"></div>
+
+        <form id="adminForm" class="form" novalidate>
+          <div>
+            <label for="a_email">E-posta</label>
+            <input id="a_email" type="email" placeholder="admin@apartyonet.com" required />
+          </div>
+          <div>
+            <label for="a_password">Şifre</label>
+            <input id="a_password" type="password" placeholder="En az 6 karakter" required />
+          </div>
+          <div>
+            <label for="a_displayName">Ad Soyad</label>
+            <input id="a_displayName" type="text" placeholder="Admin Ad Soyad" />
+          </div>
+          <div style="display:flex; align-items:flex-end;">
+            <button id="createBtn" class="btn btn-primary" type="submit">Admin Ekle</button>
+          </div>
+        </form>
+
+        <div style="overflow:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>E-posta</th>
+                <th>Ad Soyad</th>
+                <th>Rol</th>
+                <th>Durum</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="adminsBody">
+              <tr><td colspan="5">Yükleniyor...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <section id="locked" class="locked">
+    <div class="box">
+      <h1 style="margin:0; font-size:1.35rem;">Yetkisiz Erişim</h1>
+      <p style="color:#9fb0cf; line-height:1.6;">Bu ekran yalnızca süper admin içindir.</p>
+      <a class="btn btn-primary" href="/login.html">Giriş Sayfasına Dön</a>
+    </div>
+  </section>
+
+  <script>
+    let currentUser = null;
+    let currentProfile = null;
+    let admins = [];
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
+      authDomain: "apartyonet-af6d3.firebaseapp.com",
+      projectId: "apartyonet-af6d3",
+      storageBucket: "apartyonet-af6d3.firebasestorage.app",
+      messagingSenderId: "825430154124",
+      appId: "1:825430154124:web:7156fa0462fcfc222414a9"
+    };
+
+    const app = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+    const auth = app.auth();
+    const db = app.firestore();
+
+    const appEl = document.getElementById("app");
+    const lockedEl = document.getElementById("locked");
+    const statusEl = document.getElementById("status");
+    const bodyEl = document.getElementById("adminsBody");
+
+    function setStatus(msg, type) {
+      statusEl.textContent = msg || "";
+      statusEl.className = "status" + (type ? " " + type : "");
+    }
+
+    async function createAuthUser(email, password) {
+      const appName = "admin-user-create-" + Date.now();
+      const secondary = firebase.initializeApp(firebaseConfig, appName);
+      try {
+        const cred = await secondary.auth().createUserWithEmailAndPassword(email, password);
+        const uid = cred.user.uid;
+        await secondary.auth().signOut();
+        return uid;
+      } finally {
+        await secondary.delete().catch(() => {});
+      }
+    }
+
+    async function findUserByEmail(email) {
+      const snap = await db.collection("users")
+        .where("email", "==", normalizeEmail(email))
+        .limit(1)
+        .get();
+      if (snap.empty) return null;
+      const doc = snap.docs[0];
+      return { uid: doc.id, ...doc.data() };
+    }
+
+    function renderAdmins() {
+      if (!admins.length) {
+        bodyEl.innerHTML = '<tr><td colspan="5">Henüz admin yok.</td></tr>';
+        return;
+      }
+      bodyEl.innerHTML = admins.map((u) => `
+        <tr>
+          <td>${u.email || "-"}</td>
+          <td>${u.displayName || "-"}</td>
+          <td>${formatRoleLabel(u.role || "")}</td>
+          <td>${u.status === "active" ? "Aktif" : "Pasif"}</td>
+          <td>
+            ${u.role === APARTYONET_ROLES.ADMIN
+              ? `<button class="btn btn-ghost" data-remove="${u.uid}" type="button">Admin Yetkisini Kaldır</button>`
+              : '<span style="color:#9fb0cf;">Kaldırılamaz</span>'}
+          </td>
+        </tr>
+      `).join("");
+
+      bodyEl.querySelectorAll("[data-remove]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const uid = btn.getAttribute("data-remove");
+          if (!uid) return;
+          try {
+            await db.collection("users").doc(uid).update({
+              role: APARTYONET_ROLES.RESIDENT,
+              status: "inactive",
+              siteId: "removed-admin",
+              unitId: "",
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            setStatus("Admin yetkisi kaldırıldı.", "ok");
+            await loadAdmins();
+          } catch (err) {
+            console.error(err);
+            setStatus("Admin yetkisi kaldırılamadı.", "error");
+          }
+        });
+      });
+    }
+
+    async function loadAdmins() {
+      try {
+        const snap = await db.collection("users")
+          .where("role", "in", [APARTYONET_ROLES.SUPER_ADMIN, APARTYONET_ROLES.ADMIN])
+          .limit(200)
+          .get();
+        admins = snap.docs
+          .map((d) => ({ uid: d.id, ...d.data() }))
+          .sort((a, b) => (a.role === APARTYONET_ROLES.SUPER_ADMIN ? -1 : 1));
+        renderAdmins();
+      } catch (err) {
+        console.error(err);
+        bodyEl.innerHTML = '<tr><td colspan="5">Admin listesi yüklenemedi.</td></tr>';
+      }
+    }
+
+    async function onCreateAdmin(e) {
+      e.preventDefault();
+      const btn = document.getElementById("createBtn");
+      const email = normalizeEmail(document.getElementById("a_email").value);
+      const password = String(document.getElementById("a_password").value || "");
+      const displayName = String(document.getElementById("a_displayName").value || "").trim();
+      if (!email || !password) return setStatus("E-posta ve şifre zorunludur.", "error");
+      if (password.length < 6) return setStatus("Şifre en az 6 karakter olmalı.", "error");
+
+      btn.disabled = true;
+      btn.textContent = "Ekleniyor...";
+      try {
+        let uid = null;
+        try {
+          uid = await createAuthUser(email, password);
+        } catch (err) {
+          if (err && err.code === "auth/email-already-in-use") {
+            const found = await findUserByEmail(email);
+            if (!found || !found.uid) throw new Error("E-posta Auth'ta var ama users kaydı bulunamadı.");
+            uid = found.uid;
+          } else {
+            throw err;
+          }
+        }
+        await db.collection("users").doc(uid).set({
+          email,
+          displayName: displayName || "ApartYönet Admin",
+          role: APARTYONET_ROLES.ADMIN,
+          siteId: "*",
+          unitId: "",
+          status: "active",
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        setStatus("Admin hesabı hazırlandı.", "ok");
+        document.getElementById("adminForm").reset();
+        await loadAdmins();
+      } catch (err) {
+        console.error(err);
+        setStatus((err && err.message) || "Admin hesabı oluşturulamadı.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Admin Ekle";
+      }
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await auth.signOut();
+      window.location.href = "/login.html";
+    });
+    document.getElementById("adminForm").addEventListener("submit", onCreateAdmin);
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        appEl.style.display = "none";
+        lockedEl.style.display = "grid";
+        return;
+      }
+      try {
+        await ensureBootstrapAdminProfile(db, user);
+        const profile = await getCurrentUserProfile(db, user.uid);
+        currentUser = user;
+        currentProfile = profile;
+        if (!profile || !isProfileActive(profile) || profile.role !== APARTYONET_ROLES.SUPER_ADMIN) {
+          appEl.style.display = "none";
+          lockedEl.style.display = "grid";
+          return;
+        }
+        lockedEl.style.display = "none";
+        appEl.style.display = "block";
+        await loadAdmins();
+      } catch (err) {
+        console.error(err);
+        appEl.style.display = "none";
+        lockedEl.style.display = "grid";
+      }
+    });
+  </script>
+</body>
+</html>
