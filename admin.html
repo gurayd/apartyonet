@@ -190,6 +190,22 @@
       display: block;
     }
 
+    .user-mgmt-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .user-mgmt-body {
+      display: none;
+    }
+
+    .user-mgmt-body.open {
+      display: block;
+    }
+
     .user-form {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -502,8 +518,12 @@
 
       <div id="status" class="status"></div>
       <section id="userMgmt" class="user-mgmt">
-        <h3 style="margin:0 0 8px; font-size:1rem;">Kullanıcı Yönetimi</h3>
-        <p style="margin:0 0 10px; color:#9fb0cf; font-size:0.84rem;">Bu bölümden ApartYönet adminleri ve site kullanıcılarını yönetebilirsiniz.</p>
+        <div class="user-mgmt-head">
+          <h3 style="margin:0; font-size:1rem;">ApartYönet Admin Yönetimi</h3>
+          <button id="toggleUserMgmtBtn" type="button" class="btn btn-ghost">Aç / Kapat</button>
+        </div>
+        <div id="userMgmtBody" class="user-mgmt-body">
+        <p style="margin:0 0 10px; color:#9fb0cf; font-size:0.84rem;">Bu bölüm yalnızca süper admin içindir. Buradan platform admin hesabı ekleyip kaldırabilirsiniz.</p>
         <form id="userForm" class="user-form" novalidate>
           <div>
             <label for="u_email">E-posta</label>
@@ -517,38 +537,8 @@
             <label for="u_displayName">Ad Soyad</label>
             <input id="u_displayName" type="text" placeholder="Kullanıcı adı" />
           </div>
-          <div>
-            <label for="u_role">Rol</label>
-            <select id="u_role">
-              <option value="super_admin">Süper Yönetici</option>
-              <option value="admin">Admin</option>
-              <option value="site_manager">Site Yöneticisi</option>
-              <option value="assistant_manager">Yönetici Yardımcısı</option>
-              <option value="resident">Kat Sakini</option>
-            </select>
-          </div>
-          <div>
-            <label for="u_siteId">Site ID</label>
-            <input id="u_siteId" type="text" placeholder="gunes-sitesi" />
-          </div>
-          <div>
-            <label for="u_unitId">Daire Kodu</label>
-            <input id="u_unitId" type="text" placeholder="A-D-1 (sakin için)" />
-          </div>
-          <div>
-            <label for="u_status">Durum</label>
-            <select id="u_status">
-              <option value="active">Aktif</option>
-              <option value="inactive">Pasif</option>
-            </select>
-          </div>
           <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;">
-            <button id="createUserBtn" class="btn btn-primary" type="submit">Kullanıcı Oluştur</button>
-            <button id="seedSiteBtn" class="btn btn-ghost" type="button">Güneş Sitesi Kur</button>
-            <button id="sampleAdminBtn" class="btn btn-ghost" type="button">Admin Örneği</button>
-            <button id="sampleManagerBtn" class="btn btn-ghost" type="button">Yönetici Örneği</button>
-            <button id="sampleAssistantBtn" class="btn btn-ghost" type="button">Yardımcı Örneği</button>
-            <button id="sampleResidentBtn" class="btn btn-ghost" type="button">Sakin Örneği Doldur</button>
+            <button id="createUserBtn" class="btn btn-primary" type="submit">Admin Ekle</button>
           </div>
         </form>
         <div style="overflow:auto;">
@@ -558,16 +548,15 @@
                 <th>E-posta</th>
                 <th>Ad Soyad</th>
                 <th>Rol</th>
-                <th>Site ID</th>
-                <th>Daire</th>
                 <th>Durum</th>
                 <th>İşlem</th>
               </tr>
             </thead>
             <tbody id="usersBody">
-              <tr><td colspan="7">Henüz kullanıcı yok.</td></tr>
+              <tr><td colspan="5">Henüz admin yok.</td></tr>
             </tbody>
           </table>
+        </div>
         </div>
       </section>
       <section id="list" class="list"></section>
@@ -697,48 +686,14 @@
       return applicationRows.find((r) => r.id === id);
     }
 
-    function canAssignRole(targetRole) {
-      const roles = APARTYONET_ROLES;
-      if (!currentProfile) return false;
-      if (currentProfile.role === roles.SUPER_ADMIN) return true;
-      if (currentProfile.role === roles.ADMIN) {
-        return [roles.SITE_MANAGER, roles.ASSISTANT_MANAGER, roles.RESIDENT].includes(targetRole);
-      }
-      return false;
-    }
-
-    function userRoleOptions(selectedRole) {
-      const roles = APARTYONET_ROLES;
-      const options = [
-        { value: roles.SUPER_ADMIN, label: "Süper Yönetici" },
-        { value: roles.ADMIN, label: "Admin" },
-        { value: roles.SITE_MANAGER, label: "Site Yöneticisi" },
-        { value: roles.ASSISTANT_MANAGER, label: "Yönetici Yardımcısı" },
-        { value: roles.RESIDENT, label: "Kat Sakini" }
-      ];
-      return options
-        .filter((opt) => canAssignRole(opt.value) || opt.value === selectedRole)
-        .map((opt) => `<option value="${opt.value}" ${opt.value === selectedRole ? "selected" : ""}>${opt.label}</option>`)
-        .join("");
-    }
-
-    function syncCreateRoleOptions() {
-      const select = document.getElementById("u_role");
-      if (!select) return;
-      const current = select.value || APARTYONET_ROLES.SITE_MANAGER;
-      select.innerHTML = userRoleOptions(current);
-      if (!select.value) {
-        select.value = canAssignRole(APARTYONET_ROLES.ADMIN)
-          ? APARTYONET_ROLES.ADMIN
-          : APARTYONET_ROLES.SITE_MANAGER;
-      }
+    function isSuperAdminCurrent() {
+      return !!(currentProfile && currentProfile.role === APARTYONET_ROLES.SUPER_ADMIN);
     }
 
     function setMeta(profile, user) {
       document.getElementById("userEmail").textContent = normalizeEmail(user && user.email);
       document.getElementById("userRole").textContent = formatRoleLabel(profile.role);
       document.getElementById("activeSite").textContent = profile.siteId || "-";
-      document.getElementById("u_siteId").value = profile.siteId === "*" ? "" : (profile.siteId || "");
     }
 
     function renderCards(items) {
@@ -959,89 +914,65 @@
 
     function renderUsersTable(users) {
       if (!users.length) {
-        usersBodyEl.innerHTML = '<tr><td colspan="7">Bu site için kullanıcı yok.</td></tr>';
+        usersBodyEl.innerHTML = '<tr><td colspan="5">Henüz admin yok.</td></tr>';
         return;
       }
       usersBodyEl.innerHTML = users.map((u) => `
         <tr>
           <td>${escapeHtml(u.email || "-")}</td>
-          <td><input data-u-field="displayName" data-u-id="${u.uid}" value="${escapeHtml(u.displayName || "")}" /></td>
+          <td>${escapeHtml(u.displayName || "-")}</td>
+          <td>${escapeHtml(formatRoleLabel(u.role || ""))}</td>
+          <td>${u.status === "active" ? "Aktif" : "Pasif"}</td>
           <td>
-            <select data-u-field="role" data-u-id="${u.uid}">
-              ${userRoleOptions(u.role || "")}
-            </select>
+            ${u.role === APARTYONET_ROLES.ADMIN
+              ? `<button class="btn btn-ghost" data-admin-remove="${u.uid}" type="button">Admin Yetkisini Kaldır</button>`
+              : '<span style="color:#9fb0cf;">Kaldırılamaz</span>'}
           </td>
-          <td><input data-u-field="siteId" data-u-id="${u.uid}" value="${escapeHtml(u.siteId || "")}" /></td>
-          <td><input data-u-field="unitId" data-u-id="${u.uid}" value="${escapeHtml(u.unitId || "")}" /></td>
-          <td>
-            <select data-u-field="status" data-u-id="${u.uid}">
-              <option value="active" ${u.status === "active" ? "selected" : ""}>Aktif</option>
-              <option value="inactive" ${u.status === "inactive" ? "selected" : ""}>Pasif</option>
-            </select>
-          </td>
-          <td><button class="btn btn-ghost" data-user-save="${u.uid}" type="button">Kaydet</button></td>
         </tr>
       `).join("");
 
-      document.querySelectorAll("[data-user-save]").forEach((btn) => {
+      document.querySelectorAll("[data-admin-remove]").forEach((btn) => {
         btn.addEventListener("click", async () => {
-          const uid = btn.getAttribute("data-user-save");
+          const uid = btn.getAttribute("data-admin-remove");
           if (!uid) return;
-          const row = siteUsers.find((u) => u.uid === uid);
+          const row = siteUsers.find((u) => u.uid === uid && u.role === APARTYONET_ROLES.ADMIN);
           if (!row) return;
-          const getVal = (field) => {
-            const el = document.querySelector(`[data-u-field="${field}"][data-u-id="${uid}"]`);
-            return el ? String(el.value || "").trim() : "";
-          };
-          const patch = {
-            displayName: getVal("displayName"),
-            role: getVal("role"),
-            siteId: getVal("siteId"),
-            unitId: getVal("unitId"),
-            status: getVal("status"),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          };
-          if (!canAssignRole(patch.role)) {
-            setStatus("Bu rolü atama yetkiniz yok.", "error");
+          if (!isSuperAdminCurrent()) {
+            setStatus("Sadece süper admin bu işlemi yapabilir.", "error");
             return;
-          }
-          if (currentProfile.role === APARTYONET_ROLES.ADMIN) {
-            if (patch.siteId !== currentProfile.siteId) {
-              setStatus("Admin sadece kendi site ID değeri üzerinde işlem yapabilir.", "error");
-              return;
-            }
-          }
-          if (!patch.siteId && patch.role !== APARTYONET_ROLES.SUPER_ADMIN) {
-            setStatus("Site ID zorunludur.", "error");
-            return;
-          }
-          if (patch.role === APARTYONET_ROLES.SUPER_ADMIN) {
-            patch.siteId = "*";
-            patch.unitId = "";
-          } else if (patch.role !== APARTYONET_ROLES.RESIDENT) {
-            patch.unitId = "";
           }
           try {
-            await db.collection("users").doc(uid).update(patch);
-            setStatus("Kullanıcı güncellendi.", "ok");
-            await loadSiteUsers();
+            await db.collection("users").doc(uid).update({
+              role: APARTYONET_ROLES.RESIDENT,
+              status: "inactive",
+              siteId: "removed-admin",
+              unitId: "",
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            setStatus("Admin yetkisi kaldırıldı.", "ok");
+            await loadPlatformAdmins();
           } catch (err) {
             console.error(err);
-            setStatus("Kullanıcı güncellenemedi.", "error");
+            setStatus("Admin yetkisi kaldırılamadı.", "error");
           }
         });
       });
     }
 
-    async function loadSiteUsers() {
+    async function loadPlatformAdmins() {
       if (!canAccess("user_management", currentProfile.role)) return;
       try {
-        const snap = await enforceSiteScope(db.collection("users"), currentProfile.siteId).limit(200).get();
-        siteUsers = snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
+        const snap = await db.collection("users")
+          .where("role", "in", [APARTYONET_ROLES.SUPER_ADMIN, APARTYONET_ROLES.ADMIN])
+          .limit(200)
+          .get();
+        siteUsers = snap.docs
+          .map((d) => ({ uid: d.id, ...d.data() }))
+          .sort((a, b) => (a.role === APARTYONET_ROLES.SUPER_ADMIN ? -1 : 1));
         renderUsersTable(siteUsers);
       } catch (err) {
         console.error(err);
-        usersBodyEl.innerHTML = '<tr><td colspan="7">Kullanıcılar yüklenemedi.</td></tr>';
+        usersBodyEl.innerHTML = '<tr><td colspan="5">Admin listesi yüklenemedi.</td></tr>';
       }
     }
 
@@ -1132,10 +1063,6 @@
       const email = normalizeEmail(document.getElementById("u_email").value);
       const password = String(document.getElementById("u_password").value || "");
       const displayName = document.getElementById("u_displayName").value.trim();
-      const role = document.getElementById("u_role").value;
-      const siteId = (document.getElementById("u_siteId").value || "").trim();
-      const unitId = (document.getElementById("u_unitId").value || "").trim();
-      const status = document.getElementById("u_status").value;
 
       if (!email || !password) {
         setStatus("E-posta ve şifre zorunludur.", "error");
@@ -1145,112 +1072,38 @@
         setStatus("Şifre en az 6 karakter olmalı.", "error");
         return;
       }
-      if (!canAssignRole(role)) {
-        setStatus("Bu rolü oluşturma yetkiniz yok.", "error");
-        return;
-      }
-      if (!siteId || siteId === "*") {
-        if (role !== APARTYONET_ROLES.SUPER_ADMIN) {
-          setStatus("Geçerli bir site ID girin.", "error");
-          return;
-        }
-      }
-      if (currentProfile.role !== APARTYONET_ROLES.SUPER_ADMIN && siteId !== currentProfile.siteId) {
-        setStatus("Sadece kendi siteniz için kullanıcı oluşturabilirsiniz.", "error");
-        return;
-      }
-      if (currentProfile.role === APARTYONET_ROLES.ADMIN && [APARTYONET_ROLES.ADMIN, APARTYONET_ROLES.SUPER_ADMIN].includes(role)) {
-        setStatus("Admin rolü, admin veya süper admin hesabı oluşturamaz.", "error");
+      if (!isSuperAdminCurrent()) {
+        setStatus("Sadece süper admin yeni admin ekleyebilir.", "error");
         return;
       }
 
       btn.disabled = true;
       btn.textContent = "Oluşturuluyor...";
       try {
-        const targetSiteId = role === APARTYONET_ROLES.SUPER_ADMIN ? "*" : siteId;
-        if (targetSiteId !== "*") {
-          await ensureSiteDoc(targetSiteId, targetSiteId);
-        }
         const uid = await createAuthUser(email, password);
         await db.collection("users").doc(uid).set({
           email,
           displayName,
-          role,
-          siteId: targetSiteId,
-          unitId: role === "resident" ? unitId : "",
-          status,
+          role: APARTYONET_ROLES.ADMIN,
+          siteId: "*",
+          unitId: "",
+          status: "active",
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
-        setStatus("Kullanıcı hesabı oluşturuldu.", "ok");
+        setStatus("Admin hesabı oluşturuldu.", "ok");
         document.getElementById("userForm").reset();
-        document.getElementById("u_siteId").value = currentProfile.siteId === "*" ? "" : (currentProfile.siteId || "");
-        syncCreateRoleOptions();
-        await loadSiteUsers();
+        await loadPlatformAdmins();
       } catch (err) {
         console.error(err);
-        let msg = "Kullanıcı oluşturulamadı.";
+        let msg = "Admin hesabı oluşturulamadı.";
         if (err && err.code === "auth/email-already-in-use") msg = "Bu e-posta zaten kayıtlı.";
         else if (err && err.code === "auth/weak-password") msg = "Şifre çok zayıf.";
         setStatus(msg, "error");
       } finally {
         btn.disabled = false;
-        btn.textContent = "Kullanıcı Oluştur";
+        btn.textContent = "Admin Ekle";
       }
-    }
-
-    async function seedGunesSite() {
-      const siteId = "gunes-sitesi";
-      try {
-        await ensureSiteDoc(siteId, "Güneş Sitesi");
-        document.getElementById("u_siteId").value = currentProfile.siteId || siteId;
-        document.getElementById("u_email").value = "sakin1@gunes-sitesi.com";
-        document.getElementById("u_displayName").value = "Güneş Sitesi Sakini";
-        document.getElementById("u_role").value = "resident";
-        document.getElementById("u_unitId").value = "A-D-1";
-        document.getElementById("u_status").value = "active";
-        setStatus("Güneş Sitesi hazırlandı. Şifre girip kullanıcı oluşturabilirsiniz.", "ok");
-      } catch (err) {
-        console.error(err);
-        setStatus("Güneş Sitesi kurulumu başarısız.", "error");
-      }
-    }
-
-    function fillResidentTemplate() {
-      document.getElementById("u_role").value = "resident";
-      document.getElementById("u_unitId").value = "A-D-1";
-      if (!document.getElementById("u_displayName").value) {
-        document.getElementById("u_displayName").value = "Kat Sakini";
-      }
-    }
-
-    function fillManagerTemplate() {
-      document.getElementById("u_email").value = "yonetici@gunes-sitesi.com";
-      document.getElementById("u_displayName").value = "Güneş Sitesi Yöneticisi";
-      document.getElementById("u_role").value = "site_manager";
-      document.getElementById("u_unitId").value = "";
-      document.getElementById("u_status").value = "active";
-    }
-
-    function fillAdminTemplate() {
-      document.getElementById("u_email").value = "admin@gunes-sitesi.com";
-      document.getElementById("u_displayName").value = "ApartYönet Admin";
-      document.getElementById("u_role").value = "admin";
-      if (!document.getElementById("u_siteId").value) {
-        document.getElementById("u_siteId").value = currentProfile && currentProfile.siteId && currentProfile.siteId !== "*"
-          ? currentProfile.siteId
-          : "gunes-sitesi";
-      }
-      document.getElementById("u_unitId").value = "";
-      document.getElementById("u_status").value = "active";
-    }
-
-    function fillAssistantTemplate() {
-      document.getElementById("u_email").value = "yardimci@gunes-sitesi.com";
-      document.getElementById("u_displayName").value = "Yönetici Yardımcısı";
-      document.getElementById("u_role").value = "assistant_manager";
-      document.getElementById("u_unitId").value = "";
-      document.getElementById("u_status").value = "active";
     }
 
     function wireBaseEvents() {
@@ -1266,11 +1119,10 @@
         extraUsersDraft.push(emptyExtraUser());
         renderExtraUsers();
       });
-      document.getElementById("seedSiteBtn").addEventListener("click", seedGunesSite);
-      document.getElementById("sampleAdminBtn").addEventListener("click", fillAdminTemplate);
-      document.getElementById("sampleManagerBtn").addEventListener("click", fillManagerTemplate);
-      document.getElementById("sampleAssistantBtn").addEventListener("click", fillAssistantTemplate);
-      document.getElementById("sampleResidentBtn").addEventListener("click", fillResidentTemplate);
+      document.getElementById("toggleUserMgmtBtn").addEventListener("click", () => {
+        const body = document.getElementById("userMgmtBody");
+        body.classList.toggle("open");
+      });
       document.getElementById("userForm").addEventListener("submit", createUserFromForm);
     }
 
@@ -1392,13 +1244,13 @@
         currentUser = user;
         currentProfile = profile;
         setMeta(profile, user);
-        syncCreateRoleOptions();
         lockedEl.style.display = "none";
         appEl.style.display = "block";
 
-        if (canAccess("user_management", profile.role)) {
+        if (isSuperAdminCurrent()) {
           userMgmtEl.classList.add("open");
-          await loadSiteUsers();
+          document.getElementById("userMgmtBody").classList.add("open");
+          await loadPlatformAdmins();
         } else {
           userMgmtEl.classList.remove("open");
         }

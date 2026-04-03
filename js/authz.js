@@ -45,7 +45,7 @@ window.canAccess = function canAccess(module, role) {
   const roles = window.APARTYONET_ROLES;
   const matrix = {
     admin_panel: [roles.SUPER_ADMIN, roles.ADMIN],
-    user_management: [roles.SUPER_ADMIN, roles.ADMIN],
+    user_management: [roles.SUPER_ADMIN],
     demo_panel: [roles.SUPER_ADMIN, roles.ADMIN, roles.SITE_MANAGER, roles.ASSISTANT_MANAGER, roles.RESIDENT],
     edit_application: [roles.SUPER_ADMIN, roles.ADMIN],
     resident_panel: [roles.RESIDENT]
