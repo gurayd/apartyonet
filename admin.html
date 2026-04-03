@@ -558,7 +558,6 @@
           </div>
           <div class="full"><label>Adres</label><textarea id="e_adres"></textarea></div>
           <div class="full"><label>Notlar</label><textarea id="e_notlar"></textarea></div>
-          <div class="full"><label>Blok Yapısı JSON</label><textarea id="e_blok_json"></textarea></div>
         </div>
         <div class="modal-actions">
           <button id="saveBtn" class="btn btn-primary" type="submit">Kaydet</button>
@@ -662,7 +661,6 @@
         const header = escapeHtml(item.site_adi || "Site adı yok");
         const sub = escapeHtml((item.ad_soyad || "İsim yok") + " • " + (item.telefon || "Telefon yok"));
         const createdAt = formatDate(item.createdAt);
-        const blokJson = JSON.stringify(item.blok_yapisi_json || [], null, 2);
         const personelCount = Array.isArray(item.site_personel_list) ? item.site_personel_list.length : 0;
 
         return `
@@ -694,7 +692,6 @@
                 <div class="field"><small>Notlar</small><div>${escapeHtml(item.notlar || "-")}</div></div>
                 <div class="field"><small>Kayıt Zamanı</small><div>${createdAt}</div></div>
               </div>
-              <div class="json">${escapeHtml(blokJson)}</div>
             </div>
           </article>
         `;
@@ -758,7 +755,6 @@
         }))
         : [];
       renderExtraUsers();
-      document.getElementById("e_blok_json").value = JSON.stringify(row.blok_yapisi_json || [], null, 2);
       modalEl.classList.add("open");
       modalEl.setAttribute("aria-hidden", "false");
     }
@@ -974,18 +970,6 @@
         return;
       }
 
-      let blokYapisi;
-      try {
-        const raw = document.getElementById("e_blok_json").value || "[]";
-        blokYapisi = JSON.parse(raw);
-        if (!Array.isArray(blokYapisi)) throw new Error("Geçersiz blok listesi");
-      } catch {
-        setStatus("Blok Yapısı JSON formatı geçersiz.", "error");
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Kaydet";
-        return;
-      }
-
       const siteName = document.getElementById("e_site_adi").value.trim();
       const siteId = slugifySiteId(siteName) || currentProfile.siteId;
       const managerEmail = normalizeEmail(document.getElementById("e_manager_email").value);
@@ -1022,8 +1006,6 @@
         aylik_aidat: document.getElementById("e_aylik_aidat").value.trim(),
         dukkan_aidat: document.getElementById("e_dukkan_aidat").value.trim(),
         site_personel_list: normalizeExtraUsers(),
-        blok_yapisi_json: blokYapisi,
-        blok_yapisi: JSON.stringify(blokYapisi),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
 
