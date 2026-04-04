@@ -281,12 +281,10 @@
 
     async function resolvePublishedBySlug(slug) {
       if (!slug) return null;
-      const snap = await db.collection("published_sites")
-        .where("slug", "==", slug)
-        .limit(1)
-        .get();
-      if (snap.empty) return null;
-      return snap.docs[0].data() || null;
+      const normalizedSlug = slugifySiteId(slug);
+      const direct = await db.collection("published_sites").doc(normalizedSlug).get();
+      if (direct.exists) return direct.data() || null;
+      return null;
     }
 
     async function routeByProfile(user) {

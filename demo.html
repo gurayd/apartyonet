@@ -799,9 +799,14 @@
 
     async function getPublicationBySlug(slug) {
       if (!slug || isReservedSlug(slug)) return null;
-      const snap = await db.collection("published_sites").where("slug", "==", slug).limit(1).get();
-      if (snap.empty) return null;
-      return { id: snap.docs[0].id, ...snap.docs[0].data() };
+      const normalizedSlug = normalizeSiteId(slug);
+      const direct = await db.collection("published_sites").doc(normalizedSlug).get();
+      if (direct.exists) return { id: direct.id, ...direct.data() };
+      if (canAccess("admin_panel", currentRole)) {
+        const snap = await db.collection("published_sites").where("slug", "==", slug).limit(1).get();
+        if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+      }
+      return null;
     }
 
     async function getPublicationBySiteId(siteId) {
