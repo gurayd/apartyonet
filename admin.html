@@ -689,6 +689,24 @@
       publishedBySiteId = out;
     }
 
+    async function getLivePathForSite(siteId) {
+      const normalized = slugifySiteId(siteId || "");
+      if (!normalized) return "";
+      const direct = await db.collection("published_sites").doc(normalized).get();
+      if (direct.exists) {
+        const row = direct.data() || {};
+        if (row.slug && row.status === "published") return "/" + encodeURIComponent(row.slug);
+      }
+      const byField = await db.collection("published_sites")
+        .where("siteId", "==", normalized)
+        .limit(1)
+        .get();
+      if (byField.empty) return "";
+      const row = byField.docs[0].data() || {};
+      if (!row.slug || row.status !== "published") return "";
+      return "/" + encodeURIComponent(row.slug);
+    }
+
     function setMeta(profile, user) {
       document.getElementById("userEmail").textContent = normalizeEmail(user && user.email);
       document.getElementById("userRole").textContent = formatRoleLabel(profile.role);
@@ -771,10 +789,16 @@
       });
 
       document.querySelectorAll("[data-demo-id]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
+        btn.addEventListener("click", async (e) => {
           e.stopPropagation();
           const id = btn.getAttribute("data-demo-id");
-          if (!id) return;
+          const item = id ? byId(id) : null;
+          if (!id || !item) return;
+          const publish = publishedBySiteId[item.siteId];
+          if (publish && publish.slug && publish.status === "published") {
+            window.open("/" + encodeURIComponent(publish.slug), "_blank", "noopener");
+            return;
+          }
           window.open("/demo.html?id=" + encodeURIComponent(id), "_blank", "noopener");
         });
       });
@@ -1295,7 +1319,12 @@
           return;
         }
         if (!canAccess("admin_panel", profile.role)) {
-          window.location.href = "/demo.html";
+          if (canAccess("demo_panel", profile.role)) {
+            const livePath = await getLivePathForSite(profile.siteId);
+            window.location.href = livePath || "/login.html";
+          } else {
+            window.location.href = "/login.html";
+          }
           return;
         }
 
