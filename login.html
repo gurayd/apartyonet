@@ -236,13 +236,57 @@
       document.getElementById("error").textContent = message || "";
     }
 
+    function getSafeNextPath() {
+      const raw = new URLSearchParams(window.location.search).get("next");
+      if (!raw) return "";
+      if (!raw.startsWith("/")) return "";
+      if (raw.startsWith("//")) return "";
+      return raw;
+    }
+
+    function parseSlugFromPath(pathValue) {
+      const basePath = String(pathValue || "").split("?")[0].trim();
+      const slug = basePath.replace(/^\/+|\/+$/g, "");
+      if (!slug) return "";
+      if (slug.includes("/")) return "";
+      if (slug.includes(".")) return "";
+      const reserved = ["login", "admin", "admin-yonetimi", "basvuru", "demo", "index"];
+      if (reserved.includes(slug.toLowerCase())) return "";
+      return slug;
+    }
+
     async function resolvePublishedAccess(siteId) {
       if (!siteId || siteId === "*") return null;
-      const snap = await db.collection("published_sites").doc(siteId).get();
-      if (!snap.exists) return null;
-      const row = snap.data() || {};
-      if (!row.slug) return null;
-      return row;
+      const normalized = slugifySiteId(siteId);
+      const direct = await db.collection("published_sites").doc(siteId).get();
+      if (direct.exists) {
+        const row = direct.data() || {};
+        if (row.slug) return row;
+      }
+      if (normalized && normalized !== siteId) {
+        const byNormalized = await db.collection("published_sites").doc(normalized).get();
+        if (byNormalized.exists) {
+          const row = byNormalized.data() || {};
+          if (row.slug) return row;
+        }
+      }
+      const byField = await db.collection("published_sites")
+        .where("siteId", "==", normalized || siteId)
+        .limit(1)
+        .get();
+      if (byField.empty) return null;
+      const row = byField.docs[0].data() || {};
+      return row.slug ? row : null;
+    }
+
+    async function resolvePublishedBySlug(slug) {
+      if (!slug) return null;
+      const snap = await db.collection("published_sites")
+        .where("slug", "==", slug)
+        .limit(1)
+        .get();
+      if (snap.empty) return null;
+      return snap.docs[0].data() || null;
     }
 
     async function routeByProfile(user) {
@@ -270,6 +314,27 @@
         return;
       }
       if (canAccess("demo_panel", profile.role)) {
+        const nextPath = getSafeNextPath();
+        const requestedSlug = parseSlugFromPath(nextPath);
+        if (requestedSlug) {
+          const requestedPublication = await resolvePublishedBySlug(requestedSlug);
+          if (!requestedPublication) {
+            throw new Error("Bu apartman paneli yayında değil.");
+          }
+          if (slugifySiteId(requestedPublication.siteId || "") !== slugifySiteId(profile.siteId || "")) {
+            throw new Error("Bu apartman paneline erişim yetkiniz yok.");
+          }
+          if (requestedPublication.status === "suspended" && requestedPublication.suspensionMode === "blocked") {
+            window.alert("Bu site yayından askıya alınmıştır. Giriş geçici olarak kapalıdır.");
+            throw new Error("Bu site yayından askıya alınmıştır. Yöneticinizle iletişime geçin.");
+          }
+          if (requestedPublication.status !== "published" && requestedPublication.status !== "suspended") {
+            throw new Error("Site yayına uygun durumda değil. Yönetici ile iletişime geçin.");
+          }
+          window.location.href = nextPath;
+          return;
+        }
+
         const pub = await resolvePublishedAccess(profile.siteId);
         if (!pub) {
           throw new Error("Bu site henüz yayımlanmadı. Lütfen ApartYönet yönetimi ile iletişime geçin.");

@@ -1059,6 +1059,22 @@
       }
     }
 
+    async function getAuthUidBySignIn(email, password) {
+      if (!password || password.length < 6) return null;
+      const appName = "user-lookup-" + Date.now();
+      const secondary = firebase.initializeApp(firebaseConfig, appName);
+      try {
+        const cred = await secondary.auth().signInWithEmailAndPassword(email, password);
+        const uid = cred && cred.user ? cred.user.uid : null;
+        await secondary.auth().signOut();
+        return uid || null;
+      } catch (_) {
+        return null;
+      } finally {
+        await secondary.delete().catch(() => {});
+      }
+    }
+
     async function findUserByEmail(email) {
       const snap = await db.collection("users")
         .where("email", "==", normalizeEmail(email))
@@ -1073,8 +1089,12 @@
       const managerEmail = normalizeEmail(params.managerEmail);
       const managerPassword = String(params.managerPassword || "");
       const managerName = (params.managerName || "").trim();
-      const siteId = params.siteId;
+      const siteId = slugifySiteId(params.siteId || "");
       const siteName = params.siteName;
+
+      if (!siteId) {
+        throw new Error("Geçerli bir site ID üretilemedi. Site adı zorunlu.");
+      }
 
       let uid = null;
       let createdNew = false;
@@ -1093,7 +1113,10 @@
           if (found && found.uid) {
             uid = found.uid;
           } else {
-            throw new Error("Bu e-posta Auth'ta var ancak users kaydı yok. Önce users/{uid} eşlemesi yapılmalı.");
+            uid = await getAuthUidBySignIn(managerEmail, managerPassword);
+            if (!uid) {
+              throw new Error("Bu e-posta daha önce kullanılmış. Bu hesabın şifresini girin veya farklı e-posta kullanın.");
+            }
           }
         } else {
           throw err;
@@ -1181,9 +1204,15 @@
       }
 
       const siteName = document.getElementById("e_site_adi").value.trim();
-      const siteId = slugifySiteId(siteName) || currentProfile.siteId;
+      const siteId = slugifySiteId(siteName);
       const managerEmail = normalizeEmail(document.getElementById("e_manager_email").value);
       const managerPassword = String(document.getElementById("e_manager_password").value || "");
+      if (!siteName || !siteId) {
+        setStatus("Site adı zorunlu. Geçerli bir site adı girin.", "error");
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Kaydet";
+        return;
+      }
       if (!managerEmail) {
         setStatus("Site yöneticisi e-posta alanı zorunlu.", "error");
         saveBtn.disabled = false;
