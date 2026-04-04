@@ -85,7 +85,7 @@ service cloud.firestore {
     function isSameEmail(emailA, emailB) {
       return emailA is string
         && emailB is string
-        && lower(emailA) == lower(emailB);
+        && emailA == emailB;
     }
 
     function isPanelReaderForSite(siteId) {
