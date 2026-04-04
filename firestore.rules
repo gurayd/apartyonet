@@ -82,6 +82,12 @@ service cloud.firestore {
       return mode == null || mode in ["blocked", "readonly"];
     }
 
+    function isSameEmail(emailA, emailB) {
+      return emailA is string
+        && emailB is string
+        && lower(emailA) == lower(emailB);
+    }
+
     function isPanelReaderForSite(siteId) {
       return isActive() && (
         isSuperAdmin()
@@ -168,6 +174,10 @@ service cloud.firestore {
         isSuperAdmin()
         || (isAdmin() && resource.data.siteId == mySiteId())
         || resource.data.siteId == mySiteId()
+        || (isSiteManager() && (
+          (resource.data.manager_uid is string && resource.data.manager_uid == request.auth.uid)
+          || isSameEmail(resource.data.manager_email, request.auth.token.email)
+        ))
       );
 
       allow create: if (

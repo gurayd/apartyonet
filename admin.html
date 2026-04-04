@@ -985,6 +985,8 @@
           siteId,
           slug,
           applicationId: item.id,
+          manager_uid: item.manager_uid || "",
+          manager_email: normalizeEmail(item.manager_email || item.email || ""),
           status: "published",
           suspensionMode: null,
           publishedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1022,6 +1024,8 @@
           siteId,
           slug: existing.slug,
           applicationId: existing.applicationId || item.id,
+          manager_uid: existing.manager_uid || item.manager_uid || "",
+          manager_email: normalizeEmail(existing.manager_email || item.manager_email || item.email || ""),
           status: "suspended",
           suspensionMode: mode,
           suspendedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1288,6 +1292,17 @@
         payload.manager_provisioned_at = firebase.firestore.FieldValue.serverTimestamp();
 
         await db.collection("basvurular").doc(id).update(payload);
+
+        const publishedRef = db.collection("published_sites").doc(siteId);
+        const publishedSnap = await publishedRef.get();
+        if (publishedSnap.exists) {
+          await publishedRef.set({
+            manager_uid: manager.uid,
+            manager_email: managerEmail,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
+
         closeEditModal();
         setStatus(manager.createdNew ? "Başvuru güncellendi, yönetici hesabı oluşturuldu." : "Başvuru güncellendi, yönetici hesabı eşleştirildi.", "ok");
         await loadApplications();
