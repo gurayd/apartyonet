@@ -335,6 +335,111 @@
     .state.ok { color: var(--ok); }
     .state.error { color: var(--danger); }
 
+    .unit-grid {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 8px;
+    }
+
+    .unit-card {
+      border: 1px solid rgba(152, 175, 214, 0.22);
+      border-radius: 10px;
+      padding: 9px;
+      background: rgba(11, 18, 31, 0.72);
+    }
+
+    .unit-card strong {
+      display: block;
+      font-size: 0.88rem;
+      margin-bottom: 4px;
+    }
+
+    .unit-card small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.74rem;
+      margin-bottom: 6px;
+    }
+
+    .unit-card .btn {
+      width: 100%;
+      margin-top: 6px;
+      padding: 7px 10px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(3, 7, 15, 0.72);
+      z-index: 220;
+      padding: 18px;
+    }
+
+    .modal.open { display: grid; }
+
+    .modal-card {
+      width: min(560px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.96));
+      padding: 14px;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .modal-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
+    }
+
+    .modal-form .full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-form label {
+      display: block;
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .modal-form input,
+    .modal-form textarea,
+    .modal-form select {
+      width: 100%;
+      border: 1px solid rgba(152, 175, 214, 0.3);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: rgba(10, 16, 27, 0.75);
+      color: #e8eefc;
+      font-family: inherit;
+      font-size: 0.88rem;
+    }
+
+    .modal-form textarea {
+      min-height: 86px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
       .sidebar { position: static; }
@@ -563,6 +668,35 @@
     </section>
   </div>
 
+  <section id="unitModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <strong id="unitModalTitle">Daire Düzenle</strong>
+        <button id="closeUnitModalBtn" type="button" class="btn btn-ghost">Kapat</button>
+      </div>
+      <form id="unitForm" novalidate>
+        <div class="modal-form">
+          <div><label>Ad Soyad</label><input id="u_fullName" type="text" /></div>
+          <div><label>Telefon</label><input id="u_phone" type="text" /></div>
+          <div><label>E-posta</label><input id="u_email" type="email" /></div>
+          <div>
+            <label>Oturum Durumu</label>
+            <select id="u_occupancyType">
+              <option value="">Seçiniz</option>
+              <option value="malik">Malik</option>
+              <option value="kiraci">Kiracı</option>
+            </select>
+          </div>
+          <div class="full"><label>Not</label><textarea id="u_note"></textarea></div>
+        </div>
+        <div class="modal-actions">
+          <button id="saveUnitBtn" type="submit" class="btn btn-primary">Kaydet</button>
+          <button id="cancelUnitBtn" type="button" class="btn btn-ghost">İptal</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
   <script>
     let currentProfile = null;
     let currentRole = "";
@@ -578,7 +712,9 @@
     ];
     const state = {
       row: null,
+      panelSiteId: "",
       bloklar: [],
+      unitsById: {},
       aktifBlok: null,
       aidatAyarlari: {},
       dukkanAidatAyarlari: {},
@@ -587,6 +723,7 @@
       ekstraGiderKayitlari: [],
       sabitGiderKayitlari: []
     };
+    let editingUnitId = "";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
@@ -642,6 +779,24 @@
       return slugifySiteId(String(value || ""));
     }
 
+    function canWritePanel() {
+      if (isReadonlyMode) return false;
+      return [
+        APARTYONET_ROLES.SUPER_ADMIN,
+        APARTYONET_ROLES.ADMIN,
+        APARTYONET_ROLES.SITE_MANAGER
+      ].includes(currentRole);
+    }
+
+    function panelRef() {
+      if (!state.panelSiteId) throw new Error("Panel site ID bulunamadı.");
+      return db.collection("site_panels").doc(state.panelSiteId);
+    }
+
+    function panelCollection(name) {
+      return panelRef().collection(name);
+    }
+
     async function getPublicationBySlug(slug) {
       if (!slug || isReservedSlug(slug)) return null;
       const snap = await db.collection("published_sites").where("slug", "==", slug).limit(1).get();
@@ -651,9 +806,16 @@
 
     async function getPublicationBySiteId(siteId) {
       if (!siteId || siteId === "*") return null;
-      const snap = await db.collection("published_sites").doc(siteId).get();
-      if (!snap.exists) return null;
-      return { id: snap.id, ...snap.data() };
+      const normalized = normalizeSiteId(siteId);
+      const direct = await db.collection("published_sites").doc(siteId).get();
+      if (direct.exists) return { id: direct.id, ...direct.data() };
+      if (normalized && normalized !== siteId) {
+        const byNorm = await db.collection("published_sites").doc(normalized).get();
+        if (byNorm.exists) return { id: byNorm.id, ...byNorm.data() };
+      }
+      const byField = await db.collection("published_sites").where("siteId", "==", (normalized || siteId)).limit(1).get();
+      if (byField.empty) return null;
+      return { id: byField.docs[0].id, ...byField.docs[0].data() };
     }
 
     function parseNumber(val, fallback = 0) {
@@ -663,6 +825,15 @@
 
     function formatMoney(value) {
       return parseNumber(value, 0).toLocaleString("tr-TR", { maximumFractionDigits: 2 });
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? "" : value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
     function todayIso() {
@@ -745,6 +916,197 @@
       return null;
     }
 
+    function getPanelSiteId(row, publication) {
+      return normalizeSiteId(
+        (publication && publication.siteId)
+        || (row && row.siteId)
+        || (currentProfile && currentProfile.siteId)
+      );
+    }
+
+    function toBlockKey(raw, idx) {
+      const base = String(raw || "").trim().toUpperCase();
+      if (base) return base;
+      return `B${idx + 1}`;
+    }
+
+    function buildSeedBlocks(row) {
+      const src = Array.isArray(row && row.blok_yapisi_json) ? row.blok_yapisi_json : [];
+      if (!src.length) return [];
+      return src.map((b, idx) => {
+        const blockKey = toBlockKey(b.blok || b.ad, idx);
+        const shopNumbers = parseShopNumbers(b.dukkan);
+        return {
+          blockId: blockKey,
+          name: String(b.ad || `${blockKey} Blok`),
+          floorCount: parseNumber(b.katSayisi, 0),
+          apartmentCount: parseNumber(b.daireAdet, 0),
+          shopNumbers,
+          order: idx
+        };
+      });
+    }
+
+    function makeUnitId(blockId, type, no) {
+      return `${blockId}-${type === "dukkan" ? "S" : "D"}-${String(no)}`;
+    }
+
+    async function seedPanelFromApplication(row, publication) {
+      state.panelSiteId = getPanelSiteId(row, publication);
+      if (!state.panelSiteId) throw new Error("Geçerli site ID bulunamadı.");
+      const root = panelRef();
+      const existing = await root.get();
+      if (existing.exists) return;
+
+      const blocks = buildSeedBlocks(row);
+      const year = String(new Date().getFullYear());
+      const apartmentAmount = parseNumber(row && row.aylik_aidat, 0);
+      const shopAmount = parseNumber(row && row.dukkan_aidat, apartmentAmount);
+
+      await root.set({
+        siteId: state.panelSiteId,
+        siteName: String((row && row.site_adi) || state.panelSiteId),
+        sourceApplicationId: publication && publication.applicationId ? publication.applicationId : (row && row.id ? row.id : ""),
+        seedVersion: 1,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      for (const block of blocks) {
+        await panelCollection("blocks").doc(block.blockId).set({
+          blockId: block.blockId,
+          name: block.name,
+          floorCount: block.floorCount,
+          apartmentCount: block.apartmentCount,
+          shopNumbers: block.shopNumbers,
+          order: block.order,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        for (let i = 1; i <= block.apartmentCount; i += 1) {
+          const unitId = makeUnitId(block.blockId, "daire", i);
+          await panelCollection("units").doc(unitId).set({
+            unitId,
+            blockId: block.blockId,
+            type: "daire",
+            no: String(i),
+            occupant: { fullName: "", phone: "", email: "", occupancyType: "", note: "" },
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
+
+        for (const shopNo of block.shopNumbers) {
+          const unitId = makeUnitId(block.blockId, "dukkan", shopNo);
+          await panelCollection("units").doc(unitId).set({
+            unitId,
+            blockId: block.blockId,
+            type: "dukkan",
+            no: String(shopNo),
+            occupant: { fullName: "", phone: "", email: "", occupancyType: "", note: "" },
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
+      }
+
+      await panelCollection("aidat_settings").doc(year).set({
+        year,
+        apartmentAmount,
+        shopAmount,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
+
+    async function loadPanelData() {
+      const [blocksSnap, unitsSnap, aidatSnap, itemSnap, aidatRecSnap, expRecSnap] = await Promise.all([
+        panelCollection("blocks").orderBy("order", "asc").get(),
+        panelCollection("units").get(),
+        panelCollection("aidat_settings").get(),
+        panelCollection("expense_items").get(),
+        panelCollection("aidat_records").get(),
+        panelCollection("expense_records").get()
+      ]);
+
+      const blocks = blocksSnap.docs.map((doc) => doc.data() || {});
+      state.bloklar = blocks.map((b) => ({
+        blok: String(b.blockId || ""),
+        ad: String(b.name || `${b.blockId || ""} Blok`),
+        daireAdet: parseNumber(b.apartmentCount, 0),
+        katSayisi: parseNumber(b.floorCount, 0),
+        dukkan: Array.isArray(b.shopNumbers) ? b.shopNumbers.join(",") : ""
+      }));
+      state.aktifBlok = state.bloklar[0] ? state.bloklar[0].blok : null;
+
+      state.unitsById = {};
+      unitsSnap.docs.forEach((doc) => {
+        state.unitsById[doc.id] = doc.data() || {};
+      });
+
+      state.aidatAyarlari = {};
+      state.dukkanAidatAyarlari = {};
+      aidatSnap.docs.forEach((doc) => {
+        const row = doc.data() || {};
+        const y = String(row.year || doc.id);
+        state.aidatAyarlari[y] = parseNumber(row.apartmentAmount, 0);
+        state.dukkanAidatAyarlari[y] = parseNumber(row.shopAmount, state.aidatAyarlari[y]);
+      });
+
+      state.giderKalemleri = itemSnap.docs.map((doc) => {
+        const d = doc.data() || {};
+        return {
+          id: doc.id,
+          ad: String(d.name || ""),
+          toplamTutar: parseNumber(d.totalAmount, 0),
+          daireSecim: String(d.allocationScope || "all"),
+          daireAdet: parseNumber(d.unitCount, 1),
+          daireBasi: parseNumber(d.perUnitAmount, 0)
+        };
+      });
+
+      state.aidatKayitlari = aidatRecSnap.docs.map((doc) => {
+        const d = doc.data() || {};
+        return {
+          id: doc.id,
+          tarih: String(d.date || todayIso()),
+          yil: String(d.year || ""),
+          ay: String(d.month || ""),
+          blok: String(d.blockId || ""),
+          tip: String(d.type || "daire"),
+          no: String(d.unitNo || ""),
+          expected: parseNumber(d.expectedAmount, 0),
+          odenen: parseNumber(d.paidAmount, 0)
+        };
+      });
+
+      state.ekstraGiderKayitlari = [];
+      state.sabitGiderKayitlari = [];
+      expRecSnap.docs.forEach((doc) => {
+        const d = doc.data() || {};
+        if (d.type === "sabit") {
+          state.sabitGiderKayitlari.push({
+            id: doc.id,
+            tip: "sabit",
+            tur: String(d.category || ""),
+            tutar: parseNumber(d.amount, 0),
+            tarih: String(d.date || todayIso()),
+            aciklama: String(d.note || "")
+          });
+          return;
+        }
+        state.ekstraGiderKayitlari.push({
+          id: doc.id,
+          tip: "ekstra",
+          tarih: String(d.date || todayIso()),
+          kalemId: String(d.expenseItemId || ""),
+          kalemAd: String(d.expenseItemName || ""),
+          blok: String(d.blockId || ""),
+          daireNo: String(d.unitNo || ""),
+          expected: parseNumber(d.expectedAmount, 0),
+          odenen: parseNumber(d.paidAmount, 0),
+          note: String(d.note || "")
+        });
+      });
+    }
+
     function parseShopNumbers(rawValue) {
       const raw = String(rawValue || "").trim();
       if (!raw) return [];
@@ -793,8 +1155,9 @@
     }
 
     function getYears() {
-      const y = new Date().getFullYear();
-      return [y - 1, y, y + 1, y + 2, y + 3].map(String);
+      const years = [];
+      for (let y = 2026; y <= 2035; y += 1) years.push(String(y));
+      return years;
     }
 
     function renderSelect(elId, options, selectedValue) {
@@ -949,8 +1312,35 @@
       state.aktifBlok = blok.blok;
       const daireAdet = parseNumber(blok.daireAdet, 0);
       const dukkanlar = parseShopNumbers(blok.dukkan);
-      const dairePills = Array.from({ length: daireAdet }, (_, idx) => `<span class="pill">${blok.blok} D${idx + 1}</span>`).join("");
-      const dukkanPills = dukkanlar.map((n) => `<span class="pill">${blok.blok} S${n}</span>`).join("");
+      const canEditUnits = canWritePanel();
+      const unitCards = [];
+
+      for (let i = 1; i <= daireAdet; i += 1) {
+        const unitId = makeUnitId(blok.blok, "daire", i);
+        const unit = state.unitsById[unitId] || {};
+        const occ = unit.occupant || {};
+        unitCards.push(`
+          <div class="unit-card">
+            <strong>${blok.blok} Blok / Daire ${i}</strong>
+            <small>${occ.fullName ? escapeHtml(occ.fullName) : "Sakin bilgisi girilmedi"}</small>
+            <div class="muted">${occ.phone ? escapeHtml(occ.phone) : "-"}</div>
+            ${canEditUnits ? `<button type="button" class="btn btn-ghost" data-unit-edit="${unitId}">Düzenle</button>` : ""}
+          </div>
+        `);
+      }
+      for (const shopNo of dukkanlar) {
+        const unitId = makeUnitId(blok.blok, "dukkan", shopNo);
+        const unit = state.unitsById[unitId] || {};
+        const occ = unit.occupant || {};
+        unitCards.push(`
+          <div class="unit-card">
+            <strong>${blok.blok} Blok / Dükkan ${escapeHtml(String(shopNo))}</strong>
+            <small>${occ.fullName ? escapeHtml(occ.fullName) : "Sakin bilgisi girilmedi"}</small>
+            <div class="muted">${occ.phone ? escapeHtml(occ.phone) : "-"}</div>
+            ${canEditUnits ? `<button type="button" class="btn btn-ghost" data-unit-edit="${unitId}">Düzenle</button>` : ""}
+          </div>
+        `);
+      }
       document.getElementById("blokContent").innerHTML = `
         <div class="card-grid">
           <div class="mini"><small>Blok</small><strong>${blok.ad || `${blok.blok} Blok`}</strong></div>
@@ -958,13 +1348,82 @@
           <div class="mini"><small>Kat Sayısı</small><strong>${parseNumber(blok.katSayisi, 0)}</strong></div>
           <div class="mini"><small>Dükkan Sayısı</small><strong>${dukkanlar.length}</strong></div>
         </div>
-        <div style="margin-top:10px;"><div class="muted">Daireler</div><div>${dairePills || "-"}</div></div>
-        <div style="margin-top:8px;"><div class="muted">Dükkanlar</div><div>${dukkanPills || '<span class="muted">Dükkan yok</span>'}</div></div>
+        <div class="unit-grid">${unitCards.join("") || '<div class="muted">Bağımsız bölüm bulunamadı.</div>'}</div>
       `;
+
+      document.querySelectorAll("[data-unit-edit]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const unitId = btn.getAttribute("data-unit-edit");
+          if (!unitId) return;
+          openUnitModal(unitId);
+        });
+      });
     }
 
-    function saveAidatRecord() {
-      if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
+    function closeUnitModal() {
+      const modal = document.getElementById("unitModal");
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+      editingUnitId = "";
+    }
+
+    function openUnitModal(unitId) {
+      if (!canWritePanel()) {
+        setStateMessage("Bu işlem için yetkiniz yok.", "error");
+        return;
+      }
+      const unit = state.unitsById[unitId] || {};
+      const occupant = unit.occupant || {};
+      editingUnitId = unitId;
+      document.getElementById("unitModalTitle").textContent = `${unitId} Düzenle`;
+      document.getElementById("u_fullName").value = occupant.fullName || "";
+      document.getElementById("u_phone").value = occupant.phone || "";
+      document.getElementById("u_email").value = occupant.email || "";
+      document.getElementById("u_occupancyType").value = occupant.occupancyType || "";
+      document.getElementById("u_note").value = occupant.note || "";
+      const modal = document.getElementById("unitModal");
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    async function saveUnitOccupant(event) {
+      event.preventDefault();
+      if (!editingUnitId) return;
+      if (!canWritePanel()) {
+        setStateMessage("Bu işlem için yetkiniz yok.", "error");
+        return;
+      }
+      const saveBtn = document.getElementById("saveUnitBtn");
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Kaydediliyor...";
+      try {
+        const fullName = String(document.getElementById("u_fullName").value || "").trim();
+        const phone = String(document.getElementById("u_phone").value || "").trim();
+        const email = normalizeEmail(document.getElementById("u_email").value || "");
+        const occupancyType = String(document.getElementById("u_occupancyType").value || "").trim();
+        const note = String(document.getElementById("u_note").value || "").trim();
+        await panelCollection("units").doc(editingUnitId).set({
+          occupant: { fullName, phone, email, occupancyType, note },
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        state.unitsById[editingUnitId] = {
+          ...(state.unitsById[editingUnitId] || {}),
+          occupant: { fullName, phone, email, occupancyType, note }
+        };
+        closeUnitModal();
+        setStateMessage("Bağımsız bölüm bilgisi kaydedildi.", "ok");
+        renderDaireTab();
+      } catch (err) {
+        console.error(err);
+        setStateMessage("Bağımsız bölüm bilgisi kaydedilemedi.", "error");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Kaydet";
+      }
+    }
+
+    async function saveAidatRecord() {
+      if (!canWritePanel()) {
         setStateMessage("Bu işlem için yetkiniz yok.", "error");
         return;
       }
@@ -980,8 +1439,9 @@
       }
       const expected = parseNumber(document.getElementById("aidatBeklenen").value, 0);
       const paid = parseNumber(document.getElementById("aidatOdenen").value, expected);
-      state.aidatKayitlari.push({
-        id: `aidat_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      const recordId = `aidat_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      const payload = {
+        id: recordId,
         tarih,
         yil,
         ay,
@@ -990,10 +1450,27 @@
         no: daireNo || dukkanNo,
         expected,
         odenen: Math.max(0, paid)
-      });
-      document.getElementById("aidatInfo").textContent = `Kayıt eklendi: ${blok} Blok ${daireNo ? `Daire ${daireNo}` : `Dükkan ${dukkanNo}`}`;
-      setStateMessage("Aidat kaydı eklendi.", "ok");
-      renderAll();
+      };
+      try {
+        await panelCollection("aidat_records").doc(recordId).set({
+          date: payload.tarih,
+          year: payload.yil,
+          month: payload.ay,
+          blockId: payload.blok,
+          type: payload.tip,
+          unitNo: payload.no,
+          expectedAmount: payload.expected,
+          paidAmount: payload.odenen,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        state.aidatKayitlari.push(payload);
+        document.getElementById("aidatInfo").textContent = `Kayıt eklendi: ${blok} Blok ${daireNo ? `Daire ${daireNo}` : `Dükkan ${dukkanNo}`}`;
+        setStateMessage("Aidat kaydı eklendi.", "ok");
+        renderAll();
+      } catch (err) {
+        console.error(err);
+        setStateMessage("Aidat kaydı kaydedilemedi.", "error");
+      }
     }
 
     function renderAidatTab() {
@@ -1035,8 +1512,8 @@
         .concat(state.giderKalemleri.map((g) => ({ value: g.ad, label: g.ad }))), "");
     }
 
-    function saveEkstraGider() {
-      if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
+    async function saveEkstraGider() {
+      if (!canWritePanel()) {
         setStateMessage("Bu işlem için yetkiniz yok.", "error");
         return;
       }
@@ -1052,8 +1529,9 @@
       const expected = parseNumber(document.getElementById("giderBeklenen").value, kalem.daireBasi);
       const paid = parseNumber(document.getElementById("giderOdenen").value, expected);
       const note = (document.getElementById("giderNot").value || "").trim();
-      state.ekstraGiderKayitlari.push({
-        id: `eg_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      const recId = `eg_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      const payload = {
+        id: recId,
         tip: "ekstra",
         tarih,
         kalemId: kalem.id,
@@ -1063,14 +1541,32 @@
         expected,
         odenen: Math.max(0, paid),
         note
-      });
-      document.getElementById("giderInfo").textContent = `${kalem.ad} kaydı eklendi: ${blok} Blok Daire ${daireNo}`;
-      setStateMessage("Ekstra gider ödemesi eklendi.", "ok");
-      renderAll();
+      };
+      try {
+        await panelCollection("expense_records").doc(recId).set({
+          type: "ekstra",
+          date: payload.tarih,
+          expenseItemId: payload.kalemId,
+          expenseItemName: payload.kalemAd,
+          blockId: payload.blok,
+          unitNo: payload.daireNo,
+          expectedAmount: payload.expected,
+          paidAmount: payload.odenen,
+          note: payload.note,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        state.ekstraGiderKayitlari.push(payload);
+        document.getElementById("giderInfo").textContent = `${kalem.ad} kaydı eklendi: ${blok} Blok Daire ${daireNo}`;
+        setStateMessage("Ekstra gider ödemesi eklendi.", "ok");
+        renderAll();
+      } catch (err) {
+        console.error(err);
+        setStateMessage("Ekstra gider kaydı kaydedilemedi.", "error");
+      }
     }
 
-    function saveSabitGider() {
-      if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
+    async function saveSabitGider() {
+      if (!canWritePanel()) {
         setStateMessage("Bu işlem için yetkiniz yok.", "error");
         return;
       }
@@ -1082,19 +1578,34 @@
         setStateMessage("Sabit gider için tür ve tutar zorunlu.", "error");
         return;
       }
-      state.sabitGiderKayitlari.push({
-        id: `sg_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+      const recId = `sg_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      const payload = {
+        id: recId,
         tip: "sabit",
         tur,
         tutar,
         tarih,
         aciklama
-      });
-      document.getElementById("sabitTur").value = "";
-      document.getElementById("sabitTutar").value = "";
-      document.getElementById("sabitAciklama").value = "";
-      setStateMessage("Sabit gider eklendi.", "ok");
-      renderAll();
+      };
+      try {
+        await panelCollection("expense_records").doc(recId).set({
+          type: "sabit",
+          category: payload.tur,
+          amount: payload.tutar,
+          date: payload.tarih,
+          note: payload.aciklama,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        state.sabitGiderKayitlari.push(payload);
+        document.getElementById("sabitTur").value = "";
+        document.getElementById("sabitTutar").value = "";
+        document.getElementById("sabitAciklama").value = "";
+        setStateMessage("Sabit gider eklendi.", "ok");
+        renderAll();
+      } catch (err) {
+        console.error(err);
+        setStateMessage("Sabit gider kaydedilemedi.", "error");
+      }
     }
 
     function renderGiderTable() {
@@ -1295,8 +1806,8 @@
 
       document.getElementById("giderToplamTutar").addEventListener("input", updateGiderDaireBasi);
       document.getElementById("giderDaireSecim").addEventListener("change", updateGiderDaireBasi);
-      document.getElementById("saveGiderKalemBtn").addEventListener("click", () => {
-        if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
+      document.getElementById("saveGiderKalemBtn").addEventListener("click", async () => {
+        if (!canWritePanel()) {
           setStateMessage("Bu işlem için yetkiniz yok.", "error");
           return;
         }
@@ -1309,49 +1820,95 @@
           setStateMessage("Gider kalemi adı ve toplam tutar zorunlu.", "error");
           return;
         }
-        state.giderKalemleri.push({
-          id: `kalem_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+        const itemId = `kalem_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+        const payload = {
+          id: itemId,
           ad,
           toplamTutar: toplam,
           daireSecim: secim,
           daireAdet: adet,
           daireBasi
-        });
-        document.getElementById("giderKalemAd").value = "";
-        document.getElementById("giderToplamTutar").value = "";
-        document.getElementById("giderDaireBasiTutar").value = "";
-        setStateMessage("Gider kalemi eklendi.", "ok");
-        renderAll();
+        };
+        try {
+          await panelCollection("expense_items").doc(itemId).set({
+            name: payload.ad,
+            totalAmount: payload.toplamTutar,
+            allocationScope: payload.daireSecim,
+            unitCount: payload.daireAdet,
+            perUnitAmount: payload.daireBasi,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          state.giderKalemleri.push(payload);
+          document.getElementById("giderKalemAd").value = "";
+          document.getElementById("giderToplamTutar").value = "";
+          document.getElementById("giderDaireBasiTutar").value = "";
+          setStateMessage("Gider kalemi eklendi.", "ok");
+          renderAll();
+        } catch (err) {
+          console.error(err);
+          setStateMessage("Gider kalemi kaydedilemedi.", "error");
+        }
       });
 
-      document.getElementById("saveAidatAyarBtn").addEventListener("click", () => {
-        if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
+      document.getElementById("saveAidatAyarBtn").addEventListener("click", async () => {
+        if (!canWritePanel()) {
           setStateMessage("Bu işlem için yetkiniz yok.", "error");
           return;
         }
         const yil = document.getElementById("ayarAidatYil").value;
         const tutar = parseNumber(document.getElementById("ayarAidatTutar").value, 0);
         if (tutar <= 0) return setStateMessage("Aidat tutarı 0'dan büyük olmalı.", "error");
-        state.aidatAyarlari[yil] = tutar;
-        setStateMessage(`Daire aidatı kaydedildi (${yil}).`, "ok");
-        renderAll();
+        try {
+          await panelCollection("aidat_settings").doc(yil).set({
+            year: yil,
+            apartmentAmount: tutar,
+            shopAmount: parseNumber(state.dukkanAidatAyarlari[yil], tutar),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          state.aidatAyarlari[yil] = tutar;
+          if (!state.dukkanAidatAyarlari[yil]) state.dukkanAidatAyarlari[yil] = tutar;
+          setStateMessage(`Daire aidatı kaydedildi (${yil}).`, "ok");
+          renderAll();
+        } catch (err) {
+          console.error(err);
+          setStateMessage("Aidat ayarı kaydedilemedi.", "error");
+        }
       });
 
-      document.getElementById("saveDukkanAyarBtn").addEventListener("click", () => {
-        if (currentRole === APARTYONET_ROLES.RESIDENT || isReadonlyMode) {
+      document.getElementById("saveDukkanAyarBtn").addEventListener("click", async () => {
+        if (!canWritePanel()) {
           setStateMessage("Bu işlem için yetkiniz yok.", "error");
           return;
         }
         const yil = document.getElementById("ayarDukkanYil").value;
         const tutar = parseNumber(document.getElementById("ayarDukkanTutar").value, 0);
         if (tutar <= 0) return setStateMessage("Dükkan aidatı 0'dan büyük olmalı.", "error");
-        state.dukkanAidatAyarlari[yil] = tutar;
-        setStateMessage(`Dükkan aidatı kaydedildi (${yil}).`, "ok");
-        renderAll();
+        try {
+          await panelCollection("aidat_settings").doc(yil).set({
+            year: yil,
+            apartmentAmount: parseNumber(state.aidatAyarlari[yil], tutar),
+            shopAmount: tutar,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          state.dukkanAidatAyarlari[yil] = tutar;
+          if (!state.aidatAyarlari[yil]) state.aidatAyarlari[yil] = tutar;
+          setStateMessage(`Dükkan aidatı kaydedildi (${yil}).`, "ok");
+          renderAll();
+        } catch (err) {
+          console.error(err);
+          setStateMessage("Dükkan aidat ayarı kaydedilemedi.", "error");
+        }
       });
 
       document.getElementById("tabloAidatYil").addEventListener("change", renderAidatTableSummary);
       document.getElementById("raporOlusturBtn").addEventListener("click", generateReport);
+
+      document.getElementById("unitForm").addEventListener("submit", saveUnitOccupant);
+      document.getElementById("closeUnitModalBtn").addEventListener("click", closeUnitModal);
+      document.getElementById("cancelUnitBtn").addEventListener("click", closeUnitModal);
+      document.getElementById("unitModal").addEventListener("click", (e) => {
+        if (e.target === document.getElementById("unitModal")) closeUnitModal();
+      });
 
       document.getElementById("logoutBtn").addEventListener("click", async () => {
         await auth.signOut();
@@ -1392,22 +1949,28 @@
       }
 
       state.row = row;
-      state.bloklar = Array.isArray(row.blok_yapisi_json) ? row.blok_yapisi_json : [];
-      state.aktifBlok = state.bloklar[0] ? state.bloklar[0].blok : null;
+      state.aidatAyarlari = {};
+      state.dukkanAidatAyarlari = {};
+      state.aidatKayitlari = [];
+      state.giderKalemleri = [];
+      state.ekstraGiderKayitlari = [];
+      state.sabitGiderKayitlari = [];
+      state.unitsById = {};
+
+      await seedPanelFromApplication(row, publication);
+      await loadPanelData();
+
+      if (!state.bloklar.length) {
+        throw new Error("Panel blok verisi bulunamadı. Yönetici ile iletişime geçin.");
+      }
 
       const nowYear = String(new Date().getFullYear());
-      const daireAidatDefault = parseNumber(row.aylik_aidat, 1200);
-      const dukkanAidatDefault = parseNumber(row.dukkan_aidat, daireAidatDefault);
-      state.aidatAyarlari[nowYear] = daireAidatDefault;
-      state.dukkanAidatAyarlari[nowYear] = dukkanAidatDefault;
-      state.aidatAyarlari[String(Number(nowYear) + 1)] = daireAidatDefault * 1.1;
-      state.dukkanAidatAyarlari[String(Number(nowYear) + 1)] = dukkanAidatDefault * 1.1;
-
-      const totalDaire = Math.max(1, getTotalDaire());
-      state.giderKalemleri = [
-        { id: "kalem_1", ad: "Hidrofor Bakımı", toplamTutar: totalDaire * 220, daireSecim: "all", daireAdet: totalDaire, daireBasi: 220 },
-        { id: "kalem_2", ad: "Asansör Revizyon", toplamTutar: totalDaire * 160, daireSecim: "all", daireAdet: totalDaire, daireBasi: 160 }
-      ];
+      if (!state.aidatAyarlari[nowYear]) {
+        const daireAidatDefault = parseNumber(row.aylik_aidat, 1200);
+        const dukkanAidatDefault = parseNumber(row.dukkan_aidat, daireAidatDefault);
+        state.aidatAyarlari[nowYear] = daireAidatDefault;
+        state.dukkanAidatAyarlari[nowYear] = dukkanAidatDefault;
+      }
 
       refreshCommonSelectors();
       document.getElementById("aidatTarih").value = todayIso();

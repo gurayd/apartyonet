@@ -82,6 +82,29 @@ service cloud.firestore {
       return mode == null || mode in ["blocked", "readonly"];
     }
 
+    function isPanelReaderForSite(siteId) {
+      return isActive() && (
+        isSuperAdmin()
+        || (isAdmin() && mySiteId() == siteId)
+        || mySiteId() == siteId
+      );
+    }
+
+    function isPanelWriterForSite(siteId) {
+      return isActive() && (
+        isSuperAdmin()
+        || (isAdmin() && mySiteId() == siteId)
+        || (isSiteManager() && mySiteId() == siteId)
+      );
+    }
+
+    function hasPublishedAccessToApplication(docId) {
+      return mySiteId() != ""
+        && mySiteId() != "*"
+        && exists(/databases/$(database)/documents/published_sites/$(mySiteId()))
+        && get(/databases/$(database)/documents/published_sites/$(mySiteId())).data.applicationId == docId;
+    }
+
     match /users/{uid} {
       allow read: if signedIn() && (
         request.auth.uid == uid ||
@@ -167,9 +190,24 @@ service cloud.firestore {
       allow delete: if isSuperAdmin() || (isAdmin() && resource.data.siteId == mySiteId());
     }
 
+    match /site_panels/{siteId} {
+      allow read: if isPanelReaderForSite(siteId);
+      allow create, update: if isPanelWriterForSite(siteId);
+      allow delete: if isSuperAdmin() || (isAdmin() && mySiteId() == siteId);
+
+      match /{subCollection}/{docId} {
+        allow read: if isPanelReaderForSite(siteId);
+        allow create, update: if isPanelWriterForSite(siteId);
+        allow delete: if isSuperAdmin() || (isAdmin() && mySiteId() == siteId) || (isSiteManager() && mySiteId() == siteId);
+      }
+    }
+
     match /basvurular/{docId} {
       allow create: if true;
-      allow read: if isActive() && sameSite(resource.data);
+      allow read: if isActive() && (
+        sameSite(resource.data)
+        || (isManager() && hasPublishedAccessToApplication(docId))
+      );
       allow update: if (isSuperAdmin() && sameSite(resource.data) && sameSite(request.resource.data))
         || (isAdmin() && sameSiteStrict(resource.data) && sameSiteStrict(request.resource.data));
       allow delete: if (isSuperAdmin() && sameSite(resource.data))
