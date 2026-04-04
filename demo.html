@@ -440,6 +440,66 @@
       flex-wrap: wrap;
     }
 
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      align-items: end;
+      margin-top: 12px;
+    }
+
+    .title-inline {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .profile-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .staff-list {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .staff-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid rgba(152, 175, 214, 0.25);
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(11, 18, 31, 0.45);
+    }
+
+    .staff-main {
+      display: grid;
+      gap: 4px;
+    }
+
+    .staff-main strong {
+      font-size: 0.96rem;
+      color: #e8f0ff;
+    }
+
+    .staff-meta {
+      color: var(--text-soft);
+      font-size: 0.83rem;
+    }
+
+    .staff-empty {
+      border: 1px dashed rgba(152, 175, 214, 0.4);
+      border-radius: 12px;
+      padding: 14px;
+      color: var(--text-soft);
+      font-size: 0.86rem;
+    }
+
     @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
       .sidebar { position: static; }
@@ -459,6 +519,7 @@
         <span>ApartYönet Site Paneli</span>
       </a>
       <div class="top-actions">
+        <button id="profileBtn" class="btn btn-ghost" type="button" style="display:none;">Profil</button>
         <a id="adminBackBtn" class="btn btn-ghost" href="/admin.html" style="display:none;">Admin'e Dön</a>
         <button id="logoutBtn" class="btn btn-primary" type="button">Çıkış Yap</button>
       </div>
@@ -478,6 +539,7 @@
         <button class="tab-btn" data-tab="tablo">Genel Tablo</button>
         <button class="tab-btn" data-tab="belirleme">Aidat Belirleme</button>
         <button class="tab-btn" data-tab="raporlar">Raporlar</button>
+        <button class="tab-btn" data-tab="profil">Profil</button>
       </aside>
 
       <main class="content">
@@ -663,6 +725,28 @@
           <div class="card-grid" id="raporKartlar"></div>
         </section>
 
+        <section id="tab-profil" class="tab-pane">
+          <h2 class="section-title">Profil ve Yetkili Kişiler</h2>
+          <div class="muted">Site yönetimi için yeni görevli tanımlayın ve yetkili listesini buradan yönetin.</div>
+          <div class="profile-grid">
+            <div class="f"><label>İsim Soyisim</label><input id="p_fullName" type="text" placeholder="Örn. Ayşe Demir" /></div>
+            <div class="f"><label>Telefon</label><input id="p_phone" type="text" placeholder="05xx xxx xx xx" /></div>
+            <div class="f"><label>E-posta</label><input id="p_email" type="email" placeholder="ornek@email.com" /></div>
+            <div class="f">
+              <label>Ünvan</label>
+              <div class="title-inline">
+                <select id="p_title"></select>
+                <button id="addTitleBtn" class="btn btn-ghost" type="button" aria-label="Ünvan ekle">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button id="addStaffBtn" class="btn btn-primary" type="button">Kişi Ekle</button>
+          </div>
+          <div id="profileInfo" class="muted" style="margin-top:8px;"></div>
+          <div id="profileList" class="staff-list"></div>
+        </section>
+
         <div id="state" class="state"></div>
       </main>
     </section>
@@ -721,9 +805,20 @@
       aidatKayitlari: [],
       giderKalemleri: [],
       ekstraGiderKayitlari: [],
-      sabitGiderKayitlari: []
+      sabitGiderKayitlari: [],
+      profileTitles: [],
+      staffMembers: []
     };
     let editingUnitId = "";
+    const DEFAULT_PROFILE_TITLES = [
+      "Yönetici",
+      "Yönetici Yardımcısı",
+      "Sayman",
+      "Yazman",
+      "Güvenlik Görevlisi",
+      "Temizlikçi",
+      "Bahçıvan"
+    ];
 
     const firebaseConfig = {
       apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
@@ -786,6 +881,14 @@
         APARTYONET_ROLES.ADMIN,
         APARTYONET_ROLES.SITE_MANAGER
       ].includes(currentRole);
+    }
+
+    function canAccessProfilePanel(role) {
+      return [
+        APARTYONET_ROLES.SUPER_ADMIN,
+        APARTYONET_ROLES.ADMIN,
+        APARTYONET_ROLES.SITE_MANAGER
+      ].includes(role);
     }
 
     function panelRef() {
@@ -873,7 +976,9 @@
 
     function getAllowedTabsByRole(role) {
       if (role === APARTYONET_ROLES.RESIDENT) return ["aidat"];
-      return ["daireler", "aidat", "gider", "tablo", "belirleme", "raporlar"];
+      const tabs = ["daireler", "aidat", "gider", "tablo", "belirleme", "raporlar"];
+      if (canAccessProfilePanel(role)) tabs.push("profil");
+      return tabs;
     }
 
     function applyRoleUi() {
@@ -901,6 +1006,17 @@
       const adminBackBtn = document.getElementById("adminBackBtn");
       if (!adminBackBtn) return;
       adminBackBtn.style.display = canAccess("admin_panel", currentRole) ? "inline-flex" : "none";
+      const profileBtn = document.getElementById("profileBtn");
+      if (profileBtn) profileBtn.style.display = canAccessProfilePanel(currentRole) ? "inline-flex" : "none";
+    }
+
+    function activateTab(tab) {
+      document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".tab-pane").forEach((pane) => pane.classList.remove("active"));
+      const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+      if (btn) btn.classList.add("active");
+      const target = document.getElementById(`tab-${tab}`);
+      if (target) target.classList.add("active");
     }
 
     async function loadLatestApplicationForSite(siteId) {
@@ -1022,13 +1138,15 @@
     }
 
     async function loadPanelData() {
-      const [blocksSnap, unitsSnap, aidatSnap, itemSnap, aidatRecSnap, expRecSnap] = await Promise.all([
+      const [blocksSnap, unitsSnap, aidatSnap, itemSnap, aidatRecSnap, expRecSnap, profileMetaSnap, staffSnap] = await Promise.all([
         panelCollection("blocks").orderBy("order", "asc").get(),
         panelCollection("units").get(),
         panelCollection("aidat_settings").get(),
         panelCollection("expense_items").get(),
         panelCollection("aidat_records").get(),
-        panelCollection("expense_records").get()
+        panelCollection("expense_records").get(),
+        panelCollection("profile_meta").doc("settings").get(),
+        panelCollection("staff_members").get()
       ]);
 
       const blocks = blocksSnap.docs.map((doc) => doc.data() || {});
@@ -1110,6 +1228,32 @@
           note: String(d.note || "")
         });
       });
+
+      const incomingTitles = profileMetaSnap.exists && Array.isArray((profileMetaSnap.data() || {}).titles)
+        ? (profileMetaSnap.data() || {}).titles
+        : [];
+      const mergedTitles = [...DEFAULT_PROFILE_TITLES];
+      incomingTitles.forEach((title) => {
+        const normalized = String(title || "").trim();
+        if (normalized && !mergedTitles.includes(normalized)) mergedTitles.push(normalized);
+      });
+      state.profileTitles = mergedTitles;
+
+      state.staffMembers = staffSnap.docs.map((doc) => {
+        const d = doc.data() || {};
+        const createdAtRaw = d.createdAt;
+        const createdAtMs = createdAtRaw && typeof createdAtRaw.toDate === "function"
+          ? createdAtRaw.toDate().getTime()
+          : 0;
+        return {
+          id: doc.id,
+          fullName: String(d.fullName || ""),
+          phone: String(d.phone || ""),
+          email: String(d.email || ""),
+          title: String(d.title || ""),
+          createdAtMs
+        };
+      }).sort((a, b) => b.createdAtMs - a.createdAtMs);
     }
 
     function parseShopNumbers(rawValue) {
@@ -1759,6 +1903,124 @@
       renderDukkanAyarList();
       renderGiderKalemList();
       generateReport();
+      renderProfileTab();
+    }
+
+    function renderProfileTab() {
+      const titleSelect = document.getElementById("p_title");
+      if (titleSelect) {
+        titleSelect.innerHTML = state.profileTitles
+          .map((title) => `<option value="${escapeHtml(title)}">${escapeHtml(title)}</option>`)
+          .join("");
+      }
+      const listEl = document.getElementById("profileList");
+      if (!listEl) return;
+      if (!state.staffMembers.length) {
+        listEl.innerHTML = '<div class="staff-empty">Henüz eklenmiş yetkili/görevli bulunmuyor.</div>';
+        return;
+      }
+      listEl.innerHTML = state.staffMembers.map((member) => `
+        <article class="staff-item">
+          <div class="staff-main">
+            <strong>${escapeHtml(member.fullName || "İsimsiz kayıt")}</strong>
+            <div class="staff-meta">${escapeHtml(member.title || "Ünvan belirtilmedi")}</div>
+            <div class="staff-meta">${escapeHtml(member.phone || "-")} • ${escapeHtml(member.email || "-")}</div>
+          </div>
+          ${canWritePanel() ? `<button class="btn btn-ghost" type="button" data-staff-delete="${escapeHtml(member.id)}">Sil</button>` : ""}
+        </article>
+      `).join("");
+    }
+
+    async function persistProfileTitles() {
+      await panelCollection("profile_meta").doc("settings").set({
+        titles: state.profileTitles,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
+
+    async function addCustomTitle() {
+      if (!canWritePanel()) {
+        setStateMessage("Bu işlem için yetkiniz yok.", "error");
+        return;
+      }
+      const raw = window.prompt("Yeni ünvan adı girin:");
+      const title = String(raw || "").trim();
+      if (!title) return;
+      if (state.profileTitles.includes(title)) {
+        setStateMessage("Bu ünvan zaten listede mevcut.", "error");
+        return;
+      }
+      state.profileTitles.push(title);
+      try {
+        await persistProfileTitles();
+        renderProfileTab();
+        setStateMessage("Yeni ünvan eklendi.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStateMessage("Ünvan kaydedilemedi.", "error");
+      }
+    }
+
+    async function addStaffMember() {
+      if (!canWritePanel()) {
+        setStateMessage("Bu işlem için yetkiniz yok.", "error");
+        return;
+      }
+      const fullName = (document.getElementById("p_fullName").value || "").trim();
+      const phone = (document.getElementById("p_phone").value || "").trim();
+      const email = (document.getElementById("p_email").value || "").trim();
+      const title = (document.getElementById("p_title").value || "").trim();
+      if (!fullName || !phone || !email || !title) {
+        setStateMessage("Profil alanlarında isim, telefon, e-posta ve ünvan zorunlu.", "error");
+        return;
+      }
+      const staffId = `staff_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
+      const payload = {
+        fullName,
+        phone,
+        email,
+        title,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      try {
+        await panelCollection("staff_members").doc(staffId).set(payload, { merge: true });
+        state.staffMembers.unshift({
+          id: staffId,
+          fullName,
+          phone,
+          email,
+          title,
+          createdAtMs: Date.now()
+        });
+        document.getElementById("p_fullName").value = "";
+        document.getElementById("p_phone").value = "";
+        document.getElementById("p_email").value = "";
+        document.getElementById("profileInfo").textContent = `${fullName} listeye eklendi.`;
+        renderProfileTab();
+        setStateMessage("Yetkili/görevli kaydı oluşturuldu.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStateMessage("Yetkili/görevli kaydı oluşturulamadı.", "error");
+      }
+    }
+
+    async function deleteStaffMember(staffId) {
+      if (!canWritePanel()) {
+        setStateMessage("Bu işlem için yetkiniz yok.", "error");
+        return;
+      }
+      if (!staffId) return;
+      if (!window.confirm("Bu kişiyi listeden kaldırmak istiyor musunuz?")) return;
+      try {
+        await panelCollection("staff_members").doc(staffId).delete();
+        state.staffMembers = state.staffMembers.filter((item) => item.id !== staffId);
+        renderProfileTab();
+        setStateMessage("Kişi listeden kaldırıldı.", "ok");
+      } catch (err) {
+        console.error(err);
+        setStateMessage("Kişi silinemedi.", "error");
+      }
     }
 
     function setupEvents() {
@@ -1766,13 +2028,13 @@
       eventsBound = true;
       document.querySelectorAll(".tab-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
           const tab = btn.getAttribute("data-tab");
-          document.querySelectorAll(".tab-pane").forEach((pane) => pane.classList.remove("active"));
-          const target = document.getElementById(`tab-${tab}`);
-          if (target) target.classList.add("active");
+          activateTab(tab);
         });
+      });
+
+      document.getElementById("profileBtn").addEventListener("click", () => {
+        activateTab("profil");
       });
 
       document.querySelectorAll("[data-tablo-tab]").forEach((btn) => {
@@ -1918,6 +2180,14 @@
       document.getElementById("logoutBtn").addEventListener("click", async () => {
         await auth.signOut();
         window.location.href = "/login.html";
+      });
+
+      document.getElementById("addTitleBtn").addEventListener("click", addCustomTitle);
+      document.getElementById("addStaffBtn").addEventListener("click", addStaffMember);
+      document.getElementById("profileList").addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-staff-delete]");
+        if (!btn) return;
+        deleteStaffMember(btn.getAttribute("data-staff-delete"));
       });
     }
 
