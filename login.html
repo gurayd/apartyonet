@@ -289,19 +289,16 @@
       throw new Error("Rol tanımı geçersiz. Yönetici ile iletişime geçin.");
     }
 
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        authChecked = true;
-        return;
-      }
+    async function resetSessionForManualLogin() {
       try {
-        await routeByProfile(user);
+        await auth.signOut();
       } catch (err) {
-        showError((err && err.message) || "Giriş yetkisi doğrulanamadı.");
-      } finally {
-        authChecked = true;
+        console.error(err);
       }
-    });
+      authChecked = true;
+    }
+
+    const loginInitPromise = resetSessionForManualLogin();
 
     document.getElementById("loginForm").addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -320,15 +317,11 @@
       submitBtn.textContent = "Giris yapiliyor...";
 
       try {
+        await loginInitPromise;
         authChecked = false;
-        await auth.signInWithEmailAndPassword(email, password);
-        const waitStart = Date.now();
-        while (!authChecked && Date.now() - waitStart < 4000) {
-          await new Promise((resolve) => setTimeout(resolve, 50));
-        }
-        if (!authChecked) {
-          showError("Giriş doğrulaması uzun sürdü. Ağ engeli veya eklenti engeli olabilir, tekrar deneyin.");
-        }
+        const cred = await auth.signInWithEmailAndPassword(email, password);
+        await routeByProfile(cred.user);
+        authChecked = true;
       } catch (err) {
         let msg = "Giris basarisiz. Bilgileri kontrol edin.";
         if (err && err.code === "auth/user-not-found") msg = "Bu e-posta ile bir hesap bulunamadi.";

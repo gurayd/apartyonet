@@ -347,7 +347,7 @@
   <script src="/js/authz.js"></script>
 </head>
 <body>
-  <div class="container">
+  <div id="demoApp" class="container" style="display:none;">
     <header class="top">
       <a class="brand" href="/index.html">
         <img src="assets/apartyonet-logo-white-transparent.svg" alt="ApartYönet" />
@@ -1399,9 +1399,14 @@
       setStateMessage("Demo verisi yüklendi.", "ok");
     }
 
+    function redirectToLogin() {
+      const next = window.location.pathname + window.location.search;
+      window.location.href = "/login.html?next=" + encodeURIComponent(next);
+    }
+
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
-        window.location.href = "/login.html";
+        redirectToLogin();
         return;
       }
       try {
@@ -1409,12 +1414,12 @@
         currentProfile = await getCurrentUserProfile(db, user.uid);
         if (!currentProfile || !isProfileActive(currentProfile)) {
           await auth.signOut();
-          window.location.href = "/login.html";
+          redirectToLogin();
           return;
         }
         if (!canAccess("demo_panel", currentProfile.role)) {
           await auth.signOut();
-          window.location.href = "/login.html";
+          redirectToLogin();
           return;
         }
         currentRole = currentProfile.role;
@@ -1462,6 +1467,7 @@
 
         setupEvents();
         await loadDemoData({ docId, publication: currentPublication });
+        document.getElementById("demoApp").style.display = "";
       } catch (err) {
         console.error(err);
         setStateMessage(err && err.code === "permission-denied"
