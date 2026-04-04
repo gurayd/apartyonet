@@ -638,6 +638,10 @@
       return ["demo", "admin", "login", "basvuru", "admin-yonetimi"].includes(String(slug || "").toLowerCase());
     }
 
+    function normalizeSiteId(value) {
+      return slugifySiteId(String(value || ""));
+    }
+
     async function getPublicationBySlug(slug) {
       if (!slug || isReservedSlug(slug)) return null;
       const snap = await db.collection("published_sites").where("slug", "==", slug).limit(1).get();
@@ -1363,10 +1367,10 @@
       if (!row.siteId) {
         throw new Error("Başvuru site bilgisi eksik.");
       }
-      if (!isSuperAdmin && row.siteId !== currentProfile.siteId) {
+      if (!isSuperAdmin && normalizeSiteId(row.siteId) !== normalizeSiteId(currentProfile.siteId)) {
         throw new Error("Bu site verisini görüntüleme yetkiniz yok.");
       }
-      if (isScopedAdmin && currentProfile.siteId !== "*" && row.siteId !== currentProfile.siteId) {
+      if (isScopedAdmin && currentProfile.siteId !== "*" && normalizeSiteId(row.siteId) !== normalizeSiteId(currentProfile.siteId)) {
         throw new Error("Bu site verisini görüntüleme yetkiniz yok.");
       }
 
@@ -1436,7 +1440,7 @@
           if (!publication) {
             throw new Error("Bu apartman paneli henüz yayında değil.");
           }
-          if (publication.siteId && currentProfile.siteId !== "*" && publication.siteId !== currentProfile.siteId) {
+          if (publication.siteId && currentProfile.siteId !== "*" && normalizeSiteId(publication.siteId) !== normalizeSiteId(currentProfile.siteId)) {
             throw new Error("Bu apartman panelini görüntüleme yetkiniz yok.");
           }
           currentPublication = publication;
@@ -1470,6 +1474,7 @@
         document.getElementById("demoApp").style.display = "";
       } catch (err) {
         console.error(err);
+        document.getElementById("demoApp").style.display = "";
         setStateMessage(err && err.code === "permission-denied"
           ? "Bu veriyi görüntüleme yetkiniz yok. Firestore kurallarını kontrol edin."
           : (err.message || "Demo yüklenemedi."), "error");

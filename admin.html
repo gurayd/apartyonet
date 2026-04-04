@@ -1109,14 +1109,17 @@
         }
       } catch (err) {
         if (err && err.code === "auth/email-already-in-use") {
+          const uidFromPassword = await getAuthUidBySignIn(managerEmail, managerPassword);
           const found = await findUserByEmail(managerEmail);
-          if (found && found.uid) {
+
+          if (uidFromPassword) {
+            uid = uidFromPassword;
+          } else if (managerPassword && managerPassword.length >= 6) {
+            throw new Error("Bu e-posta zaten kayıtlı. Girdiğiniz şifre mevcut hesapla eşleşmiyor.");
+          } else if (found && found.uid) {
             uid = found.uid;
           } else {
-            uid = await getAuthUidBySignIn(managerEmail, managerPassword);
-            if (!uid) {
-              throw new Error("Bu e-posta daha önce kullanılmış. Bu hesabın şifresini girin veya farklı e-posta kullanın.");
-            }
+            throw new Error("Bu e-posta Auth'ta var ancak users kaydı yok. Yönetici ile UID eşlemesi yapılmalı.");
           }
         } else {
           throw err;
