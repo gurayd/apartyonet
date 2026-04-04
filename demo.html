@@ -351,16 +351,16 @@
     <header class="top">
       <a class="brand" href="/index.html">
         <img src="assets/apartyonet-logo-white-transparent.svg" alt="ApartYönet" />
-        <span>ApartYönet Demo Panel</span>
+        <span>ApartYönet Site Paneli</span>
       </a>
       <div class="top-actions">
-        <a id="adminBackBtn" class="btn btn-ghost" href="/admin.html">Admin'e Dön</a>
+        <a id="adminBackBtn" class="btn btn-ghost" href="/admin.html" style="display:none;">Admin'e Dön</a>
         <button id="logoutBtn" class="btn btn-primary" type="button">Çıkış Yap</button>
       </div>
     </header>
 
     <section class="hero">
-      <h1 id="heroTitle">Demo panel hazırlanıyor...</h1>
+      <h1 id="heroTitle">Site paneli yükleniyor...</h1>
       <p id="heroSub">Başvuru verisi okunuyor.</p>
       <div class="stats" id="heroStats"></div>
     </section>
@@ -702,10 +702,7 @@
 
     function applyRoleUi() {
       const allowed = getAllowedTabsByRole(currentRole);
-      const adminBackBtn = document.getElementById("adminBackBtn");
-      if (adminBackBtn) {
-        adminBackBtn.style.display = canAccess("admin_panel", currentRole) ? "inline-flex" : "none";
-      }
+      applyAdminBackVisibility();
 
       document.querySelectorAll(".tab-btn").forEach((btn) => {
         const tab = btn.getAttribute("data-tab");
@@ -722,6 +719,30 @@
         const firstTab = document.querySelector('.tab-btn[data-tab="aidat"]');
         if (firstTab) firstTab.click();
       }
+    }
+
+    function applyAdminBackVisibility() {
+      const adminBackBtn = document.getElementById("adminBackBtn");
+      if (!adminBackBtn) return;
+      adminBackBtn.style.display = canAccess("admin_panel", currentRole) ? "inline-flex" : "none";
+    }
+
+    async function loadLatestApplicationForSite(siteId) {
+      const candidates = [String(siteId || "").trim(), normalizeSiteId(siteId)];
+      const tried = new Set();
+      for (const candidate of candidates) {
+        if (!candidate || tried.has(candidate)) continue;
+        tried.add(candidate);
+        const q = db.collection("basvurular")
+          .where("siteId", "==", candidate)
+          .orderBy("createdAt", "desc")
+          .limit(1);
+        const snap = await q.get();
+        if (!snap.empty) {
+          return { id: snap.docs[0].id, ...snap.docs[0].data() };
+        }
+      }
+      return null;
     }
 
     function parseShopNumbers(rawValue) {
@@ -1354,12 +1375,8 @@
         if (!docSnap.exists) throw new Error("Başvuru bulunamadı.");
         row = { id: docSnap.id, ...docSnap.data() };
       } else {
-        const q = enforceSiteScope(db.collection("basvurular"), currentProfile.siteId)
-          .orderBy("createdAt", "desc")
-          .limit(1);
-        const snap = await q.get();
-        if (snap.empty) throw new Error("Bu site için başvuru verisi bulunamadı.");
-        row = { id: snap.docs[0].id, ...snap.docs[0].data() };
+        row = await loadLatestApplicationForSite(currentProfile.siteId);
+        if (!row) throw new Error("Bu site için başvuru verisi bulunamadı.");
       }
 
       const isSuperAdmin = currentProfile.role === APARTYONET_ROLES.SUPER_ADMIN;
@@ -1428,6 +1445,8 @@
         }
         currentRole = currentProfile.role;
         currentUnit = parseUnitId(currentProfile.unitId);
+        applyAdminBackVisibility();
+        setupEvents();
         const docId = getQueryParam("id");
         const slug = getPathSlug();
         const isSlugRoute = !!slug && !isReservedSlug(slug);
@@ -1469,7 +1488,6 @@
           }
         }
 
-        setupEvents();
         await loadDemoData({ docId, publication: currentPublication });
         document.getElementById("demoApp").style.display = "";
       } catch (err) {
