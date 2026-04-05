@@ -381,7 +381,9 @@
     .modal.open { display: grid; }
 
     .modal-card {
-      width: min(560px, 100%);
+      width: min(1180px, 100%);
+      max-height: calc(100vh - 36px);
+      overflow: auto;
       border: 1px solid var(--line);
       border-radius: 14px;
       background: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.96));
@@ -438,6 +440,113 @@
       justify-content: flex-end;
       gap: 8px;
       flex-wrap: wrap;
+    }
+
+    .unit-head-meta {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 3px;
+    }
+
+    .unit-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid rgba(152, 175, 214, 0.2);
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .unit-tab-btn {
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 8px 8px 9px;
+      background: transparent;
+      color: #d8e5ff;
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+
+    .unit-tab-btn.active {
+      color: #8ebdff;
+      border-bottom-color: #4f7cff;
+    }
+
+    .unit-tab-pane { display: none; }
+    .unit-tab-pane.active { display: block; }
+
+    .split-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .subsection {
+      border: 1px solid rgba(152, 175, 214, 0.18);
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(11, 18, 31, 0.58);
+    }
+
+    .subsection-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .repeat-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .repeat-item {
+      border: 1px solid rgba(152, 175, 214, 0.18);
+      border-radius: 10px;
+      padding: 8px;
+      background: rgba(11, 18, 31, 0.58);
+    }
+
+    .repeat-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+
+    .note-log {
+      margin-top: 8px;
+      display: grid;
+      gap: 6px;
+      max-height: 210px;
+      overflow: auto;
+    }
+
+    .note-row {
+      border: 1px solid rgba(152, 175, 214, 0.2);
+      border-radius: 8px;
+      padding: 8px;
+      background: rgba(11, 18, 31, 0.58);
+    }
+
+    .note-row small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 4px;
     }
 
     .profile-grid {
@@ -728,6 +837,15 @@
         <section id="tab-profil" class="tab-pane">
           <h2 class="section-title">Profil ve Yetkili Kişiler</h2>
           <div class="muted">Site yönetimi için yeni görevli tanımlayın ve yetkili listesini buradan yönetin.</div>
+          <h3 class="section-title" style="margin-top:14px;">Şifre Değiştir</h3>
+          <div class="inline-form">
+            <div class="f"><label>Mevcut Şifre (Gerekirse)</label><input id="p_currentPassword" type="password" autocomplete="current-password" placeholder="Mevcut şifreniz" /></div>
+            <div class="f"><label>Yeni Şifre</label><input id="p_newPassword" type="password" autocomplete="new-password" placeholder="En az 6 karakter" /></div>
+            <div class="f"><label>Yeni Şifre (Tekrar)</label><input id="p_newPasswordAgain" type="password" autocomplete="new-password" placeholder="Yeni şifreyi tekrar girin" /></div>
+            <div class="f" style="display:flex;align-items:flex-end;"><button id="changePasswordBtn" class="btn btn-primary" type="button">Şifreyi Güncelle</button></div>
+          </div>
+          <div class="muted" style="margin-top:6px;">Oturum süresi uzunsa, güvenlik için mevcut şifre istenebilir.</div>
+          <hr style="margin:14px 0; border:none; border-top:1px solid rgba(152, 175, 214, 0.2);" />
           <div class="profile-grid">
             <div class="f"><label>İsim Soyisim</label><input id="p_fullName" type="text" placeholder="Örn. Ayşe Demir" /></div>
             <div class="f"><label>Telefon</label><input id="p_phone" type="text" placeholder="05xx xxx xx xx" /></div>
@@ -755,24 +873,141 @@
   <section id="unitModal" class="modal" aria-hidden="true">
     <div class="modal-card">
       <div class="modal-head">
-        <strong id="unitModalTitle">Daire Düzenle</strong>
-        <button id="closeUnitModalBtn" type="button" class="btn btn-ghost">Kapat</button>
+        <div>
+          <strong id="unitModalTitle">Bağımsız Bölüm Düzenle</strong>
+          <div id="unitModalMeta" class="unit-head-meta">-</div>
+        </div>
+        <button id="closeUnitModalBtn" type="button" class="btn btn-ghost">✕</button>
+      </div>
+      <div class="unit-tabs">
+        <button class="unit-tab-btn active" type="button" data-unit-tab="kimlik">Kimlik</button>
+        <button class="unit-tab-btn" type="button" data-unit-tab="kisiler">Kişiler & Araçlar</button>
+        <button class="unit-tab-btn" type="button" data-unit-tab="borc">Borç & Hukuki</button>
+        <button class="unit-tab-btn" type="button" data-unit-tab="notlar">Notlar</button>
       </div>
       <form id="unitForm" novalidate>
-        <div class="modal-form">
-          <div><label>Ad Soyad</label><input id="u_fullName" type="text" /></div>
-          <div><label>Telefon</label><input id="u_phone" type="text" /></div>
-          <div><label>E-posta</label><input id="u_email" type="email" /></div>
-          <div>
-            <label>Oturum Durumu</label>
-            <select id="u_occupancyType">
-              <option value="">Seçiniz</option>
-              <option value="malik">Malik</option>
-              <option value="kiraci">Kiracı</option>
-            </select>
+        <section id="unit-tab-kimlik" class="unit-tab-pane active">
+          <div class="split-grid">
+            <div class="stack">
+              <div class="subsection">
+                <p class="subsection-title">Kimlik & İletişim</p>
+                <div class="modal-form">
+                  <div><label>Daire No</label><input id="u_unitNo" type="text" readonly /></div>
+                  <div><label>Blok</label><input id="u_blockId" type="text" readonly /></div>
+                  <div><label>T.C. Kimlik No</label><input id="u_tcKimlikNo" type="text" inputmode="numeric" maxlength="11" placeholder="***********" /></div>
+                  <div><label>Doğum Tarihi</label><input id="u_birthDate" type="date" /></div>
+                  <div><label>Malik Adı Soyadı</label><input id="u_ownerName" type="text" /></div>
+                  <div><label>Kiracı Adı Soyadı</label><input id="u_tenantName" type="text" /></div>
+                  <div><label>Sakin Adı Soyadı</label><input id="u_residentName" type="text" /></div>
+                  <div><label>E-posta</label><input id="u_email" type="email" /></div>
+                  <div><label>Telefon 1</label><input id="u_phone1" type="text" /></div>
+                  <div><label>Telefon 2</label><input id="u_phone2" type="text" /></div>
+                </div>
+              </div>
+            </div>
+            <div class="stack">
+              <div class="subsection">
+                <p class="subsection-title">Aidat & Durum</p>
+                <div class="modal-form">
+                  <div>
+                    <label>Ödeme Durumu</label>
+                    <select id="u_paymentStatus">
+                      <option value="odenmedi">Ödenmedi</option>
+                      <option value="kismi">Kısmi</option>
+                      <option value="odendi">Ödedi</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Daire Durumu</label>
+                    <select id="u_unitStatus">
+                      <option value="malik">Malik</option>
+                      <option value="kiraci">Kiracı</option>
+                      <option value="bos">Boş</option>
+                    </select>
+                  </div>
+                  <div><label>Aidat (₺/Ay)</label><input id="u_monthlyFee" type="number" step="0.01" min="0" /></div>
+                  <div><label>Kat</label><input id="u_floor" type="number" step="1" /></div>
+                  <div><label>Aidat Muafiyeti (%)</label><input id="u_feeExemptionPct" type="number" step="0.01" min="0" max="100" /></div>
+                  <div><label>Alan (m²)</label><input id="u_areaM2" type="number" step="0.01" min="0" /></div>
+                  <div class="full">
+                    <label>Oda Tipi</label>
+                    <select id="u_roomType">
+                      <option value="">Seçiniz</option>
+                      <option value="1+0">1+0</option>
+                      <option value="1+1">1+1</option>
+                      <option value="2+1">2+1</option>
+                      <option value="3+1">3+1</option>
+                      <option value="4+1">4+1</option>
+                      <option value="villa">Villa</option>
+                      <option value="dukkan">Dükkan</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="unitSensitiveInfo" class="muted" style="margin-top:8px;">T.C. kimlik bilgisi şifreli saklanır.</div>
+              </div>
+            </div>
           </div>
-          <div class="full"><label>Not</label><textarea id="u_note"></textarea></div>
-        </div>
+        </section>
+
+        <section id="unit-tab-kisiler" class="unit-tab-pane">
+          <div class="split-grid">
+            <div class="subsection">
+              <div class="list-header">
+                <p class="subsection-title" style="margin:0;">Evdeki Kişiler (<span id="u_peopleCount">0</span>)</p>
+                <button id="addPersonBtn" type="button" class="btn btn-ghost">+ Kişi Ekle</button>
+              </div>
+              <div id="u_peopleList" class="repeat-list"></div>
+            </div>
+            <div class="subsection">
+              <div class="list-header">
+                <p class="subsection-title" style="margin:0;">Araçlar (<span id="u_vehicleCount">0</span>)</p>
+                <button id="addVehicleBtn" type="button" class="btn btn-ghost">+ Plaka Ekle</button>
+              </div>
+              <div id="u_vehicleList" class="repeat-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="unit-tab-borc" class="unit-tab-pane">
+          <div class="subsection">
+            <div class="modal-form">
+              <div><label>Yasal Gecikme Faiz Oranı (Yıllık %)</label><input id="u_legalInterestAnnualPct" type="number" step="0.01" min="0" /></div>
+              <div><label>Asıl Borç (₺)</label><input id="u_principalDebt" type="number" step="0.01" min="0" /></div>
+              <div><label>Vade / Gecikme Başlangıcı</label><input id="u_dueDate" type="date" /></div>
+              <div><label>Tahsil Edilen (₺)</label><input id="u_paidAmount" type="number" step="0.01" min="0" /></div>
+              <div><label>Hesaplanan Faiz (₺)</label><input id="u_calculatedInterest" type="number" step="0.01" readonly /></div>
+              <div><label>Toplam Borç (₺)</label><input id="u_totalDebt" type="number" step="0.01" min="0" /></div>
+              <div>
+                <label>Hukuki Aşama</label>
+                <select id="u_legalStage">
+                  <option value="normal">Normal</option>
+                  <option value="ihtar">İhtar Gönderildi</option>
+                  <option value="icra">İcra Takibi</option>
+                  <option value="dava">Dava Süreci</option>
+                </select>
+              </div>
+              <div><label>İhtar / İcra Tarihi</label><input id="u_noticeDate" type="date" /></div>
+              <div class="full"><label>Dosya / Avukat Notu</label><input id="u_legalNote" type="text" /></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="unit-tab-notlar" class="unit-tab-pane">
+          <div class="subsection">
+            <p class="subsection-title">Not Ekle</p>
+            <div class="modal-form">
+              <div class="full"><textarea id="u_newNoteText" placeholder="Daire notu..." ></textarea></div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+              <button id="addUnitNoteBtn" type="button" class="btn btn-ghost">+ Not Ekle</button>
+            </div>
+          </div>
+          <div class="subsection" style="margin-top:10px;">
+            <p class="subsection-title">Not Geçmişi</p>
+            <div id="u_notesLog" class="note-log"></div>
+          </div>
+        </section>
+
         <div class="modal-actions">
           <button id="saveUnitBtn" type="submit" class="btn btn-primary">Kaydet</button>
           <button id="cancelUnitBtn" type="button" class="btn btn-ghost">İptal</button>
@@ -806,10 +1041,13 @@
       giderKalemleri: [],
       ekstraGiderKayitlari: [],
       sabitGiderKayitlari: [],
+      legalInterestAnnualPct: 22.5,
       profileTitles: [],
       staffMembers: []
     };
     let editingUnitId = "";
+    let editingUnitDraft = null;
+    let editingUnitSensitive = { tcKimlikNo: "", birthDate: "" };
     const DEFAULT_PROFILE_TITLES = [
       "Yönetici",
       "Yönetici Yardımcısı",
@@ -935,6 +1173,67 @@
       return parseNumber(value, 0).toLocaleString("tr-TR", { maximumFractionDigits: 2 });
     }
 
+    function toMillis(value) {
+      if (!value) return 0;
+      if (typeof value === "number") return value;
+      if (value instanceof Date) return value.getTime();
+      if (typeof value.toDate === "function") return value.toDate().getTime();
+      if (typeof value.seconds === "number") return value.seconds * 1000;
+      const parsed = Date.parse(String(value));
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function maskTcKimlikNo(raw) {
+      const digits = String(raw || "").replace(/\D/g, "").slice(0, 11);
+      if (!digits) return "";
+      if (digits.length <= 4) return "*".repeat(digits.length);
+      return `${"*".repeat(Math.max(0, digits.length - 4))}${digits.slice(-4)}`;
+    }
+
+    function daysBetween(fromIso, toDate) {
+      if (!fromIso) return 0;
+      const start = new Date(fromIso);
+      if (Number.isNaN(start.getTime())) return 0;
+      const end = toDate || new Date();
+      const diff = end.getTime() - start.getTime();
+      return Math.max(0, Math.floor(diff / 86400000));
+    }
+
+    function computeDebt(identity, debt, annualPct) {
+      const principal = parseNumber(debt && debt.principalDebt, 0);
+      const paidAmount = parseNumber(debt && debt.paidAmount, 0);
+      const dueDate = String(debt && debt.dueDate || "");
+      const remaining = Math.max(0, principal - paidAmount);
+      const dailyRate = parseNumber(annualPct, 0) / 100 / 365;
+      const days = daysBetween(dueDate, new Date());
+      const calculatedInterest = remaining * dailyRate * days;
+      const totalAuto = remaining + calculatedInterest;
+      return {
+        principal,
+        paidAmount,
+        remaining,
+        days,
+        calculatedInterest,
+        totalAuto
+      };
+    }
+
+    async function postSensitiveApi(path, payload) {
+      const user = auth.currentUser;
+      if (!user) throw new Error("Oturum bulunamadı.");
+      const idToken = await user.getIdToken();
+      const resp = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, ...payload })
+      });
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok || !data || data.ok !== true) {
+        throw new Error(data && data.message ? data.message : "Hassas veri servisi hatası.");
+      }
+      return data;
+    }
+
     function escapeHtml(value) {
       return String(value == null ? "" : value)
         .replaceAll("&", "&amp;")
@@ -1027,11 +1326,12 @@
         tried.add(candidate);
         const q = db.collection("basvurular")
           .where("siteId", "==", candidate)
-          .orderBy("createdAt", "desc")
-          .limit(1);
+          .limit(50);
         const snap = await q.get();
         if (!snap.empty) {
-          return { id: snap.docs[0].id, ...snap.docs[0].data() };
+          const rows = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          rows.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+          return rows[0];
         }
       }
       return null;
@@ -1138,7 +1438,7 @@
     }
 
     async function loadPanelData() {
-      const [blocksSnap, unitsSnap, aidatSnap, itemSnap, aidatRecSnap, expRecSnap, profileMetaSnap, staffSnap] = await Promise.all([
+      const [blocksSnap, unitsSnap, aidatSnap, itemSnap, aidatRecSnap, expRecSnap, profileMetaSnap, staffSnap, legalSnap] = await Promise.all([
         panelCollection("blocks").orderBy("order", "asc").get(),
         panelCollection("units").get(),
         panelCollection("aidat_settings").get(),
@@ -1146,7 +1446,8 @@
         panelCollection("aidat_records").get(),
         panelCollection("expense_records").get(),
         panelCollection("profile_meta").doc("settings").get(),
-        panelCollection("staff_members").get()
+        panelCollection("staff_members").get(),
+        panelCollection("settings").doc("legal").get()
       ]);
 
       const blocks = blocksSnap.docs.map((doc) => doc.data() || {});
@@ -1254,6 +1555,11 @@
           createdAtMs
         };
       }).sort((a, b) => b.createdAtMs - a.createdAtMs);
+
+      state.legalInterestAnnualPct = parseNumber(
+        legalSnap.exists ? (legalSnap.data() || {}).legalInterestAnnualPct : 22.5,
+        22.5
+      );
     }
 
     function parseShopNumbers(rawValue) {
@@ -1467,12 +1773,16 @@
       for (let i = 1; i <= daireAdet; i += 1) {
         const unitId = makeUnitId(blok.blok, "daire", i);
         const unit = state.unitsById[unitId] || {};
+        const identity = unit.identity || {};
         const occ = unit.occupant || {};
+        const displayName = identity.residentName || identity.ownerName || occ.fullName || "";
+        const displayPhone = identity.phone1 || occ.phone || "-";
+        const paymentLabel = identity.paymentStatus === "odendi" ? "Ödedi" : (identity.paymentStatus === "kismi" ? "Kısmi" : "Ödenmedi");
         unitCards.push(`
           <div class="unit-card">
             <strong>${blok.blok} Blok / Daire ${i}</strong>
-            <small>${occ.fullName ? escapeHtml(occ.fullName) : "Sakin bilgisi girilmedi"}</small>
-            <div class="muted">${occ.phone ? escapeHtml(occ.phone) : "-"}</div>
+            <small>${displayName ? escapeHtml(displayName) : "Sakin bilgisi girilmedi"}</small>
+            <div class="muted">${escapeHtml(displayPhone)} • ${escapeHtml(paymentLabel)}</div>
             ${canEditUnits ? `<button type="button" class="btn btn-ghost" data-unit-edit="${unitId}">Düzenle</button>` : ""}
           </div>
         `);
@@ -1480,12 +1790,16 @@
       for (const shopNo of dukkanlar) {
         const unitId = makeUnitId(blok.blok, "dukkan", shopNo);
         const unit = state.unitsById[unitId] || {};
+        const identity = unit.identity || {};
         const occ = unit.occupant || {};
+        const displayName = identity.residentName || identity.ownerName || occ.fullName || "";
+        const displayPhone = identity.phone1 || occ.phone || "-";
+        const paymentLabel = identity.paymentStatus === "odendi" ? "Ödedi" : (identity.paymentStatus === "kismi" ? "Kısmi" : "Ödenmedi");
         unitCards.push(`
           <div class="unit-card">
             <strong>${blok.blok} Blok / Dükkan ${escapeHtml(String(shopNo))}</strong>
-            <small>${occ.fullName ? escapeHtml(occ.fullName) : "Sakin bilgisi girilmedi"}</small>
-            <div class="muted">${occ.phone ? escapeHtml(occ.phone) : "-"}</div>
+            <small>${displayName ? escapeHtml(displayName) : "Sakin bilgisi girilmedi"}</small>
+            <div class="muted">${escapeHtml(displayPhone)} • ${escapeHtml(paymentLabel)}</div>
             ${canEditUnits ? `<button type="button" class="btn btn-ghost" data-unit-edit="${unitId}">Düzenle</button>` : ""}
           </div>
         `);
@@ -1514,25 +1828,241 @@
       modal.classList.remove("open");
       modal.setAttribute("aria-hidden", "true");
       editingUnitId = "";
+      editingUnitDraft = null;
+      editingUnitSensitive = { tcKimlikNo: "", birthDate: "" };
     }
 
-    function openUnitModal(unitId) {
+    function activateUnitTab(tabKey) {
+      document.querySelectorAll(".unit-tab-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-unit-tab") === tabKey);
+      });
+      document.querySelectorAll(".unit-tab-pane").forEach((pane) => {
+        pane.classList.toggle("active", pane.id === `unit-tab-${tabKey}`);
+      });
+    }
+
+    function buildDefaultUnitDraft(unitId, unit) {
+      const identity = unit.identity || {};
+      const occupant = unit.occupant || {};
+      const debt = unit.debt || {};
+      return {
+        unitId,
+        blockId: String(unit.blockId || (parseUnitId(unitId) || {}).blok || ""),
+        no: String(unit.no || (parseUnitId(unitId) || {}).no || ""),
+        type: String(unit.type || (parseUnitId(unitId) || {}).tip || "daire"),
+        identity: {
+          ownerName: String(identity.ownerName || ""),
+          tenantName: String(identity.tenantName || ""),
+          residentName: String(identity.residentName || occupant.fullName || ""),
+          phone1: String(identity.phone1 || occupant.phone || ""),
+          phone2: String(identity.phone2 || ""),
+          email: String(identity.email || occupant.email || ""),
+          unitStatus: String(identity.unitStatus || occupant.occupancyType || "malik"),
+          floor: String(identity.floor || ""),
+          areaM2: String(identity.areaM2 || ""),
+          roomType: String(identity.roomType || (unit.type === "dukkan" ? "dukkan" : "")),
+          monthlyFee: String(identity.monthlyFee || ""),
+          feeExemptionPct: String(identity.feeExemptionPct || "0"),
+          paymentStatus: String(identity.paymentStatus || "odenmedi"),
+          tcKimlikNoMasked: String(identity.tcKimlikNoMasked || "")
+        },
+        people: Array.isArray(unit.people) ? unit.people : [],
+        vehicles: Array.isArray(unit.vehicles) ? unit.vehicles : [],
+        debt: {
+          principalDebt: String(debt.principalDebt || "0"),
+          dueDate: String(debt.dueDate || ""),
+          paidAmount: String(debt.paidAmount || "0"),
+          legalStage: String(debt.legalStage || "normal"),
+          legalNote: String(debt.legalNote || ""),
+          noticeDate: String(debt.noticeDate || ""),
+          totalDebt: String(debt.totalDebt || ""),
+          totalDebtManual: !!debt.totalDebtManual
+        },
+        notes: Array.isArray(unit.notes) ? unit.notes : []
+      };
+    }
+
+    function renderPeopleList() {
+      const root = document.getElementById("u_peopleList");
+      const list = Array.isArray(editingUnitDraft && editingUnitDraft.people) ? editingUnitDraft.people : [];
+      document.getElementById("u_peopleCount").textContent = String(list.length);
+      if (!list.length) {
+        root.innerHTML = '<div class="muted">Henüz kişi eklenmemiş.</div>';
+        return;
+      }
+      root.innerHTML = list.map((p, idx) => `
+        <div class="repeat-item">
+          <div class="repeat-item-head">
+            <strong>Kişi ${idx + 1}</strong>
+            <button type="button" class="btn btn-ghost" data-person-remove="${idx}">Sil</button>
+          </div>
+          <div class="modal-form">
+            <div><label>Ad Soyad</label><input type="text" data-person-field="fullName" data-person-idx="${idx}" value="${escapeHtml(p.fullName || "")}" /></div>
+            <div><label>Yakınlık</label><input type="text" data-person-field="relation" data-person-idx="${idx}" value="${escapeHtml(p.relation || "")}" /></div>
+            <div><label>Telefon</label><input type="text" data-person-field="phone" data-person-idx="${idx}" value="${escapeHtml(p.phone || "")}" /></div>
+            <div class="full"><label>Not</label><input type="text" data-person-field="note" data-person-idx="${idx}" value="${escapeHtml(p.note || "")}" /></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderVehicleList() {
+      const root = document.getElementById("u_vehicleList");
+      const list = Array.isArray(editingUnitDraft && editingUnitDraft.vehicles) ? editingUnitDraft.vehicles : [];
+      document.getElementById("u_vehicleCount").textContent = String(list.length);
+      if (!list.length) {
+        root.innerHTML = '<div class="muted">Henüz araç eklenmemiş.</div>';
+        return;
+      }
+      root.innerHTML = list.map((v, idx) => `
+        <div class="repeat-item">
+          <div class="repeat-item-head">
+            <strong>Araç ${idx + 1}</strong>
+            <button type="button" class="btn btn-ghost" data-vehicle-remove="${idx}">Sil</button>
+          </div>
+          <div class="modal-form">
+            <div><label>Plaka</label><input type="text" data-vehicle-field="plate" data-vehicle-idx="${idx}" value="${escapeHtml(v.plate || "")}" /></div>
+            <div><label>Tür</label><input type="text" data-vehicle-field="type" data-vehicle-idx="${idx}" value="${escapeHtml(v.type || "")}" /></div>
+            <div><label>Renk</label><input type="text" data-vehicle-field="color" data-vehicle-idx="${idx}" value="${escapeHtml(v.color || "")}" /></div>
+            <div class="full"><label>Not</label><input type="text" data-vehicle-field="note" data-vehicle-idx="${idx}" value="${escapeHtml(v.note || "")}" /></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderNotesLog() {
+      const root = document.getElementById("u_notesLog");
+      const notes = Array.isArray(editingUnitDraft && editingUnitDraft.notes) ? editingUnitDraft.notes : [];
+      if (!notes.length) {
+        root.innerHTML = '<div class="muted">Henüz not yok.</div>';
+        return;
+      }
+      root.innerHTML = notes
+        .slice()
+        .sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt))
+        .map((n) => `
+          <div class="note-row">
+            <small>${escapeHtml(String(n.createdBy || "-"))} • ${escapeHtml(String(n.createdAt || "-"))}</small>
+            <div>${escapeHtml(n.text || "")}</div>
+            <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+              <button type="button" class="btn btn-ghost" data-note-remove="${escapeHtml(String(n.id || ""))}">Sil</button>
+            </div>
+          </div>
+        `).join("");
+    }
+
+    function addUnitNote() {
+      if (!editingUnitDraft) return;
+      const text = String(document.getElementById("u_newNoteText").value || "").trim();
+      if (!text) return;
+      editingUnitDraft.notes = editingUnitDraft.notes || [];
+      editingUnitDraft.notes.push({
+        id: `note_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`,
+        text,
+        createdAt: new Date().toISOString(),
+        createdBy: normalizeEmail(auth.currentUser && auth.currentUser.email)
+      });
+      document.getElementById("u_newNoteText").value = "";
+      renderNotesLog();
+    }
+
+    function syncDebtPreview() {
+      const annualPct = parseNumber(document.getElementById("u_legalInterestAnnualPct").value, state.legalInterestAnnualPct);
+      const debtInput = {
+        principalDebt: document.getElementById("u_principalDebt").value,
+        paidAmount: document.getElementById("u_paidAmount").value,
+        dueDate: document.getElementById("u_dueDate").value
+      };
+      const calc = computeDebt({}, debtInput, annualPct);
+      document.getElementById("u_calculatedInterest").value = calc.calculatedInterest.toFixed(2);
+      const totalEl = document.getElementById("u_totalDebt");
+      if (!totalEl.dataset.manual || totalEl.dataset.manual !== "1") {
+        totalEl.value = calc.totalAuto.toFixed(2);
+      }
+    }
+
+    async function loadSensitiveForEditing(unitId) {
+      try {
+        const data = await postSensitiveApi("/api/unit-sensitive/get", { siteId: state.panelSiteId, unitId });
+        editingUnitSensitive = {
+          tcKimlikNo: String(data.tcKimlikNo || ""),
+          birthDate: String(data.birthDate || "")
+        };
+        document.getElementById("u_tcKimlikNo").value = editingUnitSensitive.tcKimlikNo || "";
+        document.getElementById("u_birthDate").value = editingUnitSensitive.birthDate || "";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("unitSensitiveInfo").textContent = "Hassas veriler yüklenemedi; yeni değer girip kaydedebilirsiniz.";
+      }
+    }
+
+    async function openUnitModal(unitId) {
       if (!canWritePanel()) {
         setStateMessage("Bu işlem için yetkiniz yok.", "error");
         return;
       }
       const unit = state.unitsById[unitId] || {};
-      const occupant = unit.occupant || {};
       editingUnitId = unitId;
+      editingUnitDraft = buildDefaultUnitDraft(unitId, unit);
       document.getElementById("unitModalTitle").textContent = `${unitId} Düzenle`;
-      document.getElementById("u_fullName").value = occupant.fullName || "";
-      document.getElementById("u_phone").value = occupant.phone || "";
-      document.getElementById("u_email").value = occupant.email || "";
-      document.getElementById("u_occupancyType").value = occupant.occupancyType || "";
-      document.getElementById("u_note").value = occupant.note || "";
+      document.getElementById("unitModalMeta").textContent = `${editingUnitDraft.blockId} Blok • ${editingUnitDraft.type === "dukkan" ? "Dükkan" : "Daire"} ${editingUnitDraft.no}`;
+      document.getElementById("unitSensitiveInfo").textContent = `T.C. kimlik bilgisi şifreli saklanır. Maskeli: ${editingUnitDraft.identity.tcKimlikNoMasked || "-"}`;
+      document.getElementById("u_unitNo").value = editingUnitDraft.no;
+      document.getElementById("u_blockId").value = editingUnitDraft.blockId;
+      document.getElementById("u_ownerName").value = editingUnitDraft.identity.ownerName;
+      document.getElementById("u_tenantName").value = editingUnitDraft.identity.tenantName;
+      document.getElementById("u_residentName").value = editingUnitDraft.identity.residentName;
+      document.getElementById("u_email").value = editingUnitDraft.identity.email;
+      document.getElementById("u_phone1").value = editingUnitDraft.identity.phone1;
+      document.getElementById("u_phone2").value = editingUnitDraft.identity.phone2;
+      document.getElementById("u_unitStatus").value = editingUnitDraft.identity.unitStatus || "malik";
+      document.getElementById("u_floor").value = editingUnitDraft.identity.floor;
+      document.getElementById("u_areaM2").value = editingUnitDraft.identity.areaM2;
+      document.getElementById("u_roomType").value = editingUnitDraft.identity.roomType;
+      document.getElementById("u_monthlyFee").value = editingUnitDraft.identity.monthlyFee;
+      document.getElementById("u_feeExemptionPct").value = editingUnitDraft.identity.feeExemptionPct;
+      document.getElementById("u_paymentStatus").value = editingUnitDraft.identity.paymentStatus || "odenmedi";
+      document.getElementById("u_legalInterestAnnualPct").value = String(state.legalInterestAnnualPct || 22.5);
+      document.getElementById("u_principalDebt").value = editingUnitDraft.debt.principalDebt;
+      document.getElementById("u_dueDate").value = editingUnitDraft.debt.dueDate;
+      document.getElementById("u_paidAmount").value = editingUnitDraft.debt.paidAmount;
+      document.getElementById("u_totalDebt").value = editingUnitDraft.debt.totalDebt;
+      document.getElementById("u_totalDebt").dataset.manual = editingUnitDraft.debt.totalDebtManual ? "1" : "";
+      document.getElementById("u_legalStage").value = editingUnitDraft.debt.legalStage;
+      document.getElementById("u_noticeDate").value = editingUnitDraft.debt.noticeDate;
+      document.getElementById("u_legalNote").value = editingUnitDraft.debt.legalNote;
+      document.getElementById("u_newNoteText").value = "";
+      renderPeopleList();
+      renderVehicleList();
+      renderNotesLog();
+      activateUnitTab("kimlik");
+      syncDebtPreview();
       const modal = document.getElementById("unitModal");
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
+      await loadSensitiveForEditing(unitId);
+    }
+
+    function readPeopleFromDom() {
+      const items = [];
+      document.querySelectorAll("[data-person-idx]").forEach((input) => {
+        const idx = Number(input.getAttribute("data-person-idx"));
+        const field = input.getAttribute("data-person-field");
+        if (!items[idx]) items[idx] = {};
+        items[idx][field] = String(input.value || "").trim();
+      });
+      return items.filter((i) => i && (i.fullName || i.phone || i.relation));
+    }
+
+    function readVehiclesFromDom() {
+      const items = [];
+      document.querySelectorAll("[data-vehicle-idx]").forEach((input) => {
+        const idx = Number(input.getAttribute("data-vehicle-idx"));
+        const field = input.getAttribute("data-vehicle-field");
+        if (!items[idx]) items[idx] = {};
+        items[idx][field] = String(input.value || "").trim().toUpperCase();
+      });
+      return items.filter((i) => i && (i.plate || i.type || i.color));
     }
 
     async function saveUnitOccupant(event) {
@@ -1546,25 +2076,124 @@
       saveBtn.disabled = true;
       saveBtn.textContent = "Kaydediliyor...";
       try {
-        const fullName = String(document.getElementById("u_fullName").value || "").trim();
-        const phone = String(document.getElementById("u_phone").value || "").trim();
         const email = normalizeEmail(document.getElementById("u_email").value || "");
-        const occupancyType = String(document.getElementById("u_occupancyType").value || "").trim();
-        const note = String(document.getElementById("u_note").value || "").trim();
-        await panelCollection("units").doc(editingUnitId).set({
-          occupant: { fullName, phone, email, occupancyType, note },
+        const ownerName = String(document.getElementById("u_ownerName").value || "").trim();
+        const tenantName = String(document.getElementById("u_tenantName").value || "").trim();
+        const residentName = String(document.getElementById("u_residentName").value || "").trim();
+        const phone1 = String(document.getElementById("u_phone1").value || "").trim();
+        const phone2 = String(document.getElementById("u_phone2").value || "").trim();
+        const unitStatus = String(document.getElementById("u_unitStatus").value || "malik");
+        const floor = String(document.getElementById("u_floor").value || "").trim();
+        const areaM2 = String(document.getElementById("u_areaM2").value || "").trim();
+        const roomType = String(document.getElementById("u_roomType").value || "").trim();
+        const monthlyFee = parseNumber(document.getElementById("u_monthlyFee").value, 0);
+        const feeExemptionPct = Math.max(0, Math.min(100, parseNumber(document.getElementById("u_feeExemptionPct").value, 0)));
+        const paymentStatus = String(document.getElementById("u_paymentStatus").value || "odenmedi");
+        const tcKimlikNo = String(document.getElementById("u_tcKimlikNo").value || "").replace(/\D/g, "").slice(0, 11);
+        const birthDate = String(document.getElementById("u_birthDate").value || "");
+        const legalInterestAnnualPct = parseNumber(document.getElementById("u_legalInterestAnnualPct").value, state.legalInterestAnnualPct);
+        const principalDebt = parseNumber(document.getElementById("u_principalDebt").value, 0);
+        const paidAmount = parseNumber(document.getElementById("u_paidAmount").value, 0);
+        const dueDate = String(document.getElementById("u_dueDate").value || "");
+        const legalStage = String(document.getElementById("u_legalStage").value || "normal");
+        const noticeDate = String(document.getElementById("u_noticeDate").value || "");
+        const legalNote = String(document.getElementById("u_legalNote").value || "").trim();
+        const totalDebtValue = parseNumber(document.getElementById("u_totalDebt").value, 0);
+        const totalDebtManual = document.getElementById("u_totalDebt").dataset.manual === "1";
+        const people = readPeopleFromDom();
+        const vehicles = readVehiclesFromDom();
+        const debtCalc = computeDebt({}, { principalDebt, paidAmount, dueDate }, legalInterestAnnualPct);
+        const calculatedInterest = debtCalc.calculatedInterest;
+        const totalDebt = totalDebtManual ? totalDebtValue : debtCalc.totalAuto;
+        const notes = Array.isArray(editingUnitDraft && editingUnitDraft.notes) ? editingUnitDraft.notes : [];
+
+        if (dueDate && Number.isNaN(new Date(dueDate).getTime())) {
+          throw new Error("Vade tarihi geçerli olmalı.");
+        }
+        if (noticeDate && Number.isNaN(new Date(noticeDate).getTime())) {
+          throw new Error("İhtar/icra tarihi geçerli olmalı.");
+        }
+
+        if (tcKimlikNo || birthDate) {
+          await postSensitiveApi("/api/unit-sensitive/save", {
+            siteId: state.panelSiteId,
+            unitId: editingUnitId,
+            tcKimlikNo,
+            birthDate
+          });
+        }
+
+        const identity = {
+          ownerName,
+          tenantName,
+          residentName,
+          phone1,
+          phone2,
+          email,
+          unitStatus,
+          floor,
+          areaM2,
+          roomType,
+          monthlyFee,
+          feeExemptionPct,
+          paymentStatus,
+          tcKimlikNoMasked: maskTcKimlikNo(tcKimlikNo || editingUnitSensitive.tcKimlikNo)
+        };
+        const debt = {
+          principalDebt,
+          dueDate,
+          paidAmount,
+          legalStage,
+          legalNote,
+          noticeDate,
+          calculatedInterest,
+          totalDebt,
+          totalDebtManual
+        };
+        const occupant = {
+          fullName: residentName,
+          phone: phone1,
+          email,
+          occupancyType: unitStatus,
+          note: notes.length ? notes[0].text : ""
+        };
+
+        await panelCollection("settings").doc("legal").set({
+          legalInterestAnnualPct,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
+
+        await panelCollection("units").doc(editingUnitId).set({
+          identity,
+          people,
+          vehicles,
+          debt,
+          notes,
+          notesMeta: {
+            count: notes.length,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedBy: normalizeEmail(auth.currentUser && auth.currentUser.email)
+          },
+          occupant,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
         state.unitsById[editingUnitId] = {
           ...(state.unitsById[editingUnitId] || {}),
-          occupant: { fullName, phone, email, occupancyType, note }
+          identity,
+          people,
+          vehicles,
+          debt,
+          notes,
+          occupant
         };
+        state.legalInterestAnnualPct = legalInterestAnnualPct;
         closeUnitModal();
         setStateMessage("Bağımsız bölüm bilgisi kaydedildi.", "ok");
         renderDaireTab();
       } catch (err) {
         console.error(err);
-        setStateMessage("Bağımsız bölüm bilgisi kaydedilemedi.", "error");
+        setStateMessage(err && err.message ? err.message : "Bağımsız bölüm bilgisi kaydedilemedi.", "error");
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = "Kaydet";
@@ -2023,6 +2652,69 @@
       }
     }
 
+    async function changeOwnPassword() {
+      if (!canAccessProfilePanel(currentRole)) {
+        setStateMessage("Bu işlem için yetkiniz yok.", "error");
+        return;
+      }
+      const currentPassword = String(document.getElementById("p_currentPassword").value || "");
+      const newPassword = String(document.getElementById("p_newPassword").value || "");
+      const newPasswordAgain = String(document.getElementById("p_newPasswordAgain").value || "");
+      if (!newPassword || newPassword.length < 6) {
+        setStateMessage("Yeni şifre en az 6 karakter olmalı.", "error");
+        return;
+      }
+      if (newPassword !== newPasswordAgain) {
+        setStateMessage("Yeni şifre tekrarı eşleşmiyor.", "error");
+        return;
+      }
+      const user = auth.currentUser;
+      if (!user) {
+        setStateMessage("Oturum bulunamadı. Lütfen tekrar giriş yapın.", "error");
+        return;
+      }
+      const btn = document.getElementById("changePasswordBtn");
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Güncelleniyor...";
+
+      try {
+        try {
+          await user.updatePassword(newPassword);
+        } catch (err) {
+          if (err && err.code === "auth/requires-recent-login") {
+            if (!currentPassword) {
+              throw new Error("Güvenlik nedeniyle mevcut şifre gerekir. Mevcut şifreyi girip tekrar deneyin.");
+            }
+            const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPassword);
+            await user.reauthenticateWithCredential(credential);
+            await user.updatePassword(newPassword);
+          } else {
+            throw err;
+          }
+        }
+        document.getElementById("p_currentPassword").value = "";
+        document.getElementById("p_newPassword").value = "";
+        document.getElementById("p_newPasswordAgain").value = "";
+        document.getElementById("profileInfo").textContent = "Şifreniz başarıyla güncellendi.";
+        setStateMessage("Şifre güncellendi.", "ok");
+      } catch (err) {
+        console.error(err);
+        if (err && err.code === "auth/wrong-password") {
+          setStateMessage("Mevcut şifre hatalı.", "error");
+        } else if (err && err.code === "auth/too-many-requests") {
+          setStateMessage("Çok fazla deneme yapıldı. Biraz sonra tekrar deneyin.", "error");
+        } else if (err && err.code === "auth/weak-password") {
+          setStateMessage("Yeni şifre zayıf. Daha güçlü bir şifre girin.", "error");
+        } else {
+          setStateMessage(err && err.message ? err.message : "Şifre güncellenemedi.", "error");
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
     function setupEvents() {
       if (eventsBound) return;
       eventsBound = true;
@@ -2171,6 +2863,50 @@
       document.getElementById("raporOlusturBtn").addEventListener("click", generateReport);
 
       document.getElementById("unitForm").addEventListener("submit", saveUnitOccupant);
+      document.querySelectorAll(".unit-tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => activateUnitTab(btn.getAttribute("data-unit-tab")));
+      });
+      document.getElementById("addPersonBtn").addEventListener("click", () => {
+        if (!editingUnitDraft) return;
+        editingUnitDraft.people = editingUnitDraft.people || [];
+        editingUnitDraft.people.push({ id: `person_${Date.now()}`, fullName: "", relation: "", phone: "", note: "" });
+        renderPeopleList();
+      });
+      document.getElementById("addVehicleBtn").addEventListener("click", () => {
+        if (!editingUnitDraft) return;
+        editingUnitDraft.vehicles = editingUnitDraft.vehicles || [];
+        editingUnitDraft.vehicles.push({ id: `vehicle_${Date.now()}`, plate: "", type: "", color: "", note: "" });
+        renderVehicleList();
+      });
+      document.getElementById("u_peopleList").addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-person-remove]");
+        if (!btn || !editingUnitDraft) return;
+        const idx = Number(btn.getAttribute("data-person-remove"));
+        editingUnitDraft.people.splice(idx, 1);
+        renderPeopleList();
+      });
+      document.getElementById("u_vehicleList").addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-vehicle-remove]");
+        if (!btn || !editingUnitDraft) return;
+        const idx = Number(btn.getAttribute("data-vehicle-remove"));
+        editingUnitDraft.vehicles.splice(idx, 1);
+        renderVehicleList();
+      });
+      document.getElementById("addUnitNoteBtn").addEventListener("click", addUnitNote);
+      document.getElementById("u_notesLog").addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-note-remove]");
+        if (!btn || !editingUnitDraft) return;
+        const noteId = String(btn.getAttribute("data-note-remove") || "");
+        editingUnitDraft.notes = (editingUnitDraft.notes || []).filter((n) => String(n.id || "") !== noteId);
+        renderNotesLog();
+      });
+      ["u_legalInterestAnnualPct", "u_principalDebt", "u_dueDate", "u_paidAmount"].forEach((id) => {
+        document.getElementById(id).addEventListener("input", syncDebtPreview);
+        document.getElementById(id).addEventListener("change", syncDebtPreview);
+      });
+      document.getElementById("u_totalDebt").addEventListener("input", () => {
+        document.getElementById("u_totalDebt").dataset.manual = "1";
+      });
       document.getElementById("closeUnitModalBtn").addEventListener("click", closeUnitModal);
       document.getElementById("cancelUnitBtn").addEventListener("click", closeUnitModal);
       document.getElementById("unitModal").addEventListener("click", (e) => {
@@ -2184,6 +2920,7 @@
 
       document.getElementById("addTitleBtn").addEventListener("click", addCustomTitle);
       document.getElementById("addStaffBtn").addEventListener("click", addStaffMember);
+      document.getElementById("changePasswordBtn").addEventListener("click", changeOwnPassword);
       document.getElementById("profileList").addEventListener("click", (e) => {
         const btn = e.target.closest("[data-staff-delete]");
         if (!btn) return;
@@ -2197,18 +2934,41 @@
       const publication = params.publication || null;
       setStateMessage("Demo verisi yükleniyor...");
       let row = null;
+      let panelSnapshot = null;
 
-      if (publication && publication.applicationId) {
-        const pubDoc = await db.collection("basvurular").doc(publication.applicationId).get();
-        if (!pubDoc.exists) throw new Error("Yayınlı panele ait başvuru bulunamadı.");
-        row = { id: pubDoc.id, ...pubDoc.data() };
-      } else if (docId) {
-        const docSnap = await db.collection("basvurular").doc(docId).get();
-        if (!docSnap.exists) throw new Error("Başvuru bulunamadı.");
-        row = { id: docSnap.id, ...docSnap.data() };
-      } else {
-        row = await loadLatestApplicationForSite(currentProfile.siteId);
-        if (!row) throw new Error("Bu site için başvuru verisi bulunamadı.");
+      const fallbackSiteId = getPanelSiteId(null, publication);
+      if (fallbackSiteId) {
+        state.panelSiteId = fallbackSiteId;
+        panelSnapshot = await panelRef().get();
+      }
+
+      try {
+        if (publication && publication.applicationId) {
+          const pubDoc = await db.collection("basvurular").doc(publication.applicationId).get();
+          if (!pubDoc.exists) throw new Error("Yayınlı panele ait başvuru bulunamadı.");
+          row = { id: pubDoc.id, ...pubDoc.data() };
+        } else if (docId) {
+          const docSnap = await db.collection("basvurular").doc(docId).get();
+          if (!docSnap.exists) throw new Error("Başvuru bulunamadı.");
+          row = { id: docSnap.id, ...docSnap.data() };
+        } else {
+          row = await loadLatestApplicationForSite(currentProfile.siteId);
+          if (!row) throw new Error("Bu site için başvuru verisi bulunamadı.");
+        }
+      } catch (err) {
+        if (err && err.code === "permission-denied" && panelSnapshot && panelSnapshot.exists) {
+          const panelData = panelSnapshot.data() || {};
+          row = {
+            id: String(panelData.sourceApplicationId || ""),
+            siteId: String(panelData.siteId || fallbackSiteId || currentProfile.siteId || ""),
+            site_adi: String(panelData.siteName || fallbackSiteId || currentProfile.siteId || ""),
+            aylik_aidat: 1200,
+            dukkan_aidat: 1200,
+            blok_yapisi_json: []
+          };
+        } else {
+          throw err;
+        }
       }
 
       const isSuperAdmin = currentProfile.role === APARTYONET_ROLES.SUPER_ADMIN;
