@@ -4,31 +4,60 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ApartYönet | Modern Apartman Yönetimi</title>
+  <meta name="description" content="Aidat, daire ve duyuru takibini tek panelde yapın. ApartYönet'in örnek panelini giriş yapmadan deneyin.">
+  <link rel="canonical" href="https://apartyonet.com/">
+  <script>
+    (function initThemeEarly() {
+      try {
+        const key = "apartyonet_theme";
+        const saved = localStorage.getItem(key);
+        const fallback = "dark";
+        const pref = (saved === "light" || saved === "dark") ? saved : "";
+        document.documentElement.setAttribute("data-theme", pref || fallback);
+      } catch (_) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #090d14;
-      --bg-soft: #0f1624;
-      --panel: rgba(12, 19, 33, 0.72);
-      --line: rgba(152, 175, 214, 0.2);
-      --text: #e8eefc;
-      --muted: #9fb0cf;
-      --primary: #2ea0ff;
-      --primary-2: #1676d1;
-      --accent: #5cf0d2;
-      --card: #111a2b;
-      --card-2: #0d1524;
-      --maxw: 1120px;
+      --bg: #080c14;
+      --bg-soft: #101826;
+      --surface: rgba(15, 23, 36, 0.9);
+      --surface-2: rgba(12, 19, 30, 0.84);
+      --text: #e7edf8;
+      --muted: #9eabc1;
+      --border: rgba(123, 141, 174, 0.25);
+      --brand: #2d7ff2;
+      --brand-2: #1f64c7;
+      --chip-bg: rgba(45, 127, 242, 0.14);
+      --chip-text: #a8caff;
+      --success: #39c191;
+      --hero-glow: radial-gradient(900px 380px at 10% -20%, rgba(45, 127, 242, 0.24), transparent 65%), radial-gradient(900px 380px at 90% -10%, rgba(58, 197, 165, 0.14), transparent 62%);
+      --logo-word: #ffffff;
+      --maxw: 1180px;
     }
 
-    * {
-      box-sizing: border-box;
+    html[data-theme="light"] {
+      --bg: #eff3f9;
+      --bg-soft: #e3e9f3;
+      --surface: rgba(255, 255, 255, 0.98);
+      --surface-2: #f8fbff;
+      --text: #152133;
+      --muted: #4e5f7b;
+      --border: rgba(21, 33, 51, 0.15);
+      --chip-bg: rgba(45, 127, 242, 0.1);
+      --chip-text: #18479d;
+      --hero-glow: radial-gradient(800px 350px at 10% -20%, rgba(45, 127, 242, 0.14), transparent 65%), radial-gradient(900px 360px at 90% -20%, rgba(58, 197, 165, 0.1), transparent 65%);
+      --logo-word: #ffffff;
     }
 
-    html,
-    body {
+    * { box-sizing: border-box; }
+
+    html, body {
       margin: 0;
       padding: 0;
       font-family: "Manrope", system-ui, -apple-system, Segoe UI, sans-serif;
@@ -36,30 +65,32 @@
       background: var(--bg);
     }
 
-    body::before,
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background: var(--hero-glow), linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 90%, #000 10%));
+    }
+
     body::after {
       content: "";
       position: fixed;
       inset: 0;
-      pointer-events: none;
-      z-index: -2;
-    }
-
-    body::before {
-      background:
-        radial-gradient(1200px 600px at 10% -20%, rgba(46, 160, 255, 0.32), transparent 60%),
-        radial-gradient(1000px 520px at 90% -10%, rgba(92, 240, 210, 0.2), transparent 64%),
-        radial-gradient(900px 500px at 50% 120%, rgba(22, 118, 209, 0.26), transparent 66%),
-        linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
-    }
-
-    body::after {
-      background-image:
-        linear-gradient(rgba(159, 176, 207, 0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159, 176, 207, 0.07) 1px, transparent 1px);
-      background-size: 42px 42px;
-      mask-image: radial-gradient(circle at center, black, transparent 80%);
       z-index: -1;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(134, 159, 209, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(134, 159, 209, 0.06) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black, transparent 82%);
+    }
+
+    html[data-theme="light"] body::after {
+      background-image:
+        linear-gradient(rgba(30, 41, 59, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30, 41, 59, 0.04) 1px, transparent 1px);
     }
 
     .container {
@@ -67,21 +98,21 @@
       margin: 0 auto;
     }
 
-    header {
+    .topbar {
       position: sticky;
       top: 0;
+      z-index: 40;
       backdrop-filter: blur(10px);
-      background: rgba(9, 13, 20, 0.72);
-      border-bottom: 1px solid rgba(152, 175, 214, 0.16);
-      z-index: 30;
+      background: rgba(8, 14, 28, 0.84);
+      border-bottom: 1px solid var(--border);
     }
 
-    .nav {
-      height: 82px;
+    .topbar-inner {
+      min-height: 82px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 20px;
     }
 
     .brand {
@@ -89,9 +120,9 @@
       align-items: center;
       gap: 12px;
       text-decoration: none;
-      color: inherit;
-      font-weight: 700;
-      font-size: 1.06rem;
+      color: var(--logo-word);
+      font-weight: 800;
+      letter-spacing: -0.01em;
     }
 
     .brand img {
@@ -100,10 +131,78 @@
       display: block;
     }
 
-    .nav-actions {
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-left: auto;
+      margin-right: 10px;
+    }
+
+    .menu a {
+      text-decoration: none;
+      color: #cfddfb;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .menu a:hover { color: #ffffff; }
+
+    html[data-theme="light"] .menu a {
+      color: #334155;
+    }
+
+    html[data-theme="light"] .menu a:hover {
+      color: #0f172a;
+    }
+
+    .actions {
       display: flex;
       align-items: center;
       gap: 10px;
+    }
+
+    .actions-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .menu-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface-2) 84%, transparent);
+      color: var(--text);
+      border-radius: 12px;
+      height: 40px;
+      width: 44px;
+      padding: 0;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .menu-toggle .burger {
+      position: relative;
+      width: 18px;
+      height: 12px;
+      display: inline-block;
+      border-top: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+    }
+
+    .menu-toggle .burger::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 4px;
+      border-top: 2px solid currentColor;
+    }
+
+    .menu-toggle:hover {
+      border-color: color-mix(in srgb, var(--brand) 48%, var(--border) 52%);
     }
 
     .btn {
@@ -111,192 +210,657 @@
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      border-radius: 12px;
-      padding: 10px 16px;
-      font-size: 0.92rem;
+      border-radius: 999px;
       font-weight: 700;
+      font-size: 0.9rem;
+      padding: 10px 18px;
       border: 1px solid transparent;
-      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
       white-space: nowrap;
     }
 
-    .btn:hover {
-      transform: translateY(-1px);
-    }
+    .btn:hover { transform: translateY(-1px); }
 
-    .btn-ghost {
-      color: #d9e5ff;
-      border-color: rgba(152, 175, 214, 0.35);
-      background: rgba(17, 26, 43, 0.55);
+    .btn-outline {
+      color: var(--text);
+      border-color: var(--border);
+      background: color-mix(in srgb, var(--surface-2) 78%, transparent);
     }
 
     .btn-primary {
       color: #fff;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      box-shadow: 0 14px 30px rgba(34, 130, 224, 0.3);
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 16px 32px rgba(34, 112, 214, 0.34);
+    }
+
+    .theme-btn {
+      display: none;
+      width: 44px;
+      padding: 0;
     }
 
     .hero {
-      padding: 76px 0 52px;
+      padding: 56px 0 28px;
     }
 
-    .hero-wrap {
+    .hero-shell {
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      background: linear-gradient(165deg, color-mix(in srgb, var(--surface) 92%, transparent), color-mix(in srgb, var(--surface-2) 92%, transparent));
+      padding: clamp(28px, 4vw, 48px);
       display: grid;
-      grid-template-columns: 1.06fr 0.94fr;
-      gap: 24px;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 26px;
       align-items: center;
+      box-shadow: 0 24px 46px rgba(3, 10, 23, 0.24);
     }
 
-    .hero-copy h1 {
-      margin: 12px 0 14px;
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      line-height: 1.06;
-      letter-spacing: -0.02em;
-    }
-
-    .hero-copy p {
-      margin: 0;
-      color: var(--muted);
-      font-size: clamp(1rem, 2vw, 1.12rem);
-      max-width: 630px;
-      line-height: 1.68;
-    }
-
-    .hero-eyebrow {
+    .eyebrow {
       display: inline-flex;
       align-items: center;
-      border: 1px solid rgba(92, 240, 210, 0.32);
-      background: rgba(92, 240, 210, 0.12);
-      color: #b9fff0;
+      gap: 8px;
       border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      text-transform: uppercase;
+      border: 1px solid var(--border);
+      background: var(--chip-bg);
+      color: var(--chip-text);
+      font-size: 0.76rem;
+      font-weight: 800;
       letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 8px 13px;
+    }
+
+    .hero h1 {
+      margin: 14px 0 14px;
+      font-size: clamp(2.05rem, 5vw, 3.8rem);
+      line-height: 1.04;
+      letter-spacing: -0.028em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: clamp(1rem, 1.8vw, 1.12rem);
+      max-width: 600px;
     }
 
     .hero-actions {
-      margin-top: 28px;
+      margin-top: 24px;
       display: flex;
-      flex-wrap: wrap;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     .hero-note {
-      margin-top: 16px;
-      color: #9cc7fa;
-      font-size: 0.92rem;
+      margin-top: 14px;
+      color: color-mix(in srgb, var(--success) 76%, var(--text) 24%);
+      font-size: 0.9rem;
       font-weight: 600;
     }
 
-    .hero-side {
-      border: 1px solid var(--line);
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.85), rgba(13, 21, 36, 0.75));
+    .hero-panel {
+      border: 1px solid var(--border);
       border-radius: 22px;
-      padding: 20px;
-      box-shadow: 0 20px 40px rgba(4, 8, 16, 0.45);
+      padding: 14px;
+      background: color-mix(in srgb, var(--surface-2) 95%, transparent);
+      display: grid;
+      gap: 10px;
     }
 
-    .mini-card {
-      border: 1px solid rgba(152, 175, 214, 0.2);
-      background: rgba(9, 13, 20, 0.72);
+    .snap {
+      border: 1px solid var(--border);
       border-radius: 16px;
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
       padding: 14px;
     }
 
-    .mini-card + .mini-card {
-      margin-top: 12px;
-    }
-
-    .mini-top {
+    .snap-top {
       display: flex;
-      justify-content: space-between;
-      gap: 12px;
       align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .mini-label {
-      font-size: 0.76rem;
-      color: var(--muted);
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.78rem;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      color: var(--muted);
       font-weight: 700;
     }
 
-    .mini-value {
-      font-size: 1.2rem;
+    .snap-value {
+      font-size: 1.28rem;
       font-weight: 800;
       letter-spacing: -0.02em;
-    }
-
-    .mini-muted {
-      color: #8ad8c8;
-      font-size: 0.82rem;
-      font-weight: 600;
     }
 
     .bar {
       height: 7px;
       border-radius: 999px;
-      background: rgba(152, 175, 214, 0.22);
+      background: color-mix(in srgb, var(--border) 84%, transparent);
+      margin-top: 9px;
       overflow: hidden;
-      margin-top: 8px;
     }
 
     .bar > span {
       display: block;
-      width: 72%;
       height: 100%;
+      width: 72%;
       border-radius: inherit;
-      background: linear-gradient(90deg, #2ea0ff, #5cf0d2);
+      background: linear-gradient(90deg, #2d8cff, #51e5c6);
     }
 
-    section.block {
-      padding: 32px 0;
+    .pricing-calc {
+      padding: 34px 0 20px;
     }
 
-    .section-title {
-      font-size: clamp(1.4rem, 2vw, 2rem);
-      margin: 0 0 10px;
+    .calc-shell {
+      border: 1px solid rgba(72, 104, 165, 0.34);
+      border-radius: 30px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      background: linear-gradient(180deg, #081634, #071128 55%, #060f22);
+      box-shadow: 0 26px 58px rgba(3, 10, 24, 0.45);
+    }
+
+    html[data-theme="light"] .calc-shell {
+      border: 1px solid #d3dff2;
+      background: linear-gradient(180deg, #f7fbff, #f2f8ff 55%, #eef5ff);
+      box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1);
+    }
+
+    .calc-left,
+    .calc-right {
+      padding: clamp(18px, 3vw, 28px);
+    }
+
+    .calc-left {
+      border-right: 1px solid rgba(65, 95, 148, 0.46);
+      display: grid;
+      gap: 16px;
+    }
+
+    .calc-right {
+      background: linear-gradient(160deg, #0f3f61, #103f5d 40%, #0e3651 100%);
+    }
+
+    html[data-theme="light"] .calc-left {
+      border-right: 1px solid #d1def2;
+    }
+
+    html[data-theme="light"] .calc-right {
+      background: linear-gradient(160deg, #e7f4ff, #dcf0ff 55%, #d4ecff);
+    }
+
+    .calc-title {
+      margin: 0;
+      font-size: 1.45rem;
       letter-spacing: -0.02em;
     }
 
-    .section-lead {
-      margin: 0 0 24px;
+    .calc-sub {
+      margin: 4px 0 0;
+      color: color-mix(in srgb, var(--muted) 90%, #9fb0cf 10%);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .calc-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .calc-line label {
+      font-weight: 700;
+      font-size: 0.94rem;
+    }
+
+    .calc-min {
+      border: 1px solid rgba(45, 140, 255, 0.4);
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 0.76rem;
+      color: #8dd1ff;
+      background: rgba(13, 49, 91, 0.8);
+      font-weight: 700;
+    }
+
+    .calc-units-wrap {
+      border: 1px solid rgba(73, 106, 164, 0.45);
+      border-radius: 16px;
+      background: rgba(14, 30, 60, 0.75);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    html[data-theme="light"] .calc-units-wrap {
+      border: 1px solid #cfdff6;
+      background: #edf4ff;
+    }
+
+    .calc-units-wrap input[type="number"] {
+      width: 120px;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-family: inherit;
+    }
+
+    .calc-units-wrap span {
       color: var(--muted);
-      max-width: 760px;
-      line-height: 1.65;
+      font-weight: 600;
+      font-size: 0.86rem;
     }
 
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
+    .calc-range {
+      width: 100%;
+      accent-color: #2d8cff;
+      margin-top: 2px;
     }
 
-    .grid-4 {
+    .plan-row {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .plan-btn {
+      border: 1px solid rgba(73, 106, 164, 0.45);
+      border-radius: 14px;
+      background: rgba(10, 26, 54, 0.82);
+      color: var(--text);
+      padding: 12px 10px;
+      text-align: center;
+      font: inherit;
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .plan-btn strong {
+      display: block;
+      font-size: 1.02rem;
+      letter-spacing: -0.01em;
+    }
+
+    .plan-btn span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+
+    .plan-btn.active {
+      border-color: rgba(72, 180, 255, 0.72);
+      background: linear-gradient(135deg, #1aa6ff, #0f7ad2);
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(20, 133, 218, 0.35);
+    }
+
+    .plan-btn.active span {
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .calc-toggle {
+      border: 1px solid rgba(35, 144, 124, 0.4);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: rgba(7, 45, 52, 0.36);
+    }
+
+    html[data-theme="light"] .calc-toggle {
+      border: 1px solid #b8e8de;
+      background: #eafaf5;
+    }
+
+    .calc-toggle b {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .calc-toggle small {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .calc-lifetime-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .switch {
+      position: relative;
+      width: 54px;
+      height: 32px;
+      display: inline-block;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--border) 70%, #6b7280 30%);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      top: 4px;
+      left: 4px;
+      transition: transform 0.2s ease;
+    }
+
+    .switch input:checked + .slider {
+      background: linear-gradient(135deg, #33c989, #27b879);
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(22px);
+    }
+
+    .calc-result-top {
+      margin-bottom: 12px;
+    }
+
+    .calc-result-top h3 {
+      margin: 0 0 8px;
+      font-size: 2.1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .calc-result-top p {
+      margin: 0;
+      color: color-mix(in srgb, var(--text) 62%, #b7c8df 38%);
+    }
+
+    .calc-total {
+      margin-top: 10px;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+    }
+
+    .calc-save {
+      margin-top: 8px;
+      color: #46dbac;
+      font-weight: 700;
+      font-size: 1.02rem;
+    }
+
+    .calc-metrics {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid rgba(126, 159, 196, 0.28);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(32, 70, 101, 0.55);
+    }
+
+    html[data-theme="light"] .metric {
+      border: 1px solid #c7d8ee;
+      background: #edf5ff;
+    }
+
+    .metric label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      font-size: 1.46rem;
+      letter-spacing: -0.02em;
+    }
+
+    .calc-feature {
+      margin-top: 16px;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+      color: color-mix(in srgb, var(--text) 88%, var(--muted) 12%);
+      font-size: 0.92rem;
+    }
+
+    .calc-feature li::before {
+      content: "✓";
+      color: #4adcb2;
+      margin-right: 8px;
+      font-weight: 800;
+    }
+
+    .calc-cta {
+      margin-top: 18px;
+      width: 100%;
+      justify-content: center;
+      padding: 12px 18px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff, #eef2f8);
+      color: #0d152a;
+      box-shadow: none;
+      font-size: 1.08rem;
+    }
+
+    html[data-theme="light"] .calc-cta {
+      background: linear-gradient(180deg, #0f172a, #0b1222);
+      color: #ffffff;
+    }
+
+    .feature-showcase {
+      margin-top: 6px;
+      display: grid;
+      grid-template-columns: 1fr 1.12fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .feature-nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .feature-tab {
+      border: 1px solid rgba(73, 106, 164, 0.45);
+      border-radius: 16px;
+      background: rgba(12, 30, 59, 0.8);
+      color: var(--text);
+      font: inherit;
+      padding: 16px 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .feature-tab:hover {
+      transform: translateY(-1px);
+      border-color: rgba(91, 166, 238, 0.65);
+    }
+
+    .feature-tab.active {
+      border-color: rgba(74, 154, 255, 0.76);
+      background: linear-gradient(135deg, #1e6fd9, #2d7ff2);
+      color: #ffffff;
+      box-shadow: 0 14px 28px rgba(28, 88, 170, 0.3);
+    }
+
+    .feature-tab strong {
+      display: block;
+      font-size: 1.02rem;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-tab span {
+      display: block;
+      margin-top: 5px;
+      color: color-mix(in srgb, var(--muted) 85%, #d5e3ff 15%);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .feature-tab.active span {
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .feature-detail {
+      border: 1px solid rgba(73, 106, 164, 0.45);
+      border-radius: 22px;
+      background: #f4f7fd;
+      color: #0d2b57;
+      padding: clamp(18px, 3vw, 28px);
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .feature-detail h3 {
+      margin: 0;
+      font-size: clamp(1.4rem, 2.6vw, 2rem);
+      letter-spacing: -0.02em;
+    }
+
+    .feature-detail p {
+      margin: 0;
+      color: #5f7395;
+      line-height: 1.7;
+      font-size: 1.02rem;
+    }
+
+    .feature-points {
+      list-style: none;
+      margin: 4px 0 0;
+      padding: 0;
+      display: grid;
+      gap: 7px;
+    }
+
+    .feature-points li {
+      color: #2f4670;
+      font-size: 0.94rem;
+      line-height: 1.5;
+    }
+
+    .feature-points li::before {
+      content: "✓";
+      margin-right: 8px;
+      color: #0f67d7;
+      font-weight: 800;
+    }
+
+    html[data-theme="light"] .feature-tab {
+      border: 1px solid #ccdcf2;
+      background: #edf4ff;
+      color: #1c3155;
+    }
+
+    html[data-theme="light"] .feature-tab span {
+      color: #4e678d;
+    }
+
+    html[data-theme="light"] .feature-tab.active {
+      border-color: #1f63c8;
+      background: linear-gradient(135deg, #1f63c8, #2d7ff2);
+      color: #ffffff;
+    }
+
+    html[data-theme="light"] .feature-tab.active span {
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    section.block {
+      padding: 36px 0;
+    }
+
+    .section-head {
+      margin-bottom: 22px;
+    }
+
+    .section-head h2 {
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+      font-size: clamp(1.35rem, 2vw, 2rem);
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.68;
+    }
+
+    .grid-3, .grid-4, .steps {
+      display: grid;
       gap: 14px;
     }
 
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
     .card {
-      background: linear-gradient(180deg, var(--card), var(--card-2));
-      border: 1px solid var(--line);
-      border-radius: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface-2) 96%, transparent));
       padding: 18px;
       transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
     .card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(92, 240, 210, 0.4);
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--brand) 42%, var(--border) 58%);
+    }
+
+    .badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--chip-bg);
+      color: var(--chip-text);
+      font-size: 0.84rem;
+      font-weight: 800;
+      margin-bottom: 8px;
     }
 
     .card h3 {
-      margin: 6px 0 8px;
+      margin: 0 0 8px;
       font-size: 1rem;
       letter-spacing: -0.01em;
     }
@@ -305,95 +869,68 @@
       margin: 0;
       color: var(--muted);
       font-size: 0.92rem;
-      line-height: 1.58;
+      line-height: 1.62;
     }
 
-    .icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
-      display: grid;
-      place-items: center;
-      color: #90d8ff;
-      background: rgba(46, 160, 255, 0.14);
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
-
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .step {
-      padding: 20px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: rgba(14, 22, 37, 0.72);
-    }
-
-    .step span {
-      display: inline-grid;
-      place-items: center;
+    .step > span {
       width: 28px;
       height: 28px;
       border-radius: 999px;
-      background: rgba(46, 160, 255, 0.2);
-      color: #cbe6ff;
-      font-weight: 700;
+      display: inline-grid;
+      place-items: center;
       font-size: 0.82rem;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
       margin-bottom: 10px;
     }
 
     .step h4 {
-      margin: 0 0 6px;
-      font-size: 0.98rem;
+      margin: 0 0 7px;
+      letter-spacing: -0.01em;
     }
 
     .step p {
       margin: 0;
-      font-size: 0.9rem;
-      line-height: 1.56;
       color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.62;
     }
 
     .cta {
-      padding: 52px 0 78px;
+      padding: 52px 0 74px;
     }
 
     .cta-wrap {
-      border-radius: 20px;
-      border: 1px solid rgba(92, 240, 210, 0.25);
-      background:
-        radial-gradient(620px 260px at 90% 0%, rgba(92, 240, 210, 0.18), transparent 70%),
-        linear-gradient(180deg, rgba(12, 19, 33, 0.95), rgba(10, 16, 28, 0.98));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: linear-gradient(145deg, color-mix(in srgb, var(--surface) 95%, transparent), color-mix(in srgb, var(--surface-2) 96%, transparent));
       padding: 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
       flex-wrap: wrap;
+      gap: 14px;
     }
 
-    .cta h2 {
+    .cta-wrap h2 {
       margin: 0 0 8px;
-      font-size: clamp(1.4rem, 2.2vw, 2rem);
       letter-spacing: -0.02em;
+      font-size: clamp(1.3rem, 2vw, 1.9rem);
     }
 
-    .cta p {
+    .cta-wrap p {
       margin: 0;
       color: var(--muted);
-      max-width: 560px;
-      line-height: 1.6;
+      max-width: 540px;
+      line-height: 1.64;
     }
 
     footer {
-      border-top: 1px solid rgba(152, 175, 214, 0.15);
-      color: #8ca0c2;
-      font-size: 0.82rem;
-      padding: 16px 0 24px;
+      border-top: 1px solid var(--border);
+      padding: 18px 0 24px;
+      color: var(--muted);
+      font-size: 0.84rem;
     }
 
     .footer-row {
@@ -402,21 +939,6 @@
       justify-content: space-between;
       gap: 14px;
       flex-wrap: wrap;
-    }
-
-    .footer-email {
-      margin-top: 10px;
-      text-align: center;
-      color: #b7c7e6;
-    }
-
-    .footer-email a {
-      color: #d7e6ff;
-      text-decoration: none;
-    }
-
-    .footer-email a:hover {
-      text-decoration: underline;
     }
 
     .social-links {
@@ -432,16 +954,15 @@
       align-items: center;
       justify-content: center;
       border-radius: 10px;
-      border: 1px solid rgba(152, 175, 214, 0.28);
-      color: #d3def3;
-      background: rgba(17, 26, 43, 0.62);
-      transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      border: 1px solid var(--border);
+      color: color-mix(in srgb, var(--text) 86%, #94a3b8 14%);
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
     .social-link:hover {
       transform: translateY(-1px);
-      border-color: rgba(92, 240, 210, 0.62);
-      color: #b8fff1;
+      border-color: color-mix(in srgb, var(--brand) 50%, var(--border) 50%);
     }
 
     .social-link svg {
@@ -451,127 +972,183 @@
       fill: currentColor;
     }
 
-    @media (max-width: 980px) {
-      .hero-wrap {
-        grid-template-columns: 1fr;
-      }
+    .footer-email {
+      margin-top: 10px;
+      text-align: center;
+    }
 
-      .grid-4 {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    .footer-email a {
+      color: color-mix(in srgb, var(--text) 82%, #64748b 18%);
+      text-decoration: none;
+    }
 
-      .grid-3,
-      .steps {
-        grid-template-columns: 1fr;
+    .footer-email a:hover { text-decoration: underline; }
+
+    @media (max-width: 1030px) {
+      .hero-shell { grid-template-columns: 1fr; }
+      .calc-shell { grid-template-columns: 1fr; }
+      .calc-left { border-right: 0; border-bottom: 1px solid var(--border); }
+      .feature-showcase { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3, .steps { grid-template-columns: 1fr; }
+      .menu-toggle { display: inline-flex; }
+      .topbar-inner {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+        gap: 8px 10px;
+        padding: 10px 0;
+      }
+      .brand { grid-column: 1; grid-row: 1; }
+      .menu-toggle { grid-column: 1; grid-row: 2; justify-self: start; }
+      .actions { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+      .menu {
+        display: none;
+        position: absolute;
+        left: 0;
+        top: calc(100% + 6px);
+        width: min(260px, calc(100vw - 40px));
+        margin: 0;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--surface) 95%, transparent);
+        box-shadow: 0 14px 30px rgba(2, 10, 24, 0.35);
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        z-index: 30;
+      }
+      .topbar-inner.menu-open .menu { display: flex; }
+      .actions {
+        display: grid;
+        gap: 8px;
+        justify-items: stretch;
+        width: 100%;
+        max-width: 210px;
+      }
+      .actions-top {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .theme-btn {
+        display: inline-flex;
+      }
+      .action-demo {
+        width: 100%;
+      }
+      .menu a {
+        display: block;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .footer-row {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+      }
+      .social-links {
+        width: 100%;
+        justify-content: center;
       }
     }
 
     @media (max-width: 640px) {
-      .container {
-        width: calc(100% - 28px);
-      }
-
-      .nav {
-        height: 72px;
-      }
-
-      .brand img {
-        height: 44px;
-      }
-
-      .brand span {
-        font-size: 0.98rem;
-      }
-
-      .btn {
-        padding: 9px 12px;
-        font-size: 0.82rem;
-      }
-
-      .hero {
-        padding-top: 42px;
-      }
-
-      .footer-row {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+      .container { width: calc(100% - 26px); }
+      .topbar-inner { min-height: 74px; }
+      .brand img { height: 46px; }
+      .btn { padding: 9px 14px; font-size: 0.82rem; }
+      .hero { padding-top: 34px; }
+      .action-demo { font-size: 0.82rem; }
     }
   </style>
 </head>
-<body>
-  <header>
-    <div class="container nav">
+<body data-disable-floating-theme="true">
+  <header class="topbar">
+    <div class="container topbar-inner">
       <a class="brand" href="/index.html" aria-label="ApartYönet Anasayfa">
         <img src="assets/apartyonet-logo-white-transparent.svg" alt="ApartYönet logo" />
         <span>ApartYönet</span>
       </a>
-      <nav class="nav-actions" aria-label="Üst menü">
-        <a class="btn btn-ghost" href="/login.html">Giriş Yap</a>
-        <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
+      <nav id="topMenu" class="menu" aria-label="Üst menü">
+        <a href="#ozellikler">Özellikler</a>
+        <a href="/ornek-panel.html">Örnek Panel</a>
+        <a href="/rehberler.html">Rehberler</a>
+        <a href="/fiyatlandirma.html">Fiyatlandırma</a>
       </nav>
+      <button id="menuToggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="topMenu" aria-label="Menüyü aç/kapat">
+        <span class="burger" aria-hidden="true"></span>
+      </button>
+      <div class="actions">
+        <div class="actions-top">
+          <a class="btn btn-outline" href="/login.html">Giriş Yap</a>
+          <button id="themeToggleBtn" class="btn btn-outline theme-btn" data-inline-theme-toggle type="button" aria-label="Temayı değiştir">
+            <span data-theme-icon aria-hidden="true">🌙</span>
+          </button>
+        </div>
+        <a class="btn btn-primary action-demo" href="/basvuru.html">Başvur</a>
+      </div>
     </div>
   </header>
 
   <main>
     <section class="hero">
-      <div class="container hero-wrap">
-        <div class="hero-copy">
-          <div class="hero-eyebrow">Kurulum 2 gün içinde tamamlanır</div>
-          <h1>Apartman yönetimi artık çok kolay</h1>
-          <p>Aidat takibi, duyurular ve site yönetimini tek panelde yönetin.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
-            <a class="btn btn-ghost" href="#nasil-calisir">Demo Gör</a>
-          </div>
-          <div class="hero-note">Yönetim ekibiniz için hızlı kurulum, sade arayüz, güvenli veri akışı.</div>
-        </div>
-        <div class="hero-side" aria-label="Önizleme paneli">
-          <div class="mini-card">
-            <div class="mini-top">
-              <div class="mini-label">Aidat Durumu</div>
-              <div class="mini-muted">Canlı takip</div>
+      <div class="container">
+        <div class="hero-shell">
+          <div>
+            <div class="eyebrow">Apartman ve Site Yönetimleri için</div>
+            <h1>Kim ödedi, kim borçlu? Tek ekranda görün.</h1>
+            <p>Apartmanınızın aidatlarını, ortak giderlerini ve duyurularını tek panelde takip edin. Önce örnek bir siteyi gezin, sonra kendi siteniz için başvurun.</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="/ornek-panel.html">Örnek Paneli Dene</a>
+              <a class="btn btn-outline" href="/basvuru.html">Kendi Sitem İçin Başvur</a>
             </div>
-            <div class="mini-value">%72 tahsilat</div>
-            <div class="bar"><span></span></div>
+            <div class="hero-note">Örnek panel için hesap veya iletişim bilgisi gerekmez.</div>
           </div>
-          <div class="mini-card">
-            <div class="mini-top">
-              <div class="mini-label">Duyuru</div>
-              <div class="mini-muted">Tüm daireler</div>
+
+          <aside class="hero-panel" aria-label="Önizleme paneli">
+            <div class="snap">
+              <div class="snap-top"><span>Tahsilat Oranı</span><span>Örnek veri</span></div>
+              <div class="snap-value">%72 Tahsilat</div>
+              <div class="bar"><span></span></div>
             </div>
-            <div class="mini-value">4 aktif duyuru</div>
-          </div>
-          <div class="mini-card">
-            <div class="mini-top">
-              <div class="mini-label">Kurulum</div>
-              <div class="mini-muted">Hızlı teslim</div>
+            <div class="snap">
+              <div class="snap-top"><span>Aktif Duyuru</span><span>Bu Ay</span></div>
+              <div class="snap-value">2 Duyuru</div>
             </div>
-            <div class="mini-value">2 gün içinde tamamlanır</div>
-          </div>
+            <div class="snap">
+              <div class="snap-top"><span>Site Yapısı</span><span>Örnek veri</span></div>
+              <div class="snap-value">2 Blok</div>
+            </div>
+          </aside>
         </div>
       </div>
     </section>
 
     <section class="block" id="sorunlar">
       <div class="container">
-        <h2 class="section-title">Sorunlar</h2>
-        <p class="section-lead">Dağınık WhatsApp yazışmaları, manuel aidat listeleri ve geç gelen duyurular yönetime zaman kaybettirir.</p>
+        <div class="section-head">
+          <h2>Sahadaki temel sorunlar</h2>
+          <p>Manuel tablolar, dağınık mesajlar ve farklı araçlara yayılan kayıtlar yönetim kalitesini düşürür.</p>
+        </div>
         <div class="grid-3">
           <article class="card">
-            <div class="icon">01</div>
+            <div class="badge">01</div>
             <h3>Manuel takip yükü</h3>
-            <p>Excel ve mesajlaşma ile borç ve ödeme takibi sürdürülemez hale gelir.</p>
+            <p>Excel ve mesajlaşma üzerinden aidat takibi sürdürülebilir olmaktan çıkar.</p>
           </article>
           <article class="card">
-            <div class="icon">02</div>
-            <h3>Geciken iletişim</h3>
-            <p>Duyurular herkese aynı anda ulaşmadığı için operasyon aksar.</p>
+            <div class="badge">02</div>
+            <h3>Geç iletişim</h3>
+            <p>Duyurular zamanında ve doğru kişilere ulaşmadığında operasyon aksar.</p>
           </article>
           <article class="card">
-            <div class="icon">03</div>
-            <h3>Dağınık bilgi</h3>
-            <p>Her daireye ait geçmiş kayıtlar farklı kanallarda kaldığı için kontrol zorlaşır.</p>
+            <div class="badge">03</div>
+            <h3>Dağınık veriler</h3>
+            <p>Daire, kişi ve ödeme geçmişleri farklı kanallarda tutulduğu için kontrol zorlaşır.</p>
           </article>
         </div>
       </div>
@@ -579,23 +1156,25 @@
 
     <section class="block" id="cozum">
       <div class="container">
-        <h2 class="section-title">Çözüm</h2>
-        <p class="section-lead">ApartYönet, apartmanınızın aidat, duyuru ve yönetim iletişimini tek panelde toplayarak operasyonu hızlandırır.</p>
+        <div class="section-head">
+          <h2>ApartYönet çözümü</h2>
+          <p>Tüm süreçleri tek panelde birleştirir, yönetim ekibine net görünürlük sağlar.</p>
+        </div>
         <div class="grid-3">
           <article class="card">
-            <div class="icon">A</div>
+            <div class="badge">A</div>
             <h3>Tek merkezden yönetim</h3>
-            <p>Site, blok ve daire bilgileri düzenli bir yapı ile tek ekranda tutulur.</p>
+            <p>Site, blok ve daire bilgileri standart bir yapıda tek ekranda tutulur.</p>
           </article>
           <article class="card">
-            <div class="icon">B</div>
+            <div class="badge">B</div>
             <h3>Anlık görünürlük</h3>
-            <p>Borç, ödeme ve duyuru süreçleri herkes için şeffaf ve takip edilebilir olur.</p>
+            <p>Tahsilat, borç ve duyuru süreçleri herkes için takip edilebilir hale gelir.</p>
           </article>
           <article class="card">
-            <div class="icon">C</div>
+            <div class="badge">C</div>
             <h3>Hızlı kurulum</h3>
-            <p>Başvuru sonrası paneliniz 2 gün içinde hazırlanıp kullanıma açılır.</p>
+            <p>Başvuru sonrası paneliniz kısa sürede kurulur ve yönetim devreye alınır.</p>
           </article>
         </div>
       </div>
@@ -603,24 +1182,47 @@
 
     <section class="block" id="ozellikler">
       <div class="container">
-        <h2 class="section-title">Özellikler</h2>
-        <p class="section-lead">Modern SaaS yaklaşımıyla tasarlanmış temel yönetim modülleri hazır gelir.</p>
-        <div class="grid-4">
-          <article class="card">
-            <h3>Aidat borç ve ödeme takibi</h3>
-            <p>Daire bazlı tahsilat ve borç durumunu tek ekranda yönetin.</p>
-          </article>
-          <article class="card">
-            <h3>Duyuru paylaşımı</h3>
-            <p>Tüm siteye, bloğa veya hedefli gruplara hızlı duyuru gönderin.</p>
-          </article>
-          <article class="card">
-            <h3>Yönetici iletişim paneli</h3>
-            <p>Yönetim ve sakinler arasındaki iletişimi düzenli bir kanalda toplayın.</p>
-          </article>
-          <article class="card">
-            <h3>Her daireye özel ekran</h3>
-            <p>Daire sakinleri kendi bilgilerini sade bir panelden görebilir.</p>
+        <div class="section-head">
+          <h2>Özellikler</h2>
+          <p>Günlük yönetim işlerinizi hangi ekranlardan takip edeceğinizi görün.</p>
+        </div>
+        <div class="feature-showcase">
+          <div class="feature-nav" role="tablist" aria-label="Özellik modülleri">
+            <button class="feature-tab active" type="button" data-feature="manager" role="tab" aria-selected="true">
+              <strong>Yönetici Arayüzü</strong>
+              <span>Operasyon paneli ve merkezi kontrol</span>
+            </button>
+            <button class="feature-tab" type="button" data-feature="accounting" role="tab" aria-selected="false">
+              <strong>Muhasebe İşlemleri</strong>
+              <span>Gelir-gider, tahsilat ve rapor düzeni</span>
+            </button>
+            <button class="feature-tab" type="button" data-feature="collection" role="tab" aria-selected="false">
+              <strong>Aidat ve Tahsilat Takibi</strong>
+              <span>Bekleyen, kısmi ve tamamlanan ödemeler</span>
+            </button>
+            <button class="feature-tab" type="button" data-feature="sms" role="tab" aria-selected="false">
+              <strong>Duyurular</strong>
+              <span>Yönetim bilgilendirmelerini tek yerde tutun</span>
+            </button>
+            <button class="feature-tab" type="button" data-feature="mobile" role="tab" aria-selected="false">
+              <strong>Mobil Erişim</strong>
+              <span>Telefon tarayıcısından panel erişimi</span>
+            </button>
+            <button class="feature-tab" type="button" data-feature="unit" role="tab" aria-selected="false">
+              <strong>Daire Arayüzü</strong>
+              <span>Her daireye özel bilgi ve işlem ekranı</span>
+            </button>
+          </div>
+
+          <article class="feature-detail" id="featureDetail" role="tabpanel" aria-live="polite">
+            <h3 id="featureTitle">Yönetici Arayüzü</h3>
+            <p id="featureDesc">Site yönetimindeki tüm süreçleri tek noktadan yönetmenizi sağlar. Kullanıcı yetkileri, daire kayıtları, duyurular ve borç ekranları sade bir panelde toplanır.</p>
+            <ul class="feature-points" id="featurePoints">
+              <li>Tek ekranda site-blok-daire görünümü</li>
+              <li>Rol bazlı erişim ve güvenli kullanıcı yönetimi</li>
+              <li>Hızlı arama ve düzenleme akışı</li>
+            </ul>
+            <a class="btn btn-primary" href="/ornek-panel.html">Örnek Paneli Aç</a>
           </article>
         </div>
       </div>
@@ -628,35 +1230,39 @@
 
     <section class="block" id="nasil-calisir">
       <div class="container">
-        <h2 class="section-title">Nasıl Çalışır</h2>
-        <p class="section-lead">Başvuru süreci kısa tutuldu; teknik kurulum ekibimiz tüm yapılandırmayı sizin adınıza tamamlar.</p>
+        <div class="section-head">
+          <h2>Nasıl çalışır?</h2>
+          <p>Başvuru ve kurulum akışı kısa tutuldu, teknik yapılandırma ekibimiz tarafından tamamlanır.</p>
+        </div>
         <div class="steps">
-          <article class="step">
+          <article class="card step">
             <span>1</span>
-            <h4>Başvuru Yapın</h4>
-            <p>Yetkili, site ve yapı bilgilerini formdan iletin.</p>
+            <h4>Başvuru</h4>
+            <p>Site bilgilerini form üzerinden iletin.</p>
           </article>
-          <article class="step">
+          <article class="card step">
             <span>2</span>
-            <h4>Kurulum Tamamlansın</h4>
-            <p>Paneliniz en geç 2 gün içinde hazır hale getirilir.</p>
+            <h4>Kurulum</h4>
+            <p>Paneliniz hazırlanır ve kullanıcı hesabı tanımlanır.</p>
           </article>
-          <article class="step">
+          <article class="card step">
             <span>3</span>
-            <h4>Kullanıma Başlayın</h4>
-            <p>Duyuru, aidat ve yönetim süreçlerini tek panelden yönetin.</p>
+            <h4>Canlı kullanım</h4>
+            <p>Yönetim süreçlerinizi tek panelden yürütün.</p>
           </article>
         </div>
       </div>
     </section>
 
     <section class="cta" id="cta">
-      <div class="container cta-wrap">
-        <div>
-          <h2>ApartYönet ile yönetimi dijitale taşıyın</h2>
-          <p>Başvurunuzu gönderin, paneliniz 2 gün içinde hazır olsun.</p>
+      <div class="container">
+        <div class="cta-wrap">
+          <div>
+            <h2>ApartYönet ile yönetime hemen başlayın</h2>
+            <p>Site bilgilerinizi iletin; panelinizin kurulumu için sizinle iletişime geçelim.</p>
+          </div>
+          <a class="btn btn-primary" href="/basvuru.html">Kurulum Başvurusu</a>
         </div>
-        <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
       </div>
     </section>
   </main>
@@ -675,7 +1281,7 @@
             <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5zm9.5 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
           </svg>
         </a>
-        <a class="social-link" href="https://www.facebook.com/apartyoneti" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+        <a class="social-link" href="https://www.facebook.com/apartyonet" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M13.5 8H16V5h-2.5C10.57 5 9 6.57 9 9.5V12H7v3h2v6h3v-6h3l.5-3H12V9.5c0-.83.67-1.5 1.5-1.5z"/>
           </svg>
@@ -691,5 +1297,128 @@
       <a href="mailto:destek.apartyonet@gmail.com">destek.apartyonet@gmail.com</a>
     </div>
   </footer>
+
+  <script>
+    (function initMobileMenu() {
+      const root = document.querySelector(".topbar-inner");
+      const toggle = document.getElementById("menuToggle");
+      const menu = document.getElementById("topMenu");
+      if (!root || !toggle || !menu) return;
+
+      toggle.addEventListener("click", () => {
+        const open = root.classList.toggle("menu-open");
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+
+      menu.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", () => {
+          root.classList.remove("menu-open");
+          toggle.setAttribute("aria-expanded", "false");
+        });
+      });
+    })();
+
+    (function initInlineThemeToggle() {
+      const btn = document.getElementById("themeToggleBtn");
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        if (window.AppTheme && typeof window.AppTheme.toggleTheme === "function") {
+          window.AppTheme.toggleTheme();
+        }
+      });
+    })();
+
+    (function initFeatureShowcase() {
+      const tabs = Array.from(document.querySelectorAll(".feature-tab"));
+      const titleEl = document.getElementById("featureTitle");
+      const descEl = document.getElementById("featureDesc");
+      const pointsEl = document.getElementById("featurePoints");
+      if (!tabs.length || !titleEl || !descEl || !pointsEl) return;
+
+      const featureMap = {
+        manager: {
+          title: "Yönetici Arayüzü",
+          desc: "Site yönetimindeki tüm süreçleri tek noktadan yönetmenizi sağlar. Kullanıcı yetkileri, daire kayıtları, duyurular ve borç ekranları sade bir panelde toplanır.",
+          points: [
+            "Tek ekranda site-blok-daire görünümü",
+            "Rol bazlı erişim ve güvenli kullanıcı yönetimi",
+            "Hızlı arama ve düzenleme akışı"
+          ]
+        },
+        accounting: {
+          title: "Muhasebe İşlemleri",
+          desc: "Aidat alacakları, gelir-gider hareketleri ve tahsilat durumlarını düzenli şekilde takip etmenizi sağlar.",
+          points: [
+            "Daire bazlı borç, tahsilat ve bakiye görünümü",
+            "Aylık gelir-gider raporları ve filtreleme",
+            "Gecikme ve ödeme durumlarının otomatik hesaplanması"
+          ]
+        },
+        collection: {
+          title: "Aidat ve Tahsilat Takibi",
+          desc: "Dairelerin aidatlarını ve kaydedilmiş ödemelerini dönem bazında takip edin.",
+          points: [
+            "Daire ve dükkan için ayrı aidat tutarları",
+            "Tahsil edilen ve kalan tutarların özeti",
+            "Daire bazında ödeme geçmişi"
+          ]
+        },
+        sms: {
+          title: "Duyurular",
+          desc: "Yönetim bilgilendirmelerini panelde paylaşın ve önceki duyurulara dönün.",
+          points: [
+            "Bakım ve toplantı bilgileri",
+            "Sakinlerin panel üzerinden erişimi",
+            "Duyuru geçmişi"
+          ]
+        },
+        mobile: {
+          title: "Mobil Erişim",
+          desc: "Yöneticiler ve sakinler paneli telefon tarayıcısından açabilir.",
+          points: [
+            "Mobil uyumlu hızlı giriş ve panel erişimi",
+            "Duyuru, borç ve profil takibini telefondan yönetme",
+            "Sahada kullanım için sade ve hızlı arayüz"
+          ]
+        },
+        unit: {
+          title: "Daire Arayüzü",
+          desc: "Her daire için ayrı bir ekran sağlayarak kimlik, ödeme, borç ve not alanlarını detaylı yönetmeyi mümkün kılar.",
+          points: [
+            "Daireye özel kişi, araç ve iletişim bilgileri",
+            "Borç-hukuki durum ve aidat kayıtları",
+            "Site yöneticisi için düzenlenebilir detay modülü"
+          ]
+        }
+      };
+
+      const setActive = (tab) => {
+        tabs.forEach((item) => {
+          const active = item === tab;
+          item.classList.toggle("active", active);
+          item.setAttribute("aria-selected", active ? "true" : "false");
+        });
+      };
+
+      const render = (key) => {
+        const data = featureMap[key];
+        if (!data) return;
+        titleEl.textContent = data.title;
+        descEl.textContent = data.desc;
+        pointsEl.innerHTML = data.points.map((point) => `<li>${point}</li>`).join("");
+      };
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          setActive(tab);
+          render(tab.dataset.feature || "manager");
+        });
+      });
+
+      render("manager");
+    })();
+
+  </script>
+  <script src="/js/theme.js"></script>
 </body>
 </html>

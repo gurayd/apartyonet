@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApartYönet | Fiyatlandırma</title>
+  <script>
+    (function initThemeEarly() {
+      try {
+        const key = "apartyonet_theme";
+        const saved = localStorage.getItem(key);
+        const fallback = "dark";
+        const pref = (saved === "light" || saved === "dark") ? saved : "";
+        document.documentElement.setAttribute("data-theme", pref || fallback);
+      } catch (_) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080c14;
+      --surface: rgba(15, 23, 36, 0.9);
+      --surface-2: rgba(12, 19, 30, 0.84);
+      --text: #e7edf8;
+      --muted: #9eabc1;
+      --border: rgba(123, 141, 174, 0.25);
+      --brand: #2d7ff2;
+      --brand-2: #1f64c7;
+      --success: #39c191;
+      --maxw: 1180px;
+    }
+
+    html[data-theme="light"] {
+      --bg: #eff3f9;
+      --surface: rgba(255, 255, 255, 0.98);
+      --surface-2: #f8fbff;
+      --text: #152133;
+      --muted: #4e5f7b;
+      --border: rgba(21, 33, 51, 0.15);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: "Manrope", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(900px 380px at 10% -20%, rgba(45, 127, 242, 0.24), transparent 65%),
+        radial-gradient(900px 380px at 90% -10%, rgba(58, 197, 165, 0.14), transparent 62%),
+        linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 92%, #000 8%));
+    }
+
+    .container {
+      width: min(var(--maxw), calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(10px);
+      background: rgba(8, 14, 28, 0.84);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-inner {
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .brand img {
+      height: 54px;
+      width: auto;
+      display: block;
+    }
+
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-left: auto;
+      margin-right: 10px;
+    }
+
+    .menu a {
+      text-decoration: none;
+      color: #cfddfb;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .menu a:hover { color: #ffffff; }
+
+    html[data-theme="light"] .menu a {
+      color: #334155;
+    }
+
+    html[data-theme="light"] .menu a:hover {
+      color: #0f172a;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .actions-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .menu-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface-2) 84%, transparent);
+      color: var(--text);
+      border-radius: 12px;
+      height: 40px;
+      width: 44px;
+      padding: 0;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .menu-toggle .burger {
+      position: relative;
+      width: 18px;
+      height: 12px;
+      display: inline-block;
+      border-top: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+    }
+
+    .menu-toggle .burger::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 4px;
+      border-top: 2px solid currentColor;
+    }
+
+    .menu-toggle:hover {
+      border-color: color-mix(in srgb, var(--brand) 48%, var(--border) 52%);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 10px 18px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .btn-outline {
+      color: var(--text);
+      border-color: var(--border);
+      background: color-mix(in srgb, var(--surface-2) 78%, transparent);
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 16px 32px rgba(34, 112, 214, 0.34);
+    }
+
+    .theme-btn {
+      display: none;
+      width: 44px;
+      padding: 0;
+    }
+
+    .page-intro {
+      padding: 44px 0 16px;
+    }
+
+    .page-intro h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 3.8vw, 2.9rem);
+      letter-spacing: -0.03em;
+    }
+
+    .page-intro p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 780px;
+    }
+
+    .pricing-calc {
+      padding: 10px 0 34px;
+    }
+
+    .calc-shell {
+      border: 1px solid color-mix(in srgb, var(--border) 80%, #4f83ce 20%);
+      border-radius: 30px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      background: linear-gradient(180deg, #0b1423, #0a1322 55%, #09101d);
+      box-shadow: 0 26px 58px rgba(3, 10, 24, 0.45);
+    }
+
+    html[data-theme="light"] .calc-shell {
+      border: 1px solid #ced9eb;
+      background: linear-gradient(180deg, #ffffff, #f9fbff 55%, #f5f9ff);
+      box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+    }
+
+    .calc-left,
+    .calc-right {
+      padding: clamp(18px, 3vw, 28px);
+    }
+
+    .calc-left {
+      border-right: 1px solid color-mix(in srgb, var(--border) 88%, #3f68a5 12%);
+      display: grid;
+      gap: 16px;
+    }
+
+    .calc-right {
+      background: linear-gradient(160deg, #133753, #12364f 44%, #112f45 100%);
+    }
+
+    html[data-theme="light"] .calc-left {
+      border-right: 1px solid #d3dff1;
+    }
+
+    html[data-theme="light"] .calc-right {
+      background: linear-gradient(160deg, #e9f4ff, #e2f0ff 55%, #d8ebff);
+    }
+
+    .calc-title {
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: -0.02em;
+    }
+
+    .calc-sub {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .calc-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .calc-line label {
+      font-weight: 700;
+      font-size: 0.94rem;
+    }
+
+    .calc-min {
+      border: 1px solid rgba(45, 127, 242, 0.45);
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 0.76rem;
+      color: #9bc4ff;
+      background: rgba(13, 49, 91, 0.72);
+      font-weight: 700;
+    }
+
+    html[data-theme="light"] .calc-min {
+      color: #1f4f9f;
+      background: #e6effc;
+      border-color: #b9cff0;
+    }
+
+    .calc-units-wrap {
+      border: 1px solid color-mix(in srgb, var(--border) 88%, #4568a0 12%);
+      border-radius: 16px;
+      background: rgba(14, 30, 60, 0.72);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    html[data-theme="light"] .calc-units-wrap {
+      border: 1px solid #cfddf2;
+      background: #edf4ff;
+    }
+
+    .calc-units-wrap input[type="number"] {
+      width: 120px;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-family: inherit;
+    }
+
+    .calc-units-wrap span {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.86rem;
+    }
+
+    .calc-range {
+      width: 100%;
+      accent-color: #2d7ff2;
+      margin-top: 2px;
+    }
+
+    .plan-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .plan-btn {
+      border: 1px solid color-mix(in srgb, var(--border) 85%, #4c72ad 15%);
+      border-radius: 14px;
+      background: rgba(10, 26, 54, 0.8);
+      color: var(--text);
+      padding: 12px 10px;
+      text-align: center;
+      font: inherit;
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    html[data-theme="light"] .plan-btn {
+      border-color: #c8d8ef;
+      background: #eef4fe;
+      color: #18304f;
+    }
+
+    .plan-btn strong {
+      display: block;
+      font-size: 1.02rem;
+      letter-spacing: -0.01em;
+    }
+
+    .plan-btn span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+
+    .plan-btn.active {
+      border-color: rgba(74, 154, 255, 0.78);
+      background: linear-gradient(135deg, #1e6fd9, #2d7ff2);
+      color: #ffffff;
+      box-shadow: 0 12px 24px rgba(20, 97, 185, 0.36);
+    }
+
+    html[data-theme="light"] .plan-btn.active {
+      border-color: #1f63c8;
+      background: linear-gradient(135deg, #1f63c8, #2d7ff2);
+      color: #ffffff;
+    }
+
+    .plan-btn.active span {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .calc-toggle {
+      border: 1px solid rgba(35, 144, 124, 0.4);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: rgba(7, 45, 52, 0.36);
+    }
+
+    html[data-theme="light"] .calc-toggle {
+      border: 1px solid #b8e8de;
+      background: #eafaf5;
+    }
+
+    .calc-toggle b {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .calc-toggle small {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .calc-lifetime-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .switch {
+      position: relative;
+      width: 54px;
+      height: 32px;
+      display: inline-block;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--border) 70%, #6b7280 30%);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      top: 4px;
+      left: 4px;
+      transition: transform 0.2s ease;
+    }
+
+    .switch input:checked + .slider {
+      background: linear-gradient(135deg, #33c989, #27b879);
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(22px);
+    }
+
+    .calc-result-top {
+      margin-bottom: 12px;
+    }
+
+    .calc-result-top h3 {
+      margin: 0 0 8px;
+      font-size: 2.1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .calc-result-top p {
+      margin: 0;
+      color: color-mix(in srgb, var(--text) 64%, #b7c8df 36%);
+    }
+
+    .calc-total {
+      margin-top: 10px;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+    }
+
+    .calc-save {
+      margin-top: 8px;
+      color: #46dbac;
+      font-weight: 700;
+      font-size: 1.02rem;
+    }
+
+    .calc-metrics {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid rgba(126, 159, 196, 0.28);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(32, 70, 101, 0.55);
+    }
+
+    html[data-theme="light"] .metric {
+      border: 1px solid #c7d8ee;
+      background: #edf5ff;
+    }
+
+    .metric label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .metric strong {
+      font-size: 1.46rem;
+      letter-spacing: -0.02em;
+    }
+
+    .calc-feature {
+      margin-top: 16px;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+      color: color-mix(in srgb, var(--text) 88%, var(--muted) 12%);
+      font-size: 0.92rem;
+    }
+
+    .calc-feature li::before {
+      content: "✓";
+      color: #4adcb2;
+      margin-right: 8px;
+      font-weight: 800;
+    }
+
+    .calc-cta {
+      margin-top: 18px;
+      width: 100%;
+      justify-content: center;
+      padding: 12px 18px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff, #edf2f9);
+      color: #0d152a;
+      box-shadow: none;
+      font-size: 1.08rem;
+    }
+
+    html[data-theme="light"] .calc-cta {
+      background: linear-gradient(180deg, #0f172a, #0b1222);
+      color: #ffffff;
+    }
+
+    @media (max-width: 1030px) {
+      .calc-shell { grid-template-columns: 1fr; }
+      .calc-left { border-right: 0; border-bottom: 1px solid var(--border); }
+      .menu-toggle { display: inline-flex; }
+      .topbar-inner {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+        gap: 8px 10px;
+        padding: 10px 0;
+      }
+      .brand { grid-column: 1; grid-row: 1; }
+      .menu-toggle { grid-column: 1; grid-row: 2; justify-self: start; }
+      .actions { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+      .menu {
+        display: none;
+        position: absolute;
+        left: 0;
+        top: calc(100% + 6px);
+        width: min(260px, calc(100vw - 40px));
+        margin: 0;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--surface) 95%, transparent);
+        box-shadow: 0 14px 30px rgba(2, 10, 24, 0.35);
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        z-index: 30;
+      }
+      .topbar-inner.menu-open .menu { display: flex; }
+      .actions {
+        display: grid;
+        gap: 8px;
+        justify-items: stretch;
+        width: 100%;
+        max-width: 210px;
+      }
+      .actions-top {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .theme-btn {
+        display: inline-flex;
+      }
+      .action-demo {
+        width: 100%;
+      }
+      .menu a {
+        display: block;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container { width: calc(100% - 26px); }
+      .topbar-inner { min-height: 74px; }
+      .brand img { height: 46px; }
+      .btn { padding: 9px 14px; font-size: 0.82rem; }
+      .page-intro { padding-top: 30px; }
+      .plan-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body data-disable-floating-theme="true">
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="/index.html" aria-label="ApartYönet Anasayfa">
+        <img src="assets/apartyonet-logo-white-transparent.svg" alt="ApartYönet logo" />
+        <span>ApartYönet</span>
+      </a>
+      <nav id="topMenu" class="menu" aria-label="Üst menü">
+        <a href="/index.html#ozellikler">Özellikler</a>
+        <a href="/ornek-panel.html">Örnek Panel</a>
+        <a href="/rehberler.html">Rehberler</a>
+        <a href="/fiyatlandirma.html">Fiyatlandırma</a>
+      </nav>
+      <button id="menuToggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="topMenu" aria-label="Menüyü aç/kapat">
+        <span class="burger" aria-hidden="true"></span>
+      </button>
+      <div class="actions">
+        <div class="actions-top">
+          <a class="btn btn-outline" href="/login.html">Giriş Yap</a>
+          <button id="themeToggleBtn" class="btn btn-outline theme-btn" data-inline-theme-toggle type="button" aria-label="Temayı değiştir">
+            <span data-theme-icon aria-hidden="true">🌙</span>
+          </button>
+        </div>
+        <a class="btn btn-primary action-demo" href="/basvuru.html">Başvur</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-intro">
+      <div class="container">
+        <h1>Fiyatlandırma</h1>
+        <p>Daire sayısına ve lisans süresine göre maliyeti anlık hesaplayın. Aynı ekrandan avantajları ve plan karşılaştırmasını görebilirsiniz.</p>
+      </div>
+    </section>
+
+    <section class="pricing-calc" id="fiyatlandirma">
+      <div class="container">
+        <div class="calc-shell">
+          <div class="calc-left">
+            <div>
+              <h2 class="calc-title">Fiyatlandırma Hesaplama Aracı</h2>
+              <p class="calc-sub">Daire sayısı, lisans süresi ve kampanya seçimine göre toplam maliyeti anında görün.</p>
+            </div>
+
+            <div class="calc-line">
+              <label for="calcUnits">Mesken (Daire) Sayısı</label>
+              <span class="calc-min">Min 20</span>
+            </div>
+
+            <div class="calc-units-wrap">
+              <input id="calcUnits" type="number" min="20" max="5000" step="1" value="20" />
+              <span>mesken</span>
+            </div>
+            <input id="calcUnitsRange" class="calc-range" type="range" min="20" max="5000" step="1" value="20" />
+
+            <div class="calc-line">
+              <label>Lisans Süresi</label>
+            </div>
+            <div class="plan-row" role="group" aria-label="Lisans süresi">
+              <button class="plan-btn active" type="button" data-plan="1y"><strong>1 Yıl</strong><span>Standart</span></button>
+              <button class="plan-btn" type="button" data-plan="2y"><strong>2 Yıl</strong><span>%20 indirim</span></button>
+              <button class="plan-btn" type="button" data-plan="3y"><strong>3 Yıl</strong><span>%30 indirim</span></button>
+              <button class="plan-btn" type="button" data-plan="lifetime"><strong>Ömür Boyu</strong><span>Tek sefer ödeme</span></button>
+            </div>
+
+            <div class="calc-toggle">
+              <div>
+                <b>Yeni Üye İndirimi</b>
+                <small>İlk üyeliğe özel ek %10 indirim uygula.</small>
+              </div>
+              <label class="switch" for="calcNewMember">
+                <input id="calcNewMember" type="checkbox" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <p class="calc-lifetime-note">Not: Ömür Boyu paketler temel düzeydedir.</p>
+          </div>
+
+          <div class="calc-right">
+            <div class="calc-result-top">
+              <h3>Özet Tahmin</h3>
+              <p><span id="calcSummaryUnits">20</span> mesken için <span id="calcSummaryPlan">1 Yıl</span> planı.</p>
+            </div>
+            <div id="calcTotal" class="calc-total">720 TL</div>
+            <div id="calcSave" class="calc-save">0 TL tasarruf</div>
+
+            <div class="calc-metrics">
+              <div class="metric">
+                <label>Aylık Ort.</label>
+                <strong id="calcMonthlyAvg">60 TL</strong>
+              </div>
+              <div class="metric">
+                <label>Mesken Başı (Aylık)</label>
+                <strong id="calcPerUnit">3 TL</strong>
+              </div>
+            </div>
+
+            <ul class="calc-feature">
+              <li>Sınırsız kullanıcı hesabı</li>
+              <li>Duyuru ve aidat yönetimi</li>
+              <li>Mobil uyumlu panel erişimi</li>
+              <li>Rol bazlı güvenli yetkilendirme</li>
+            </ul>
+
+            <a class="btn btn-primary calc-cta" href="/basvuru.html">Teklif Al / Hemen Başla</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function initMobileMenu() {
+      const root = document.querySelector(".topbar-inner");
+      const toggle = document.getElementById("menuToggle");
+      const menu = document.getElementById("topMenu");
+      if (!root || !toggle || !menu) return;
+
+      toggle.addEventListener("click", () => {
+        const open = root.classList.toggle("menu-open");
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+
+      menu.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", () => {
+          root.classList.remove("menu-open");
+          toggle.setAttribute("aria-expanded", "false");
+        });
+      });
+    })();
+
+    (function initInlineThemeToggle() {
+      const btn = document.getElementById("themeToggleBtn");
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        if (window.AppTheme && typeof window.AppTheme.toggleTheme === "function") {
+          window.AppTheme.toggleTheme();
+        }
+      });
+    })();
+
+    (function initPricingCalculator() {
+      const minUnits = 20;
+      const maxUnits = 5000;
+      const baseMonthlyPerUnit = 3;
+      const termConfig = {
+        "1y": { years: 1, discount: 0, label: "1 Yıl" },
+        "2y": { years: 2, discount: 0.2, label: "2 Yıl" },
+        "3y": { years: 3, discount: 0.3, label: "3 Yıl" }
+      };
+      const newMemberDiscount = 0.1;
+
+      const unitsInput = document.getElementById("calcUnits");
+      const unitsRange = document.getElementById("calcUnitsRange");
+      const yearsButtons = Array.from(document.querySelectorAll(".plan-btn"));
+      const newMemberCheckbox = document.getElementById("calcNewMember");
+      const totalEl = document.getElementById("calcTotal");
+      const saveEl = document.getElementById("calcSave");
+      const monthlyEl = document.getElementById("calcMonthlyAvg");
+      const perUnitEl = document.getElementById("calcPerUnit");
+      const summaryUnitsEl = document.getElementById("calcSummaryUnits");
+      const summaryPlanEl = document.getElementById("calcSummaryPlan");
+
+      if (!unitsInput || !unitsRange || !newMemberCheckbox || yearsButtons.length === 0) return;
+
+      let selectedPlan = "1y";
+
+      const formatTl = (value) => `${Math.round(value).toLocaleString("tr-TR")} TL`;
+
+      const sanitizeUnits = (value) => {
+        const numeric = Number.parseInt(String(value), 10);
+        if (!Number.isFinite(numeric)) return minUnits;
+        return Math.max(minUnits, Math.min(maxUnits, numeric));
+      };
+
+      const syncUnits = (value) => {
+        const safe = sanitizeUnits(value);
+        unitsInput.value = String(safe);
+        unitsRange.value = String(safe);
+        return safe;
+      };
+
+      const calcLifetimeTotal = (units) => {
+        if (units <= 20) return 5000;
+        if (units <= 50) return 6000;
+        if (units <= 100) return 7000;
+        const extraSteps = Math.ceil((units - 100) / 50);
+        return 7000 + (extraSteps * 1000);
+      };
+
+      const render = () => {
+        const units = syncUnits(unitsInput.value);
+        const isLifetime = selectedPlan === "lifetime";
+        let total;
+        let monthlyAvg;
+        let perUnitMonthly;
+        let summaryPlanText;
+
+        if (isLifetime) {
+          total = calcLifetimeTotal(units);
+          monthlyAvg = total / 12;
+          perUnitMonthly = monthlyAvg / units;
+          summaryPlanText = "Ömür Boyu";
+          saveEl.textContent = "Tek seferlik ödeme";
+        } else {
+          const cfg = termConfig[selectedPlan] || termConfig["1y"];
+          const months = cfg.years * 12;
+          const baseTotal = units * baseMonthlyPerUnit * months;
+          let discountedTotal = baseTotal * (1 - cfg.discount);
+          if (newMemberCheckbox.checked) {
+            discountedTotal *= (1 - newMemberDiscount);
+          }
+          total = Math.round(discountedTotal);
+          monthlyAvg = total / months;
+          perUnitMonthly = monthlyAvg / units;
+          summaryPlanText = cfg.label;
+          const savings = Math.max(0, Math.round(baseTotal - total));
+          saveEl.textContent = savings > 0 ? `${formatTl(savings)} tasarruf` : "Tasarruf yok";
+        }
+
+        totalEl.textContent = formatTl(total);
+        monthlyEl.textContent = formatTl(monthlyAvg);
+        perUnitEl.textContent = `${Math.max(1, Math.round(perUnitMonthly))} TL`;
+        summaryUnitsEl.textContent = units.toLocaleString("tr-TR");
+        summaryPlanEl.textContent = summaryPlanText;
+      };
+
+      yearsButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedPlan = button.dataset.plan || "1y";
+          yearsButtons.forEach((item) => item.classList.toggle("active", item === button));
+          render();
+        });
+      });
+
+      unitsInput.addEventListener("input", () => {
+        syncUnits(unitsInput.value);
+        render();
+      });
+
+      unitsInput.addEventListener("blur", () => {
+        syncUnits(unitsInput.value);
+        render();
+      });
+
+      unitsRange.addEventListener("input", () => {
+        syncUnits(unitsRange.value);
+        render();
+      });
+
+      newMemberCheckbox.addEventListener("change", render);
+      render();
+    })();
+  </script>
+  <script src="/js/theme.js"></script>
+</body>
+</html>
