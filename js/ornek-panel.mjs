@@ -55,4 +55,4 @@ function init() {
   render();
 }
 
-if (typeof document !== 'undefined') init();
+if (typeof document !== 'undefined' && document.getElementById('records')) init();

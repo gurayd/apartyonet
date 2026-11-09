@@ -1,0 +1,38 @@
+:root.ay-dusk {
+  background: var(--ay-paper);
+  --ay-paper: #f5f1ec;
+  --ay-ink: #272538;
+  --ay-muted: #605b6b;
+  --ay-line: #d8cfd8;
+  --ay-card: #fcf9f5;
+  --ay-tint: #eee8f1;
+  --ay-blue: #514788;
+  --ay-action: #514788;
+  --ay-navy: #272437;
+  --ay-shadow: 0 12px 32px #29203910;
+  --ay-dusk-cta: #514788;
+  --ay-dusk-cta-ink: #fff;
+  --ay-dusk-cta-hover: #40356f;
+}
+
+:root.ay-dusk[data-theme="dark"] {
+  --ay-paper: #191922;
+  --ay-ink: #f4eff0;
+  --ay-muted: #c0bacb;
+  --ay-line: #434151;
+  --ay-card: #22222e;
+  --ay-tint: #2c2a3a;
+  --ay-blue: #c9c2ff;
+  --ay-action: #68559f;
+  --ay-green: #afe0cc;
+  --ay-amber: #f4c49f;
+  --ay-red: #f8b6bd;
+  --ay-shadow: 0 12px 32px #08071140;
+  --ay-dusk-cta: #c9c2ff;
+  --ay-dusk-cta-ink: #29213e;
+  --ay-dusk-cta-hover: #ded8ff;
+}
+
+.ay-dusk .ay-header-actions a, .ay-dusk .ay-theme { border-radius: 99px; }
+.ay-dusk .ay-admin { --panel-bg: var(--ay-card); }
+.ay-dusk .ay-admin .top-actions .ay-theme { flex: none; }

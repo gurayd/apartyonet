@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="ay-dusk" data-theme="dark" data-theme-default="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -550,6 +550,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="/js/authz.js"></script>
   <link rel="stylesheet" href="/css/brand.css" />
+  <link rel="stylesheet" href="/css/dusk.css">
   <link rel="stylesheet" href="/css/interfaces.css" />
 </head>
 <body class="ay-ui ay-panel ay-admin">
@@ -561,6 +562,7 @@
           <span>ApartYönet Admin</span>
         </a>
         <div class="top-actions">
+          <button class="ay-theme" data-brand-theme type="button" aria-label="Koyu tema" aria-pressed="false" hidden><span aria-hidden="true">&#9790;</span></button>
           <a class="btn btn-ghost" href="/admin-yonetimi.html">Admin Yönetimi</a>
           <button id="refreshBtn" class="btn btn-ghost" type="button">Yenile</button>
           <button id="logoutBtn" class="btn btn-primary" type="button">Çıkış Yap</button>
@@ -817,6 +819,7 @@
                 <div class="field"><small>Aylık Daire Aidat</small><div>${escapeHtml(item.aylik_aidat || "-")}</div></div>
                 <div class="field"><small>Aylık Dükkan Aidat</small><div>${escapeHtml(item.dukkan_aidat || "-")}</div></div>
                 <div class="field"><small>Notlar</small><div>${escapeHtml(item.notlar || "-")}</div></div>
+                ${item.tercih_paketi === "omur-boyu" ? '<div class="field"><small>Teklif Türü</small><div>Ömür boyu kullanım</div></div>' : ""}
                 <div class="field"><small>Kayıt Zamanı</small><div>${createdAt}</div></div>
               </div>
             </div>

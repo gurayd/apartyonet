@@ -1,0 +1,7 @@
+residence-dusk.webp and residence-dusk-960.webp
+Illustrative architectural image generated with the built-in image generator.
+The development does not represent a customer or a real property.
+WebP renditions: 1536 x 1024 and 960 x 640.
+
+Generation prompt:
+Use case: photorealistic-natural. Asset type: wide website background for a Turkish apartment and residential community management website. Generate one realistic wide landscape architectural photograph, approx 3:2, of an attractive contemporary mid-rise residential complex in urban Turkey. Around five to seven stories; elegant but lived-in, warm beige and charcoal masonry, realistic balconies, a few warm windows, neat stone paths, garden landscaping and trees in a quiet courtyard. Camera from courtyard, slight perspective at eye height, calm late blue hour with muted lavender sky and subtle warm peach light. Compose the two most recognizable apartment wings in the middle and center-right, with their full facades visible in the middle band of the image so they survive a narrow horizontal crop. Leave the left third visually calm with darker trees and a recessed side of the facade for white web typography (do not render typography). Distinct but restrained warm architectural lighting; natural textures, editorial architectural photography, avoid excessive HDR and luxury resort cliches. No people as focal points, no logos, signage, text, watermarks, floating elements, borders or graphic overlays.

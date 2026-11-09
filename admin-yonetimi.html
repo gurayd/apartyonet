@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="ay-dusk" data-theme="dark" data-theme-default="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -211,6 +211,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="/js/authz.js"></script>
   <link rel="stylesheet" href="/css/brand.css" />
+  <link rel="stylesheet" href="/css/dusk.css">
   <link rel="stylesheet" href="/css/interfaces.css" />
 </head>
 <body class="ay-ui ay-panel ay-admin">
@@ -222,6 +223,7 @@
           <span>ApartYönet Admin Yönetimi</span>
         </a>
         <div class="top-actions">
+          <button class="ay-theme" data-brand-theme type="button" aria-label="Koyu tema" aria-pressed="false" hidden><span aria-hidden="true">&#9790;</span></button>
           <a class="btn btn-ghost" href="/admin.html">Admin Panele Dön</a>
           <button id="logoutBtn" class="btn btn-primary" type="button">Çıkış Yap</button>
         </div>

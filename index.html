@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr" data-theme="light">
+<html lang="tr" class="ay-dusk" data-theme="dark" data-theme-default="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,7 +14,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <script src="/js/brand-theme.js"></script>
+  <script type="module" src="/js/landing-plan.mjs"></script>
   <link rel="stylesheet" href="/css/brand.css">
+  <link rel="stylesheet" href="/css/dusk.css">
   <link rel="stylesheet" href="/css/landing.css">
 </head>
 <body>
@@ -33,32 +35,41 @@
   </header>
 
   <main id="main">
-    <section class="hero shell">
-      <div class="hero-copy">
-        <p class="eyebrow"><span class="signal"></span> APARTMAN VE SİTE YÖNETİMİ</p>
-        <h1>Apartman yönetimi.<br><em>Bir bakışta.</em></h1>
-        <p class="lede">Kim ödedi, ne harcandı, kasada ne kaldı? Aidatları, giderleri ve duyuruları sitenize özel tek bir panelde takip edin.</p>
-        <div class="actions"><a class="button primary" href="/ornek-panel.html">Örnek Paneli Dene <span aria-hidden="true">↗</span></a><a class="button secondary" href="/basvuru.html">Kendi Sitem İçin Başvur</a></div>
-        <p class="hero-note">Örnek paneli açmak için hesap gerekmez.</p>
-      </div>
-
-      <figure class="preview" aria-label="Akasya Sitesi için örnek yönetim ekranı">
-        <div class="preview-grid"></div>
-        <div class="preview-frame">
-          <div class="preview-top"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>YÖNETİM PANELİ</span><span class="sample">ÖRNEK VERİ</span></div>
-          <div class="preview-body">
-            <div class="preview-title"><div><span>DÖNEM ÖZETİ</span><strong>Akasya Sitesi</strong></div><span class="month">Ekim 2026</span></div>
-            <div class="preview-stats"><div><span>Tahsil edilen</span><strong>₺7.875</strong></div><div><span>Kalan aidat</span><strong>₺3.125</strong></div></div>
-            <div class="meter-head"><span>Tahsilat oranı</span><strong>%72</strong></div><div class="meter" aria-hidden="true"><i></i></div>
-            <div class="preview-table">
-              <div class="preview-row"><span class="unit">A-01</span><span>Daire aidatı</span><strong class="paid">Ödendi</strong></div>
-              <div class="preview-row"><span class="unit">A-04</span><span>Dükkan aidatı</span><strong class="partial">Kısmi ödeme</strong></div>
-              <div class="preview-row"><span class="unit">B-03</span><span>Daire aidatı</span><strong class="due">Bekliyor</strong></div>
-            </div>
-          </div>
+    <section class="hero-stage" aria-labelledby="hero-title">
+      <img class="hero-photo" src="/assets/courtyard-dusk.webp" srcset="/assets/courtyard-dusk-960.webp 960w, /assets/courtyard-dusk.webp 1536w" sizes="100vw" width="1536" height="1024" alt="" fetchpriority="high">
+      <div class="hero shell">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="signal"></span> APARTMAN VE SİTE YÖNETİMİ</p>
+          <h1 id="hero-title">Apartmanınızın hesabı.<br><em>Bir bakışta.</em></h1>
+          <p class="lede">Kim ödedi, ne harcandı, kasada ne kaldı? Aidatları, giderleri ve duyuruları sitenize özel tek bir panelde takip edin.</p>
+          <div class="actions"><a class="button primary" href="/ornek-panel.html">Örnek Paneli Dene <span aria-hidden="true">↗</span></a><a class="button secondary" href="/basvuru.html">Kendi Sitem İçin Başvur</a></div>
+          <p class="hero-note">Örnek paneli açmak için hesap gerekmez.</p>
         </div>
-        <figcaption><span>AKASYA SİTESİ / 02 BLOK</span><a href="/ornek-panel.html">Bu ekranı dene <span aria-hidden="true">↗</span></a></figcaption>
-      </figure>
+
+        <figure class="preview plan-sheet" aria-labelledby="plan-caption">
+          <div class="plan-drawing">
+            <div class="plan-head">
+              <div><p>AİDAT TAKİBİ</p><h2>Akasya Sitesi</h2></div>
+              <div class="plan-period"><span>Örnek veri</span><time datetime="2026-10">Ekim 2026</time></div>
+            </div>
+            <div class="plan-switch" role="group" aria-label="Örnek blok seçimi">
+              <button type="button" data-sample-block="A" aria-pressed="true" disabled>A Blok</button>
+              <button type="button" data-sample-block="B" aria-pressed="false" disabled>B Blok</button>
+            </div>
+            <ul id="planUnits" class="plan-units" aria-label="A Blok aidat durumları">
+              <li class="plan-unit" data-status="paid"><span>A-01 · Daire</span><strong>Ödendi</strong></li>
+              <li class="plan-unit" data-status="paid"><span>A-02 · Daire</span><strong>Ödendi</strong></li>
+              <li class="plan-unit" data-status="paid"><span>A-03 · Daire</span><strong>Ödendi</strong></li>
+              <li class="plan-unit" data-status="partial"><span>A-04 · Dükkan</span><strong>Kısmi ödeme</strong></li>
+            </ul>
+            <dl class="plan-ledger" aria-live="polite" aria-atomic="true">
+              <div><dt>Tahsil edilen</dt><dd id="planPaid">5.375 ₺</dd></div>
+              <div><dt>Kalan aidat</dt><dd id="planRemaining">125 ₺</dd></div>
+            </dl>
+          </div>
+          <figcaption id="plan-caption"><a href="/ornek-panel.html">Örnek paneli aç <span aria-hidden="true">↗</span></a></figcaption>
+        </figure>
+      </div>
     </section>
 
     <div class="strip"><div class="shell strip-inner"><span>DAİRE &amp; DÜKKAN AİDATLARI</span><span>ORTAK GİDERLER</span><span>DAİRE SAKİNİ PANELİ</span></div></div>

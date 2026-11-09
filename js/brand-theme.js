@@ -1,10 +1,12 @@
 (() => {
   const key = 'apartyonet_theme';
   const root = document.documentElement;
+  const fallback = root.dataset.themeDefault === 'dark' ? 'dark' : 'light';
   try {
-    root.dataset.theme = localStorage.getItem(key) === 'dark' ? 'dark' : 'light';
+    const saved = localStorage.getItem(key);
+    root.dataset.theme = saved === 'dark' || saved === 'light' ? saved : fallback;
   } catch (_) {
-    root.dataset.theme = 'light';
+    root.dataset.theme = fallback;
   }
   document.addEventListener('DOMContentLoaded', () => {
     const buttons = document.querySelectorAll('[data-brand-theme]');
