@@ -1,0 +1,47 @@
+.ay-ui .ay-photo {
+  --ay-photo-ink: #fcf6f5;
+  --ay-photo-muted: #f3eaf1;
+  --ay-photo-accent: #e3d9ff;
+  color: var(--ay-photo-ink);
+  background: var(--ay-photo-shade,
+    linear-gradient(90deg, #201a2bef, #201a2bdf 35%, #201a2b59 75%, #201a2b26)),
+    url("/assets/residence-dusk-960.webp") var(--ay-photo-position, 64% 49%) / cover no-repeat #262133;
+}
+.ay-photo .ay-kicker, .ay-photo .kicker { color: var(--ay-photo-accent); }
+.ay-ui .ay-photo :focus-visible { outline-color: var(--ay-photo-accent); }
+
+.ay-ui .ay-photo-band {
+  margin-block: clamp(16px, 2.8vw, 32px) clamp(14px, 2vw, 22px);
+  padding: clamp(24px, 4.8vw, 64px) clamp(20px, 4.5vw, 58px);
+  border: 1px solid #e0cfff38;
+  border-radius: 18px;
+}
+.ay-photo-band h1 { max-width: 23ch; }
+.ay-ui .ay-photo-band p:not(.ay-kicker, .kicker, .sample) { max-width: 51ch; color: var(--ay-photo-muted); }
+.ay-ui .ay-photo-band--compact {
+  margin-block: 14px 16px;
+  padding: clamp(18px, 2.55vw, 33px) clamp(16px, 3.4vw, 41px);
+}
+
+.ay-apply .hero-shell.ay-photo-band { width: min(906px, calc(100% - 32px)); box-sizing: border-box; margin-inline: auto; }
+.ay-apply .hero-shell h1 strong { color: var(--ay-photo-accent); }
+.ay-apply .prog-bar { background: var(--ay-tint); }
+.ay-apply .prog-fill { background: var(--ay-blue); }
+.ay-guides .grid { padding-top: 0; }
+.ay-ui.ay-sample .intro .sample { color: var(--ay-photo-ink); background: #272135df; border: 1px solid #e0cfff52; }
+.ay-sample .intro h1 { margin-block: 6px 9px; }
+.ay-tenant .hero > .ay-photo-band { margin-block: 0 12px; }
+.ay-article .card { border: 1px solid var(--ay-line); }
+.ay-article .card > .ay-photo-band { margin: 0 0 20px; }
+.ay-article .card > .ay-photo-band h1 { margin: 0; overflow-wrap: break-word; }
+.ay-placeholder { box-sizing: border-box; }
+.ay-placeholder .ay-photo-band p { margin-inline: auto; }
+.ay-placeholder .ay-photo-band :is(h1, .ay-text-link) { margin-inline: auto; }
+.ay-placeholder .ay-photo-band .ay-text-link { color: var(--ay-photo-accent); }
+
+@media (max-width: 680px) {
+  .ay-ui .ay-photo-band {
+    --ay-photo-shade: linear-gradient(90deg, #201a2bf2, #201a2baf 76%, #201a2b8a);
+    --ay-photo-position: 66% 50%;
+  }
+}

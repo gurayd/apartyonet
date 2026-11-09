@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="ay-dusk" data-theme="dark" data-theme-default="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,9 +12,11 @@
   <script src="/js/authz.js"></script>
   <script src="/js/brand-theme.js"></script>
   <link rel="stylesheet" href="/css/brand.css">
+  <link rel="stylesheet" href="/css/dusk.css">
   <link rel="stylesheet" href="/css/interfaces.css">
   <link rel="stylesheet" href="/css/login.css">
   <script src="/js/login-ui.js" defer></script>
+  <link rel="stylesheet" href="/css/residence.css">
 </head>
 <body class="ay-ui ay-login">
   <header class="ay-header"><div class="ay-shell ay-header-inner">
@@ -46,11 +48,13 @@
       </div>
     </section>
 
-    <aside class="login-plan" aria-labelledby="plan-title">
-      <div class="login-plan-top"><span>APARTMAN VE SİTE YÖNETİMİ</span><span>PLAN / 01</span></div>
-      <div class="login-plan-copy"><h2 id="plan-title">Binanızın<br><em>yönetim masası.</em></h2><p>Aidatlar, ortak giderler ve yönetim duyuruları aynı adreste.</p></div>
-      <figure class="login-drawing"><img src="/assets/login-plan.svg" alt="" width="560" height="340"><figcaption><span><i></i> A BLOK</span><span><i></i> B BLOK</span></figcaption></figure>
-      <div class="login-plan-foot"><span>TEMSİLİ BİNA ÇİZİMİ</span><a href="/ornek-panel.html">Örnek Paneli Dene <span aria-hidden="true">↗</span></a></div>
+    <aside class="login-scene ay-photo" aria-labelledby="login-scene-title">
+      <p class="ay-kicker">APARTMAN VE SİTE YÖNETİMİ</p>
+      <div class="login-scene-copy">
+        <h2 id="login-scene-title">Sitenizin <em>yönetim masası.</em></h2>
+        <p>Aidatlar, ortak giderler ve yönetim duyuruları aynı adreste.</p>
+        <a href="/ornek-panel.html">Örnek Paneli Dene <span aria-hidden="true">↗</span></a>
+      </div>
     </aside>
   </main>
 

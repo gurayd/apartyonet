@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="ay-dusk" data-theme="dark" data-theme-default="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -710,7 +710,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="/js/brand-theme.js"></script>
     <link rel="stylesheet" href="/css/brand.css">
+    <link rel="stylesheet" href="/css/dusk.css">
     <link rel="stylesheet" href="/css/interfaces.css">
+  <link rel="stylesheet" href="/css/residence.css">
 </head>
 
 <body class="ay-ui ay-apply">
@@ -719,7 +721,7 @@
         <div class="ay-header-actions"><a href="/ornek-panel.html">Örnek Panel</a><button class="ay-theme" data-brand-theme type="button" aria-label="Koyu tema" aria-pressed="false" hidden><span aria-hidden="true">☾</span></button></div>
     </div></header>
 
-    <section class="hero-shell" aria-labelledby="application-title">
+    <section class="hero-shell ay-photo ay-photo-band" aria-labelledby="application-title">
         <div class="hero-shell__container">
             <p class="ay-kicker">SİTENİZE ÖZEL PANEL / BAŞVURU</p>
             <h1 id="application-title">Kurulum <strong>başvurusu.</strong></h1>
@@ -757,6 +759,8 @@
         </div>
 
         <form id="mf" method="POST" novalidate>
+            <input type="hidden" id="requestedPlan" name="tercih_paketi">
+            <p class="sum-item" id="requestedPlanNote" hidden>Başvuru türü: <strong>Ömür boyu kullanım teklifi</strong></p>
             <input type="hidden" name="blok_yapisi" id="byi">
 
             <!-- ADIM 1 -->
@@ -963,6 +967,10 @@
     <script>
         const HR = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let cur = 1;
+        if (new URLSearchParams(window.location.search).get("paket") === "omur-boyu") {
+            document.getElementById("requestedPlan").value = "omur-boyu";
+            document.getElementById("requestedPlanNote").hidden = false;
+        }
 
         const firebaseConfig = {
             apiKey: "AIzaSyC5D36t8qeWlXXCwvJdt_uZ7jjk3-R8oVk",
