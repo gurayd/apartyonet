@@ -1,0 +1,4 @@
+tests/
+firestore.rules
+google-sheets-apps-script.gs
+README.md

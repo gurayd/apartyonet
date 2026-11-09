@@ -5,9 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ApartYönet — Başvuru</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap"
-        rel="stylesheet">
     <style>
         *,
         *::before,
@@ -710,26 +707,25 @@
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+    <script src="/js/brand-theme.js"></script>
+    <link rel="stylesheet" href="/css/brand.css">
+    <link rel="stylesheet" href="/css/interfaces.css">
 </head>
 
-<body>
+<body class="ay-ui ay-apply">
+    <header class="ay-header"><div class="ay-shell ay-header-inner">
+        <a class="ay-brand" href="/"><img src="/assets/apartyonet-building-mark-transparent.svg" alt="" width="32" height="32">Apart<span>Yönet</span></a>
+        <div class="ay-header-actions"><a href="/ornek-panel.html">Örnek Panel</a><button class="ay-theme" data-brand-theme type="button" aria-label="Koyu tema" aria-pressed="false" hidden><span aria-hidden="true">☾</span></button></div>
+    </div></header>
 
-    <header class="hero-shell">
+    <section class="hero-shell" aria-labelledby="application-title">
         <div class="hero-shell__container">
-            <div class="hero-shell__header">
-                <img class="hero-shell__header-building" src="assets/apartyonet-building-mark-transparent.svg" alt="ApartYönet bina simgesi">
-                <span class="hero-shell__badge">Kurulum 2 gün içinde tamamlanır</span>
-            </div>
-            <div class="hero-shell__eyebrow">Site yönetimi için modern başvuru</div>
-            <h1>Site yönetiminizi <strong>dijital</strong> hale getirin</h1>
-            <p class="hero-shell__lead">Birkaç adımda yetkili, site ve blok bilgilerinizi girin; özel paneliniz 2 gün içinde hazırlansın.</p>
-            <div class="hero-shell__chips">
-                <span class="hero-shell__chip">Hızlı → 10 dk</span>
-                <span class="hero-shell__chip">Gizli ve güvenli</span>
-                <span class="hero-shell__chip">Destek 7/24</span>
-            </div>
+            <p class="ay-kicker">SİTENİZE ÖZEL PANEL / BAŞVURU</p>
+            <h1 id="application-title">Kurulum <strong>başvurusu.</strong></h1>
+            <p class="hero-shell__lead">Yetkili ve site bilgilerinizi girin. Panelinizin kurulumu için sizinle iletişime geçelim.</p>
         </div>
-    </header>
+    </section>
 
     <main class="page">
         <div class="wrap">
@@ -776,7 +772,7 @@
                     <div class="cb">
                         <div class="fr">
                             <div class="f">
-                                <label>Ad Soyad <span class="req">*</span></label>
+                                <label for="f_ad">Ad Soyad <span class="req">*</span></label>
                                 <input type="text" id="f_ad" name="ad_soyad" placeholder="Ahmet Yılmaz">
                                 <span class="ferr" id="e_ad">Bu alan zorunludur.</span>
                             </div>
@@ -794,12 +790,12 @@
                         </div>
                         <div class="fr">
                             <div class="f">
-                                <label>E-posta <span class="req">*</span></label>
+                                <label for="f_email">E-posta <span class="req">*</span></label>
                                 <input type="email" id="f_email" name="email" placeholder="ornek@email.com">
                                 <span class="ferr" id="e_email">Geçerli bir e-posta girin.</span>
                             </div>
                             <div class="f">
-                                <label>Telefon <span class="req">*</span></label>
+                                <label for="f_tel">Telefon <span class="req">*</span></label>
                                 <input type="tel" id="f_tel" name="telefon" placeholder="0532 000 00 00">
                                 <span class="ferr" id="e_tel">Bu alan zorunludur.</span>
                             </div>
@@ -823,7 +819,7 @@
                     <div class="cb">
                         <div class="fr full">
                             <div class="f">
-                                <label>Site / Apartman Adı <span class="req">*</span></label>
+                                <label for="f_site">Site / Apartman Adı <span class="req">*</span></label>
                                 <input type="text" id="f_site" name="site_adi"
                                     placeholder="Örn: Güneş Apartmanı, Akasya Sitesi">
                                 <span class="ferr" id="e_site">Bu alan zorunludur.</span>
@@ -831,7 +827,7 @@
                         </div>
                         <div class="fr">
                             <div class="f">
-                                <label>İl <span class="req">*</span></label>
+                                <label for="f_il">İl <span class="req">*</span></label>
                                 <input type="text" id="f_il" name="il" placeholder="İzmir">
                                 <span class="ferr" id="e_il">Bu alan zorunludur.</span>
                             </div>
@@ -1149,6 +1145,45 @@
                 .replace(/^-+|-+$/g, '');
         }
 
+        function randomPassword(length = 12) {
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*";
+            const values = new Uint32Array(length);
+            window.crypto.getRandomValues(values);
+            let out = "";
+            for (let i = 0; i < length; i += 1) {
+                out += chars[values[i] % chars.length];
+            }
+            return out;
+        }
+
+        async function sendCredentialsEmail(idToken, email, siteName, password) {
+            const response = await fetch("/api/send-credentials", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: "Bearer " + idToken },
+                body: JSON.stringify({
+                    purpose: "application",
+                    to_email: email,
+                    site_name: siteName,
+                    password
+                })
+            });
+            return response.ok && (await response.json()).ok === true;
+        }
+
+        async function createApplicantAuthUser(email, password) {
+            const appName = "applicant-create-" + Date.now();
+            const secondary = firebase.initializeApp(firebaseConfig, appName);
+            try {
+                const cred = await secondary.auth().createUserWithEmailAndPassword(email, password);
+                if (!cred || !cred.user) throw new Error("Kullanici UID olusturulamadi.");
+                const account = { uid: cred.user.uid, idToken: await cred.user.getIdToken() };
+                await secondary.auth().signOut();
+                return account;
+            } finally {
+                await secondary.delete().catch(() => { });
+            }
+        }
+
         document.getElementById('mf').addEventListener('submit', async function (e) {
             e.preventDefault();
             const btn = document.getElementById('subbtn');
@@ -1163,24 +1198,71 @@
                     blokYapisiJson = [];
                 }
                 const siteName = (payload.f_site || payload.site_adi || '').trim();
-                const siteId = slugifySiteId(siteName);
+                const siteIdDraft = slugifySiteId(siteName);
+                const applicantEmail = String(payload.email || "").trim().toLowerCase();
+                const generatedPassword = randomPassword(12);
+                const loginUrl = window.location.origin + "/login.html";
+                let applicantAccount;
 
-                await db.collection('basvurular').add({
+                // Aynı domain'de daha önce açık kalmış bir kullanıcı oturumu,
+                // users/{uid} oluşturma kuralını etkileyebildiği için başvuru
+                // akışını anonim duruma sabitliyoruz.
+                await app.auth().signOut().catch(() => { });
+
+                if (!applicantEmail) {
+                    throw new Error("Gecerli bir e-posta zorunlu.");
+                }
+
+                try {
+                    applicantAccount = await createApplicantAuthUser(applicantEmail, generatedPassword);
+                } catch (authErr) {
+                    if (authErr && authErr.code === "auth/email-already-in-use") {
+                        throw new Error("Bu e-posta ile daha once bir hesap olusturulmus. Lutfen giris yapin veya farkli bir e-posta deneyin.");
+                    }
+                    throw authErr;
+                }
+
+                const managerUid = applicantAccount.uid;
+                const siteId = siteIdDraft || ("site-" + String(managerUid).slice(0, 10).toLowerCase());
+
+                const basvuruRef = db.collection('basvurular').doc(managerUid);
+                await basvuruRef.set({
                     ...payload,
                     site_adi: siteName || payload.site_adi || '',
-                    siteId: siteId || '',
+                    siteId: siteId,
+                    manager_uid: managerUid,
+                    manager_email: applicantEmail,
+                    manager_password_plain: generatedPassword,
+                    manager_login_url: loginUrl,
                     blok_yapisi_json: blokYapisiJson,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
+
+                let credentialsMailSent = false;
+                try {
+                    credentialsMailSent = await sendCredentialsEmail(
+                        applicantAccount.idToken,
+                        applicantEmail,
+                        siteName || payload.site_adi || "",
+                        generatedPassword
+                    );
+                } catch (mailErr) {
+                    console.error("credentials mail error", mailErr);
+                }
 
                 document.getElementById('mf').style.display = 'none';
                 document.querySelector('.steps').style.display = 'none';
                 document.querySelector('.prog-bar').style.display = 'none';
                 document.getElementById('sc').style.display = 'block';
+                if (!credentialsMailSent) {
+                    alert("Basvuru alindi. Giris bilgileri e-posta gonderimi su an tamamlanamadi; yonetim ekibi sizinle iletisime gececek.");
+                }
             } catch (err) {
                 console.error(err);
                 btn.disabled = false; btn.textContent = 'Başvuruyu Gönder ✓';
-                alert('Gönderim hatası: ' + firebaseErrorText(err) + '\n\nKontrol: Firestore Database acik mi ve rules create izni veriyor mu?');
+                const detail = err && err.code ? ('\nHata kodu: ' + err.code) : '';
+                const msg = (err && err.message) ? ('\nDetay: ' + err.message) : '';
+                alert('Gönderim hatası: ' + firebaseErrorText(err) + detail + msg + '\n\nKontrol: Firestore Database acik mi ve rules create izni veriyor mu?');
             }
         });
 

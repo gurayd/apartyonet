@@ -4,20 +4,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ApartYönet | Admin Yönetimi</title>
+  <script src="/js/brand-theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #090d14;
       --line: rgba(152, 175, 214, 0.22);
+      --border: rgba(152, 175, 214, 0.24);
       --text: #e8eefc;
       --muted: #9fb0cf;
       --primary: #2ea0ff;
       --primary-2: #1676d1;
       --card: rgba(14, 22, 37, 0.82);
+      --input-bg: rgba(10, 16, 27, 0.8);
+      --input-text: #e8eefc;
+      --panel-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.88), var(--card));
+      --top-shell-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.92));
+      --top-shell-border: rgba(152, 175, 214, 0.28);
       --ok: #86efac;
       --danger: #fca5a5;
+      --ghost-text: #d9e5ff;
+      --ghost-bg: rgba(17, 26, 43, 0.55);
+      --ghost-border: rgba(152, 175, 214, 0.35);
+    }
+
+    html[data-theme="light"] {
+      --bg: #f3f6fb;
+      --line: rgba(15, 23, 42, 0.16);
+      --border: rgba(15, 23, 42, 0.16);
+      --text: #0f172a;
+      --muted: #475569;
+      --card: rgba(255, 255, 255, 0.92);
+      --input-bg: #ffffff;
+      --input-text: #0f172a;
+      --panel-bg: linear-gradient(165deg, #ffffff, #f2f7ff);
+      --top-shell-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.92));
+      --top-shell-border: rgba(152, 175, 214, 0.28);
+      --ok: #15803d;
+      --danger: #b91c1c;
+      --ghost-text: #1e293b;
+      --ghost-bg: rgba(255, 255, 255, 0.9);
+      --ghost-border: rgba(15, 23, 42, 0.22);
     }
 
     * { box-sizing: border-box; }
@@ -42,15 +70,19 @@
         linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
     }
 
+    html[data-theme="light"] body::before {
+      background: linear-gradient(180deg, #f3f6fb, #edf3fb 48%, #e6edf8);
+    }
+
     .container {
       width: min(1000px, calc(100% - 30px));
       margin: 16px auto;
     }
 
     .top {
-      border: 1px solid var(--line);
+      border: 1px solid var(--top-shell-border);
       border-radius: 14px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+      background: var(--top-shell-bg);
       padding: 12px;
       display: flex;
       justify-content: space-between;
@@ -64,7 +96,7 @@
       align-items: center;
       gap: 10px;
       text-decoration: none;
-      color: inherit;
+      color: #f8fbff;
       font-weight: 700;
     }
 
@@ -92,16 +124,16 @@
     }
 
     .btn-ghost {
-      color: #d9e5ff;
-      border-color: rgba(152, 175, 214, 0.35);
-      background: rgba(17, 26, 43, 0.55);
+      color: var(--ghost-text);
+      border-color: var(--ghost-border);
+      background: var(--ghost-bg);
     }
 
     .panel {
       margin-top: 12px;
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.88), var(--card));
+      background: var(--panel-bg);
       padding: 12px;
     }
 
@@ -132,11 +164,11 @@
 
     input {
       width: 100%;
-      border: 1px solid rgba(152, 175, 214, 0.34);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 9px;
-      background: rgba(10, 16, 27, 0.8);
-      color: #e8eefc;
+      background: var(--input-bg);
+      color: var(--input-text);
       font-size: 0.86rem;
       font-family: inherit;
     }
@@ -148,7 +180,7 @@
     }
 
     th, td {
-      border-bottom: 1px solid rgba(152, 175, 214, 0.2);
+      border-bottom: 1px solid var(--border);
       padding: 8px 6px;
       text-align: left;
     }
@@ -171,15 +203,17 @@
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 16px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+      background: var(--panel-bg);
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="/js/authz.js"></script>
+  <link rel="stylesheet" href="/css/brand.css" />
+  <link rel="stylesheet" href="/css/interfaces.css" />
 </head>
-<body>
+<body class="ay-ui ay-panel ay-admin">
   <main id="app" style="display:none;">
     <div class="container">
       <header class="top">
@@ -195,7 +229,7 @@
 
       <section class="panel">
         <h2 style="margin:0 0 6px; font-size:1rem;">Platform Admin Hesapları</h2>
-        <p style="margin:0; color:#9fb0cf; font-size:0.84rem;">Bu ekran yalnızca süper admin içindir. Buradan admin ekleyebilir veya admin yetkisi kaldırabilirsiniz.</p>
+        <p style="margin:0; color:var(--muted); font-size:0.84rem;">Bu ekran yalnızca süper admin içindir. Buradan admin ekleyebilir veya admin yetkisi kaldırabilirsiniz.</p>
         <div id="status" class="status"></div>
 
         <form id="adminForm" class="form" novalidate>
@@ -239,7 +273,7 @@
   <section id="locked" class="locked">
     <div class="box">
       <h1 style="margin:0; font-size:1.35rem;">Yetkisiz Erişim</h1>
-      <p style="color:#9fb0cf; line-height:1.6;">Bu ekran yalnızca süper admin içindir.</p>
+      <p style="color:var(--muted); line-height:1.6;">Bu ekran yalnızca süper admin içindir.</p>
       <a class="btn btn-primary" href="/login.html">Giriş Sayfasına Dön</a>
     </div>
   </section>
@@ -272,6 +306,15 @@
       statusEl.className = "status" + (type ? " " + type : "");
     }
 
+    function escapeHtml(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     async function createAuthUser(email, password) {
       const appName = "admin-user-create-" + Date.now();
       const secondary = firebase.initializeApp(firebaseConfig, appName);
@@ -302,14 +345,14 @@
       }
       bodyEl.innerHTML = admins.map((u) => `
         <tr>
-          <td>${u.email || "-"}</td>
-          <td>${u.displayName || "-"}</td>
+          <td>${escapeHtml(u.email || "-")}</td>
+          <td>${escapeHtml(u.displayName || "-")}</td>
           <td>${formatRoleLabel(u.role || "")}</td>
           <td>${u.status === "active" ? "Aktif" : "Pasif"}</td>
           <td>
             ${u.role === APARTYONET_ROLES.ADMIN
-              ? `<button class="btn btn-ghost" data-remove="${u.uid}" type="button">Admin Yetkisini Kaldır</button>`
-              : '<span style="color:#9fb0cf;">Kaldırılamaz</span>'}
+              ? `<button class="btn btn-ghost" data-remove="${escapeHtml(u.uid)}" type="button">Admin Yetkisini Kaldır</button>`
+              : '<span style="color:var(--muted);">Kaldırılamaz</span>'}
           </td>
         </tr>
       `).join("");

@@ -1,695 +1,98 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!doctype html>
+<html lang="tr" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ApartYönet | Modern Apartman Yönetimi</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #090d14;
-      --bg-soft: #0f1624;
-      --panel: rgba(12, 19, 33, 0.72);
-      --line: rgba(152, 175, 214, 0.2);
-      --text: #e8eefc;
-      --muted: #9fb0cf;
-      --primary: #2ea0ff;
-      --primary-2: #1676d1;
-      --accent: #5cf0d2;
-      --card: #111a2b;
-      --card-2: #0d1524;
-      --maxw: 1120px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: "Manrope", system-ui, -apple-system, Segoe UI, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-    }
-
-    body::before,
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: -2;
-    }
-
-    body::before {
-      background:
-        radial-gradient(1200px 600px at 10% -20%, rgba(46, 160, 255, 0.32), transparent 60%),
-        radial-gradient(1000px 520px at 90% -10%, rgba(92, 240, 210, 0.2), transparent 64%),
-        radial-gradient(900px 500px at 50% 120%, rgba(22, 118, 209, 0.26), transparent 66%),
-        linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
-    }
-
-    body::after {
-      background-image:
-        linear-gradient(rgba(159, 176, 207, 0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(159, 176, 207, 0.07) 1px, transparent 1px);
-      background-size: 42px 42px;
-      mask-image: radial-gradient(circle at center, black, transparent 80%);
-      z-index: -1;
-    }
-
-    .container {
-      width: min(var(--maxw), calc(100% - 40px));
-      margin: 0 auto;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      backdrop-filter: blur(10px);
-      background: rgba(9, 13, 20, 0.72);
-      border-bottom: 1px solid rgba(152, 175, 214, 0.16);
-      z-index: 30;
-    }
-
-    .nav {
-      height: 82px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: inherit;
-      font-weight: 700;
-      font-size: 1.06rem;
-    }
-
-    .brand img {
-      height: 54px;
-      width: auto;
-      display: block;
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      border-radius: 12px;
-      padding: 10px 16px;
-      font-size: 0.92rem;
-      font-weight: 700;
-      border: 1px solid transparent;
-      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-ghost {
-      color: #d9e5ff;
-      border-color: rgba(152, 175, 214, 0.35);
-      background: rgba(17, 26, 43, 0.55);
-    }
-
-    .btn-primary {
-      color: #fff;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      box-shadow: 0 14px 30px rgba(34, 130, 224, 0.3);
-    }
-
-    .hero {
-      padding: 76px 0 52px;
-    }
-
-    .hero-wrap {
-      display: grid;
-      grid-template-columns: 1.06fr 0.94fr;
-      gap: 24px;
-      align-items: center;
-    }
-
-    .hero-copy h1 {
-      margin: 12px 0 14px;
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      line-height: 1.06;
-      letter-spacing: -0.02em;
-    }
-
-    .hero-copy p {
-      margin: 0;
-      color: var(--muted);
-      font-size: clamp(1rem, 2vw, 1.12rem);
-      max-width: 630px;
-      line-height: 1.68;
-    }
-
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      border: 1px solid rgba(92, 240, 210, 0.32);
-      background: rgba(92, 240, 210, 0.12);
-      color: #b9fff0;
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .hero-actions {
-      margin-top: 28px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .hero-note {
-      margin-top: 16px;
-      color: #9cc7fa;
-      font-size: 0.92rem;
-      font-weight: 600;
-    }
-
-    .hero-side {
-      border: 1px solid var(--line);
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.85), rgba(13, 21, 36, 0.75));
-      border-radius: 22px;
-      padding: 20px;
-      box-shadow: 0 20px 40px rgba(4, 8, 16, 0.45);
-    }
-
-    .mini-card {
-      border: 1px solid rgba(152, 175, 214, 0.2);
-      background: rgba(9, 13, 20, 0.72);
-      border-radius: 16px;
-      padding: 14px;
-    }
-
-    .mini-card + .mini-card {
-      margin-top: 12px;
-    }
-
-    .mini-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .mini-label {
-      font-size: 0.76rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 700;
-    }
-
-    .mini-value {
-      font-size: 1.2rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .mini-muted {
-      color: #8ad8c8;
-      font-size: 0.82rem;
-      font-weight: 600;
-    }
-
-    .bar {
-      height: 7px;
-      border-radius: 999px;
-      background: rgba(152, 175, 214, 0.22);
-      overflow: hidden;
-      margin-top: 8px;
-    }
-
-    .bar > span {
-      display: block;
-      width: 72%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #2ea0ff, #5cf0d2);
-    }
-
-    section.block {
-      padding: 32px 0;
-    }
-
-    .section-title {
-      font-size: clamp(1.4rem, 2vw, 2rem);
-      margin: 0 0 10px;
-      letter-spacing: -0.02em;
-    }
-
-    .section-lead {
-      margin: 0 0 24px;
-      color: var(--muted);
-      max-width: 760px;
-      line-height: 1.65;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: linear-gradient(180deg, var(--card), var(--card-2));
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 18px;
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(92, 240, 210, 0.4);
-    }
-
-    .card h3 {
-      margin: 6px 0 8px;
-      font-size: 1rem;
-      letter-spacing: -0.01em;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.58;
-    }
-
-    .icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
-      display: grid;
-      place-items: center;
-      color: #90d8ff;
-      background: rgba(46, 160, 255, 0.14);
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
-
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .step {
-      padding: 20px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: rgba(14, 22, 37, 0.72);
-    }
-
-    .step span {
-      display: inline-grid;
-      place-items: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      background: rgba(46, 160, 255, 0.2);
-      color: #cbe6ff;
-      font-weight: 700;
-      font-size: 0.82rem;
-      margin-bottom: 10px;
-    }
-
-    .step h4 {
-      margin: 0 0 6px;
-      font-size: 0.98rem;
-    }
-
-    .step p {
-      margin: 0;
-      font-size: 0.9rem;
-      line-height: 1.56;
-      color: var(--muted);
-    }
-
-    .cta {
-      padding: 52px 0 78px;
-    }
-
-    .cta-wrap {
-      border-radius: 20px;
-      border: 1px solid rgba(92, 240, 210, 0.25);
-      background:
-        radial-gradient(620px 260px at 90% 0%, rgba(92, 240, 210, 0.18), transparent 70%),
-        linear-gradient(180deg, rgba(12, 19, 33, 0.95), rgba(10, 16, 28, 0.98));
-      padding: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .cta h2 {
-      margin: 0 0 8px;
-      font-size: clamp(1.4rem, 2.2vw, 2rem);
-      letter-spacing: -0.02em;
-    }
-
-    .cta p {
-      margin: 0;
-      color: var(--muted);
-      max-width: 560px;
-      line-height: 1.6;
-    }
-
-    footer {
-      border-top: 1px solid rgba(152, 175, 214, 0.15);
-      color: #8ca0c2;
-      font-size: 0.82rem;
-      padding: 16px 0 24px;
-    }
-
-    .footer-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .footer-email {
-      margin-top: 10px;
-      text-align: center;
-      color: #b7c7e6;
-    }
-
-    .footer-email a {
-      color: #d7e6ff;
-      text-decoration: none;
-    }
-
-    .footer-email a:hover {
-      text-decoration: underline;
-    }
-
-    .social-links {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .social-link {
-      width: 36px;
-      height: 36px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 10px;
-      border: 1px solid rgba(152, 175, 214, 0.28);
-      color: #d3def3;
-      background: rgba(17, 26, 43, 0.62);
-      transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-    }
-
-    .social-link:hover {
-      transform: translateY(-1px);
-      border-color: rgba(92, 240, 210, 0.62);
-      color: #b8fff1;
-    }
-
-    .social-link svg {
-      width: 18px;
-      height: 18px;
-      display: block;
-      fill: currentColor;
-    }
-
-    @media (max-width: 980px) {
-      .hero-wrap {
-        grid-template-columns: 1fr;
-      }
-
-      .grid-4 {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .grid-3,
-      .steps {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .container {
-        width: calc(100% - 28px);
-      }
-
-      .nav {
-        height: 72px;
-      }
-
-      .brand img {
-        height: 44px;
-      }
-
-      .brand span {
-        font-size: 0.98rem;
-      }
-
-      .btn {
-        padding: 9px 12px;
-        font-size: 0.82rem;
-      }
-
-      .hero {
-        padding-top: 42px;
-      }
-
-      .footer-row {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ApartYönet | Apartman ve Site Yönetimi</title>
+  <meta name="description" content="Aidatları, ortak giderleri ve duyuruları tek panelde takip edin. ApartYönet'in örnek panelini giriş yapmadan deneyin.">
+  <link rel="canonical" href="https://apartyonet.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ApartYönet | Apartman ve Site Yönetimi">
+  <meta property="og:description" content="Kim ödedi, ne harcandı, kasada ne kaldı? Apartmanınızın hesabını tek panelde görün.">
+  <meta property="og:url" content="https://apartyonet.com/">
+  <link rel="icon" href="/assets/apartyonet-building-mark-transparent.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="/js/brand-theme.js"></script>
+  <link rel="stylesheet" href="/css/brand.css">
+  <link rel="stylesheet" href="/css/landing.css">
 </head>
 <body>
-  <header>
-    <div class="container nav">
-      <a class="brand" href="/index.html" aria-label="ApartYönet Anasayfa">
-        <img src="assets/apartyonet-logo-white-transparent.svg" alt="ApartYönet logo" />
-        <span>ApartYönet</span>
-      </a>
-      <nav class="nav-actions" aria-label="Üst menü">
-        <a class="btn btn-ghost" href="/login.html">Giriş Yap</a>
-        <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
+  <a class="skip" href="#main">İçeriğe geç</a>
+  <header class="header">
+    <div class="shell header-inner">
+      <a class="brand" href="/" aria-label="ApartYönet ana sayfa"><img src="/assets/apartyonet-building-mark-transparent.svg" width="32" height="32" alt=""><span>Apart<span>Yönet</span></span></a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="#ozellikler">Özellikler</a><a href="/fiyatlandirma.html">Fiyatlandırma</a><a href="/rehberler.html">Rehberler</a>
       </nav>
+      <div class="header-actions">
+        <button class="theme" type="button" data-brand-theme aria-label="Koyu tema" aria-pressed="false" hidden><span aria-hidden="true">☾</span></button>
+        <a class="login" href="/login.html">Giriş Yap <span aria-hidden="true">↗</span></a>
+      </div>
     </div>
   </header>
 
-  <main>
-    <section class="hero">
-      <div class="container hero-wrap">
-        <div class="hero-copy">
-          <div class="hero-eyebrow">Kurulum 2 gün içinde tamamlanır</div>
-          <h1>Apartman yönetimi artık çok kolay</h1>
-          <p>Aidat takibi, duyurular ve site yönetimini tek panelde yönetin.</p>
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
-            <a class="btn btn-ghost" href="#nasil-calisir">Demo Gör</a>
-          </div>
-          <div class="hero-note">Yönetim ekibiniz için hızlı kurulum, sade arayüz, güvenli veri akışı.</div>
-        </div>
-        <div class="hero-side" aria-label="Önizleme paneli">
-          <div class="mini-card">
-            <div class="mini-top">
-              <div class="mini-label">Aidat Durumu</div>
-              <div class="mini-muted">Canlı takip</div>
+  <main id="main">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="signal"></span> APARTMAN VE SİTE YÖNETİMİ</p>
+        <h1>Apartman yönetimi.<br><em>Bir bakışta.</em></h1>
+        <p class="lede">Kim ödedi, ne harcandı, kasada ne kaldı? Aidatları, giderleri ve duyuruları sitenize özel tek bir panelde takip edin.</p>
+        <div class="actions"><a class="button primary" href="/ornek-panel.html">Örnek Paneli Dene <span aria-hidden="true">↗</span></a><a class="button secondary" href="/basvuru.html">Kendi Sitem İçin Başvur</a></div>
+        <p class="hero-note">Örnek paneli açmak için hesap gerekmez.</p>
+      </div>
+
+      <figure class="preview" aria-label="Akasya Sitesi için örnek yönetim ekranı">
+        <div class="preview-grid"></div>
+        <div class="preview-frame">
+          <div class="preview-top"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>YÖNETİM PANELİ</span><span class="sample">ÖRNEK VERİ</span></div>
+          <div class="preview-body">
+            <div class="preview-title"><div><span>DÖNEM ÖZETİ</span><strong>Akasya Sitesi</strong></div><span class="month">Ekim 2026</span></div>
+            <div class="preview-stats"><div><span>Tahsil edilen</span><strong>₺7.875</strong></div><div><span>Kalan aidat</span><strong>₺3.125</strong></div></div>
+            <div class="meter-head"><span>Tahsilat oranı</span><strong>%72</strong></div><div class="meter" aria-hidden="true"><i></i></div>
+            <div class="preview-table">
+              <div class="preview-row"><span class="unit">A-01</span><span>Daire aidatı</span><strong class="paid">Ödendi</strong></div>
+              <div class="preview-row"><span class="unit">A-04</span><span>Dükkan aidatı</span><strong class="partial">Kısmi ödeme</strong></div>
+              <div class="preview-row"><span class="unit">B-03</span><span>Daire aidatı</span><strong class="due">Bekliyor</strong></div>
             </div>
-            <div class="mini-value">%72 tahsilat</div>
-            <div class="bar"><span></span></div>
-          </div>
-          <div class="mini-card">
-            <div class="mini-top">
-              <div class="mini-label">Duyuru</div>
-              <div class="mini-muted">Tüm daireler</div>
-            </div>
-            <div class="mini-value">4 aktif duyuru</div>
-          </div>
-          <div class="mini-card">
-            <div class="mini-top">
-              <div class="mini-label">Kurulum</div>
-              <div class="mini-muted">Hızlı teslim</div>
-            </div>
-            <div class="mini-value">2 gün içinde tamamlanır</div>
           </div>
         </div>
+        <figcaption><span>AKASYA SİTESİ / 02 BLOK</span><a href="/ornek-panel.html">Bu ekranı dene <span aria-hidden="true">↗</span></a></figcaption>
+      </figure>
+    </section>
+
+    <div class="strip"><div class="shell strip-inner"><span>DAİRE &amp; DÜKKAN AİDATLARI</span><span>ORTAK GİDERLER</span><span>DAİRE SAKİNİ PANELİ</span></div></div>
+
+    <section class="shell section" id="ozellikler">
+      <div class="section-head"><div><p class="eyebrow">01 / GÜNLÜK YÖNETİM</p><h2>Her işin yeri belli.</h2></div><p>Ay sonunda tablo aramak yerine, hangi dairenin ne ödediğini ve hangi giderin kaydedildiğini tek yerden görün.</p></div>
+      <div class="feature-grid">
+        <article class="feature"><span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 9h16m-12 6h3m4 0h2"/></svg></span><h3>Aidat takibi</h3><p>Daire ve dükkan aidatlarını dönem bazında izleyin. Tam, kısmi ve bekleyen ödemeleri ayırın.</p><span class="feature-index" aria-hidden="true">01</span></article>
+        <article class="feature"><span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19h16M7 16v-4m5 4V8m5 8V5"/></svg></span><h3>Gider ve kasa</h3><p>Ortak giderleri kaydedin, seçtiğiniz dairelere paylaştırın ve kasa durumunu raporlardan takip edin.</p><span class="feature-index" aria-hidden="true">02</span></article>
+        <article class="feature"><span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14v11H9l-4 3zM9 9h6m-6 3h6"/></svg></span><h3>Sakin ekranı</h3><p>Daire sakinleri kendi aidat durumlarını ve yönetim duyurularını ayrı bir ekrandan görebilir.</p><span class="feature-index" aria-hidden="true">03</span></article>
       </div>
     </section>
 
-    <section class="block" id="sorunlar">
-      <div class="container">
-        <h2 class="section-title">Sorunlar</h2>
-        <p class="section-lead">Dağınık WhatsApp yazışmaları, manuel aidat listeleri ve geç gelen duyurular yönetime zaman kaybettirir.</p>
-        <div class="grid-3">
-          <article class="card">
-            <div class="icon">01</div>
-            <h3>Manuel takip yükü</h3>
-            <p>Excel ve mesajlaşma ile borç ve ödeme takibi sürdürülemez hale gelir.</p>
-          </article>
-          <article class="card">
-            <div class="icon">02</div>
-            <h3>Geciken iletişim</h3>
-            <p>Duyurular herkese aynı anda ulaşmadığı için operasyon aksar.</p>
-          </article>
-          <article class="card">
-            <div class="icon">03</div>
-            <h3>Dağınık bilgi</h3>
-            <p>Her daireye ait geçmiş kayıtlar farklı kanallarda kaldığı için kontrol zorlaşır.</p>
-          </article>
-        </div>
+    <section class="setup section" id="nasil-calisir"><div class="shell setup-grid">
+      <div><p class="eyebrow">02 / KURULUM</p><h2>Kendi siteniz için<br>nasıl başlarsınız?</h2><p>Önce örnek paneli gezin. Uygunsa sitenizin bilgilerini gönderin; kurulum için sizinle iletişime geçelim.</p><a class="text-link" href="/fiyatlandirma.html">Fiyatlandırmayı incele <span aria-hidden="true">↗</span></a></div>
+      <ol class="steps"><li><span>01</span><div><h3>Site bilgilerinizi gönderin</h3><p>Başvuru formunda blok, daire ve varsa dükkan sayısını belirtin.</p></div></li><li><span>02</span><div><h3>Paneliniz hazırlansın</h3><p>Site yapınıza göre panel ve yönetici erişimi oluşturulur.</p></div></li><li><span>03</span><div><h3>Yönetmeye başlayın</h3><p>Giriş yapın, aidatları ve giderleri kendi panelinizden takip edin.</p></div></li></ol>
+    </div></section>
+
+    <section class="section shell faq" aria-labelledby="faq-title">
+      <div><p class="eyebrow">03 / MERAK EDİLENLER</p><h2 id="faq-title">Sık sorulanlar.</h2><a class="text-link" href="/rehberler.html">Yönetim rehberlerine göz at <span aria-hidden="true">↗</span></a></div>
+      <div class="faq-list">
+        <details><summary>Örnek panel için hesap açmam gerekiyor mu?</summary><p>Hayır. Örnek paneli giriş yapmadan gezebilir, yönetici ve daire sakini görünümlerini deneyebilirsiniz. Gösterilen kayıtlar temsilidir.</p></details>
+        <details><summary>Birden fazla blok veya dükkan tanımlayabilir miyim?</summary><p>Evet. Başvuruda sitenizin blok yapısını ve dükkanları belirtebilirsiniz. Daire ve dükkan aidatları ayrı takip edilir.</p></details>
+        <details><summary>Daire sakinleri neyi görebilir?</summary><p>Sakin ekranında kendi dairesinin aidat durumu ve yönetim duyuruları yer alır. Örnek panelde bu görünümü inceleyebilirsiniz.</p></details>
       </div>
     </section>
 
-    <section class="block" id="cozum">
-      <div class="container">
-        <h2 class="section-title">Çözüm</h2>
-        <p class="section-lead">ApartYönet, apartmanınızın aidat, duyuru ve yönetim iletişimini tek panelde toplayarak operasyonu hızlandırır.</p>
-        <div class="grid-3">
-          <article class="card">
-            <div class="icon">A</div>
-            <h3>Tek merkezden yönetim</h3>
-            <p>Site, blok ve daire bilgileri düzenli bir yapı ile tek ekranda tutulur.</p>
-          </article>
-          <article class="card">
-            <div class="icon">B</div>
-            <h3>Anlık görünürlük</h3>
-            <p>Borç, ödeme ve duyuru süreçleri herkes için şeffaf ve takip edilebilir olur.</p>
-          </article>
-          <article class="card">
-            <div class="icon">C</div>
-            <h3>Hızlı kurulum</h3>
-            <p>Başvuru sonrası paneliniz 2 gün içinde hazırlanıp kullanıma açılır.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="ozellikler">
-      <div class="container">
-        <h2 class="section-title">Özellikler</h2>
-        <p class="section-lead">Modern SaaS yaklaşımıyla tasarlanmış temel yönetim modülleri hazır gelir.</p>
-        <div class="grid-4">
-          <article class="card">
-            <h3>Aidat borç ve ödeme takibi</h3>
-            <p>Daire bazlı tahsilat ve borç durumunu tek ekranda yönetin.</p>
-          </article>
-          <article class="card">
-            <h3>Duyuru paylaşımı</h3>
-            <p>Tüm siteye, bloğa veya hedefli gruplara hızlı duyuru gönderin.</p>
-          </article>
-          <article class="card">
-            <h3>Yönetici iletişim paneli</h3>
-            <p>Yönetim ve sakinler arasındaki iletişimi düzenli bir kanalda toplayın.</p>
-          </article>
-          <article class="card">
-            <h3>Her daireye özel ekran</h3>
-            <p>Daire sakinleri kendi bilgilerini sade bir panelden görebilir.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="nasil-calisir">
-      <div class="container">
-        <h2 class="section-title">Nasıl Çalışır</h2>
-        <p class="section-lead">Başvuru süreci kısa tutuldu; teknik kurulum ekibimiz tüm yapılandırmayı sizin adınıza tamamlar.</p>
-        <div class="steps">
-          <article class="step">
-            <span>1</span>
-            <h4>Başvuru Yapın</h4>
-            <p>Yetkili, site ve yapı bilgilerini formdan iletin.</p>
-          </article>
-          <article class="step">
-            <span>2</span>
-            <h4>Kurulum Tamamlansın</h4>
-            <p>Paneliniz en geç 2 gün içinde hazır hale getirilir.</p>
-          </article>
-          <article class="step">
-            <span>3</span>
-            <h4>Kullanıma Başlayın</h4>
-            <p>Duyuru, aidat ve yönetim süreçlerini tek panelden yönetin.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="cta" id="cta">
-      <div class="container cta-wrap">
-        <div>
-          <h2>ApartYönet ile yönetimi dijitale taşıyın</h2>
-          <p>Başvurunuzu gönderin, paneliniz 2 gün içinde hazır olsun.</p>
-        </div>
-        <a class="btn btn-primary" href="/basvuru.html">Başvuru Yap</a>
-      </div>
-    </section>
+    <section class="shell closing"><div><p class="eyebrow">SİTENİZE ÖZEL PANEL</p><h2>İlk adımı atın.</h2><p>Nasıl çalıştığını görün, hazır olduğunuzda başvurun.</p></div><div class="actions"><a class="button primary" href="/basvuru.html">Kurulum Başvurusu <span aria-hidden="true">↗</span></a><a class="button secondary" href="/ornek-panel.html">Örnek Panel</a></div></section>
   </main>
 
-  <footer>
-    <div class="container footer-row">
-      <div>ApartYönet • Modern apartman ve site yönetim sistemi</div>
-      <div class="social-links" aria-label="Sosyal medya bağlantıları">
-        <a class="social-link" href="https://www.linkedin.com/company/apartyonet/about/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4.98 3.5a2.49 2.49 0 1 0 0 4.98 2.49 2.49 0 0 0 0-4.98zM3 9h4v12H3zM9 9h3.82v1.71h.06c.53-1.01 1.83-2.08 3.77-2.08 4.03 0 4.77 2.65 4.77 6.09V21h-4v-5.49c0-1.31-.02-2.99-1.82-2.99-1.82 0-2.1 1.42-2.1 2.9V21H9z"/>
-          </svg>
-        </a>
-        <a class="social-link" href="https://www.instagram.com/apartyonet/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5zm9.5 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
-          </svg>
-        </a>
-        <a class="social-link" href="https://www.facebook.com/apartyoneti" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M13.5 8H16V5h-2.5C10.57 5 9 6.57 9 9.5V12H7v3h2v6h3v-6h3l.5-3H12V9.5c0-.83.67-1.5 1.5-1.5z"/>
-          </svg>
-        </a>
-        <a class="social-link" href="https://www.youtube.com/channel/UCNMxjofOdUkcZeridrFNarA" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M23.5 7.2a3.2 3.2 0 0 0-2.25-2.26C19.2 4.4 12 4.4 12 4.4s-7.2 0-9.25.54A3.2 3.2 0 0 0 .5 7.2C0 9.24 0 12 0 12s0 2.76.5 4.8a3.2 3.2 0 0 0 2.25 2.26C4.8 19.6 12 19.6 12 19.6s7.2 0 9.25-.54a3.2 3.2 0 0 0 2.25-2.26c.5-2.04.5-4.8.5-4.8s0-2.76-.5-4.8zM9.6 15.1V8.9l5.4 3.1-5.4 3.1z"/>
-          </svg>
-        </a>
-      </div>
-    </div>
-    <div class="container footer-email">
-      <a href="mailto:destek.apartyonet@gmail.com">destek.apartyonet@gmail.com</a>
-    </div>
+  <footer class="footer shell">
+    <div><a class="brand" href="/" aria-label="ApartYönet ana sayfa"><img src="/assets/apartyonet-building-mark-transparent.svg" width="26" height="26" alt=""><span>Apart<span>Yönet</span></span></a><p>Apartman ve site yönetimi yazılımı</p></div>
+    <div class="footer-links"><a href="/rehberler.html">Rehberler</a><a href="/fiyatlandirma.html">Fiyatlandırma</a><a href="mailto:destek.apartyonet@gmail.com">İletişim</a></div>
+    <div class="footer-links" aria-label="Sosyal medya"><a href="https://www.linkedin.com/company/apartyonet/about/">LinkedIn</a><a href="https://www.instagram.com/apartyonet/">Instagram</a><a href="https://www.facebook.com/apartyonet">Facebook</a><a href="https://www.youtube.com/channel/UCNMxjofOdUkcZeridrFNarA">YouTube</a></div>
   </footer>
 </body>
 </html>

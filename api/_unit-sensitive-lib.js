@@ -130,7 +130,8 @@ async function verifyIdToken(idToken) {
   const user = data.users[0];
   return {
     uid: String(user.localId || ""),
-    email: String((user.email || "")).trim().toLowerCase()
+    email: String((user.email || "")).trim().toLowerCase(),
+    createdAt: Number(user.createdAt || 0)
   };
 }
 
@@ -194,5 +195,6 @@ module.exports = {
   firestoreDocToJs,
   getFirestoreDocument,
   patchFirestoreDocument,
+  verifyIdToken,
   assertWriterAuthorization
 };

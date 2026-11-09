@@ -4,21 +4,56 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ApartYönet | Admin Paneli</title>
+  <script src="/js/brand-theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #090d14;
       --line: rgba(152, 175, 214, 0.22);
+      --border: rgba(152, 175, 214, 0.24);
       --text: #e8eefc;
       --muted: #9fb0cf;
       --primary: #2ea0ff;
       --primary-2: #1676d1;
       --card: rgba(14, 22, 37, 0.82);
+      --surface-2: rgba(11, 18, 31, 0.8);
+      --input-bg: rgba(10, 16, 27, 0.75);
+      --input-text: #e8eefc;
+      --modal-overlay: rgba(3, 7, 15, 0.72);
+      --modal-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.96));
+      --panel-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.88), var(--card));
+      --top-shell-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.92));
+      --top-shell-border: rgba(152, 175, 214, 0.28);
       --danger: #fca5a5;
       --ok: #86efac;
       --warn: #fcd34d;
+      --ghost-text: #d9e5ff;
+      --ghost-bg: rgba(17, 26, 43, 0.55);
+      --ghost-border: rgba(152, 175, 214, 0.35);
+    }
+
+    html[data-theme="light"] {
+      --bg: #f3f6fb;
+      --line: rgba(15, 23, 42, 0.16);
+      --border: rgba(15, 23, 42, 0.16);
+      --text: #0f172a;
+      --muted: #475569;
+      --card: rgba(255, 255, 255, 0.92);
+      --surface-2: #f3f7ff;
+      --input-bg: #ffffff;
+      --input-text: #0f172a;
+      --modal-overlay: rgba(15, 23, 42, 0.34);
+      --modal-bg: linear-gradient(165deg, #ffffff, #f2f7ff);
+      --panel-bg: linear-gradient(165deg, #ffffff, #f2f7ff);
+      --top-shell-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.92));
+      --top-shell-border: rgba(152, 175, 214, 0.28);
+      --danger: #b91c1c;
+      --ok: #15803d;
+      --warn: #b45309;
+      --ghost-text: #1e293b;
+      --ghost-bg: rgba(255, 255, 255, 0.9);
+      --ghost-border: rgba(15, 23, 42, 0.22);
     }
 
     * { box-sizing: border-box; }
@@ -44,6 +79,10 @@
         linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
     }
 
+    html[data-theme="light"] body::before {
+      background: linear-gradient(180deg, #f3f6fb, #edf3fb 48%, #e6edf8);
+    }
+
     body::after {
       content: "";
       position: fixed;
@@ -57,6 +96,12 @@
       pointer-events: none;
     }
 
+    html[data-theme="light"] body::after {
+      background-image:
+        linear-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+    }
+
     .container {
       width: min(1200px, calc(100% - 32px));
       margin: 0 auto;
@@ -65,9 +110,9 @@
     .top {
       margin-top: 16px;
       margin-bottom: 12px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--top-shell-border);
       border-radius: 16px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+      background: var(--top-shell-bg);
       padding: 14px 16px;
       display: flex;
       align-items: center;
@@ -83,6 +128,7 @@
       text-decoration: none;
       color: inherit;
       font-weight: 700;
+      color: #f8fbff;
     }
 
     .brand img {
@@ -120,9 +166,9 @@
     }
 
     .btn-ghost {
-      color: #d9e5ff;
-      border-color: rgba(152, 175, 214, 0.35);
-      background: rgba(17, 26, 43, 0.55);
+      color: var(--ghost-text);
+      border-color: var(--ghost-border);
+      background: var(--ghost-bg);
     }
 
     .btn-edit {
@@ -153,10 +199,10 @@
     }
 
     .chip {
-      border: 1px solid var(--line);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 10px 11px;
-      background: rgba(11, 18, 31, 0.72);
+      background: var(--surface-2);
     }
 
     .chip small {
@@ -191,7 +237,7 @@
       margin: 12px 0;
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.88), var(--card));
+      background: var(--panel-bg);
       padding: 12px;
       display: none;
     }
@@ -234,11 +280,11 @@
     .user-form input,
     .user-form select {
       width: 100%;
-      border: 1px solid rgba(152, 175, 214, 0.34);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 8px 9px;
-      background: rgba(10, 16, 27, 0.8);
-      color: #e8eefc;
+      background: var(--input-bg);
+      color: var(--input-text);
       font-size: 0.84rem;
       font-family: inherit;
     }
@@ -251,7 +297,7 @@
 
     .user-table th,
     .user-table td {
-      border-bottom: 1px solid rgba(152, 175, 214, 0.22);
+      border-bottom: 1px solid var(--border);
       padding: 8px 6px;
       text-align: left;
       vertical-align: top;
@@ -266,7 +312,7 @@
     .card {
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.88), var(--card));
+      background: var(--panel-bg);
       overflow: hidden;
     }
 
@@ -299,10 +345,10 @@
     }
 
     .card-body {
-      border-top: 1px solid rgba(152, 175, 214, 0.2);
+      border-top: 1px solid var(--border);
       display: none;
       padding: 12px 14px 14px;
-      background: rgba(10, 16, 27, 0.72);
+      background: var(--surface-2);
     }
 
     .card.open .card-body {
@@ -316,10 +362,10 @@
     }
 
     .field {
-      border: 1px solid rgba(152, 175, 214, 0.2);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 8px 9px;
-      background: rgba(17, 26, 43, 0.55);
+      background: var(--surface-2);
     }
 
     .field small {
@@ -336,23 +382,23 @@
 
     .json {
       margin-top: 9px;
-      border: 1px solid rgba(152, 175, 214, 0.2);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 8px;
-      background: rgba(8, 13, 22, 0.86);
-      color: #d6e4ff;
+      background: var(--surface-2);
+      color: var(--text);
       font-size: 0.8rem;
       overflow: auto;
       white-space: pre;
     }
 
     .empty {
-      border: 1px dashed rgba(152, 175, 214, 0.3);
+      border: 1px dashed var(--border);
       border-radius: 14px;
       padding: 20px;
       text-align: center;
       color: var(--muted);
-      background: rgba(11, 18, 31, 0.55);
+      background: var(--surface-2);
     }
 
     .locked {
@@ -367,7 +413,7 @@
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 18px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+      background: var(--panel-bg);
     }
 
     .modal {
@@ -375,7 +421,7 @@
       inset: 0;
       display: none;
       place-items: center;
-      background: rgba(3, 7, 15, 0.7);
+      background: var(--modal-overlay);
       z-index: 200;
       padding: 18px;
     }
@@ -388,7 +434,7 @@
       overflow: auto;
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.96));
+      background: var(--modal-bg);
       padding: 14px;
     }
 
@@ -424,10 +470,10 @@
 
     .extra-users-wrap {
       grid-column: 1 / -1;
-      border: 1px solid rgba(152, 175, 214, 0.25);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 10px;
-      background: rgba(11, 18, 31, 0.56);
+      background: var(--surface-2);
     }
 
     .extra-users-title {
@@ -465,11 +511,11 @@
     .modal-form select,
     .modal-form textarea {
       width: 100%;
-      border: 1px solid rgba(152, 175, 214, 0.3);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 9px 10px;
-      background: rgba(10, 16, 27, 0.75);
-      color: #e8eefc;
+      background: var(--input-bg);
+      color: var(--input-text);
       font-family: inherit;
       font-size: 0.9rem;
     }
@@ -503,8 +549,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="/js/authz.js"></script>
+  <link rel="stylesheet" href="/css/brand.css" />
+  <link rel="stylesheet" href="/css/interfaces.css" />
 </head>
-<body>
+<body class="ay-ui ay-panel ay-admin">
   <main id="app" style="display:none;">
     <div class="container">
       <header class="top">
@@ -535,7 +583,7 @@
   <section id="locked" class="locked">
     <div class="panel">
       <h1 style="margin:0; font-size:1.4rem;">Yetkisiz Erişim</h1>
-      <p style="color:#9fb0cf; line-height:1.6;">Bu sayfayı görüntülemek için yetkili yönetici hesabı ile giriş yapmalısınız.</p>
+      <p style="color:var(--muted); line-height:1.6;">Bu sayfayı görüntülemek için yetkili yönetici hesabı ile giriş yapmalısınız.</p>
       <a class="btn btn-primary" href="/login.html">Giriş Sayfasına Dön</a>
     </div>
   </section>
@@ -559,7 +607,7 @@
           <div><label>Aylık Dükkan Aidat</label><input id="e_dukkan_aidat" type="number" step="0.01" min="0" /></div>
           <div class="manager-row">
             <div><label>Site Yöneticisi E-posta</label><input id="e_manager_email" type="email" placeholder="yonetici@site.com" required /></div>
-            <div><label>Site Yöneticisi Şifre</label><input id="e_manager_password" type="password" placeholder="Yeni hesap için en az 6 karakter" /></div>
+            <div><label>Site Yöneticisi Şifre</label><input id="e_manager_password" type="text" placeholder="Yeni hesap için en az 6 karakter" /></div>
             <div><button id="addExtraUserBtn" class="btn btn-primary" type="button">+ Kullanıcı Ekle</button></div>
           </div>
           <div class="extra-users-wrap">
@@ -573,6 +621,7 @@
           <button id="deleteBtn" class="btn btn-edit" type="button">Kaydı Sil</button>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button id="saveBtn" class="btn btn-primary" type="submit">Kaydet</button>
+            <button id="sendManagerMailBtn" class="btn btn-ghost" type="button">Yöneticiye Mail At</button>
             <button id="cancelBtn" class="btn btn-ghost" type="button">İptal</button>
           </div>
         </div>
@@ -618,6 +667,7 @@
       messagingSenderId: "825430154124",
       appId: "1:825430154124:web:7156fa0462fcfc222414a9"
     };
+    const CREDENTIALS_MAIL_API_URL = "/api/send-credentials";
 
     const app = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
     const auth = app.auth();
@@ -760,6 +810,7 @@
                 <div class="field"><small>Site ID</small><div>${escapeHtml(item.siteId || "-")}</div></div>
                 <div class="field"><small>Yayın URL</small><div>${publish && publish.slug ? `<a href="/${encodeURIComponent(publish.slug)}" target="_blank" rel="noopener">/${escapeHtml(publish.slug)}</a>` : "-"}</div></div>
                 <div class="field"><small>Yönetici E-posta</small><div>${escapeHtml(item.manager_email || "-")}</div></div>
+                <div class="field"><small>Yönetici Şifre</small><div>${escapeHtml(item.manager_password_plain || "-")}</div></div>
                 <div class="field"><small>Ek Personel</small><div>${personelCount}</div></div>
                 <div class="field"><small>İl / İlçe</small><div>${escapeHtml((item.il || "-") + " / " + (item.ilce || "-"))}</div></div>
                 <div class="field"><small>Adres</small><div>${escapeHtml(item.adres || "-")}</div></div>
@@ -847,7 +898,7 @@
       document.getElementById("e_aylik_aidat").value = row.aylik_aidat || "";
       document.getElementById("e_dukkan_aidat").value = row.dukkan_aidat || "";
       document.getElementById("e_manager_email").value = row.manager_email || row.email || "";
-      document.getElementById("e_manager_password").value = "";
+      document.getElementById("e_manager_password").value = row.manager_password_plain || "";
       extraUsersDraft = Array.isArray(row.site_personel_list)
         ? row.site_personel_list.map((u) => ({
           ad_soyad: String(u.ad_soyad || ""),
@@ -1046,7 +1097,6 @@
       try {
         await loadPublishedSitesMap();
         const query = enforceSiteScope(db.collection("basvurular"), currentProfile.siteId)
-          .orderBy("createdAt", "desc")
           .limit(200);
         const snap = await query.get();
         const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
@@ -1181,6 +1231,170 @@
       return { uid, createdNew };
     }
 
+    async function sendManagerCredentialsEmail(toEmail, siteName, siteId, managerUid, password) {
+      const idToken = await auth.currentUser.getIdToken();
+      const payload = {
+        purpose: "admin",
+        to_email: String(toEmail || ""),
+        site_name: String(siteName || ""),
+        site_id: siteId,
+        manager_uid: managerUid,
+        password: String(password || "")
+      };
+      const resp = await fetch(CREDENTIALS_MAIL_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + idToken },
+        body: JSON.stringify(payload)
+      });
+      let data = null;
+      try {
+        data = await resp.json();
+      } catch (_) {
+        data = null;
+      }
+      if (!resp.ok || !data || data.ok !== true) {
+        const detail = data && (data.detail || data.message) ? String(data.detail || data.message) : ("HTTP " + resp.status);
+        throw new Error("Mail servisi yanıt vermedi: " + detail);
+      }
+    }
+
+    async function saveApplication(options) {
+      const opts = options || {};
+      const sendMailAfterSave = !!opts.sendMailAfterSave;
+      const saveBtn = document.getElementById("saveBtn");
+      const mailBtn = document.getElementById("sendManagerMailBtn");
+      const originalSaveText = saveBtn.textContent;
+      const originalMailText = mailBtn.textContent;
+      saveBtn.disabled = true;
+      mailBtn.disabled = true;
+      saveBtn.textContent = sendMailAfterSave ? "Kaydediliyor..." : "Kaydediliyor...";
+      mailBtn.textContent = sendMailAfterSave ? "Mail Gönderiliyor..." : originalMailText;
+
+      const id = document.getElementById("editId").value;
+      const existingRow = byId(id);
+      if (!id) {
+        setStatus("Düzenlenecek kayıt bulunamadı.", "error");
+        saveBtn.disabled = false;
+        mailBtn.disabled = false;
+        saveBtn.textContent = originalSaveText;
+        mailBtn.textContent = originalMailText;
+        return;
+      }
+
+      const siteName = document.getElementById("e_site_adi").value.trim();
+      const siteId = slugifySiteId(siteName);
+      const managerEmail = normalizeEmail(document.getElementById("e_manager_email").value);
+      const managerPassword = String(document.getElementById("e_manager_password").value || "");
+      const existingManagerPassword = String(existingRow && existingRow.manager_password_plain ? existingRow.manager_password_plain : "");
+      const effectiveManagerPassword = managerPassword || existingManagerPassword;
+      if (!siteName || !siteId) {
+        setStatus("Site adı zorunlu. Geçerli bir site adı girin.", "error");
+        saveBtn.disabled = false;
+        mailBtn.disabled = false;
+        saveBtn.textContent = originalSaveText;
+        mailBtn.textContent = originalMailText;
+        return;
+      }
+      if (!managerEmail) {
+        setStatus("Site yöneticisi e-posta alanı zorunlu.", "error");
+        saveBtn.disabled = false;
+        mailBtn.disabled = false;
+        saveBtn.textContent = originalSaveText;
+        mailBtn.textContent = originalMailText;
+        return;
+      }
+      if (currentProfile.role === APARTYONET_ROLES.ADMIN && siteId !== currentProfile.siteId) {
+        setStatus("Admin sadece kendi site kaydını güncelleyebilir.", "error");
+        saveBtn.disabled = false;
+        mailBtn.disabled = false;
+        saveBtn.textContent = originalSaveText;
+        mailBtn.textContent = originalMailText;
+        return;
+      }
+      if (effectiveManagerPassword && effectiveManagerPassword.length < 6) {
+        setStatus("Yönetici şifresi en az 6 karakter olmalı.", "error");
+        saveBtn.disabled = false;
+        mailBtn.disabled = false;
+        saveBtn.textContent = originalSaveText;
+        mailBtn.textContent = originalMailText;
+        return;
+      }
+      if (sendMailAfterSave && !effectiveManagerPassword) {
+        setStatus("Mail göndermek için yönetici şifresi zorunlu.", "error");
+        saveBtn.disabled = false;
+        mailBtn.disabled = false;
+        saveBtn.textContent = originalSaveText;
+        mailBtn.textContent = originalMailText;
+        return;
+      }
+
+      const payload = {
+        ad_soyad: document.getElementById("e_ad_soyad").value.trim(),
+        email: document.getElementById("e_email").value.trim(),
+        telefon: document.getElementById("e_telefon").value.trim(),
+        site_adi: siteName,
+        siteId,
+        il: document.getElementById("e_il").value.trim(),
+        ilce: document.getElementById("e_ilce").value.trim(),
+        adres: document.getElementById("e_adres").value.trim(),
+        notlar: document.getElementById("e_notlar").value.trim(),
+        aylik_aidat: document.getElementById("e_aylik_aidat").value.trim(),
+        dukkan_aidat: document.getElementById("e_dukkan_aidat").value.trim(),
+        site_personel_list: normalizeExtraUsers(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        const manager = await provisionManagerAccount({
+          managerEmail,
+          managerPassword: effectiveManagerPassword,
+          managerName: payload.ad_soyad,
+          siteId,
+          siteName
+        });
+        payload.manager_email = managerEmail;
+        payload.manager_password_plain = effectiveManagerPassword;
+        payload.manager_login_url = window.location.origin + "/login.html";
+        payload.manager_uid = manager.uid;
+        payload.manager_provisioned_at = firebase.firestore.FieldValue.serverTimestamp();
+
+        await db.collection("basvurular").doc(id).update(payload);
+
+        const publishedRef = db.collection("published_sites").doc(siteId);
+        const publishedSnap = await publishedRef.get();
+        if (publishedSnap.exists) {
+          await publishedRef.set({
+            manager_uid: manager.uid,
+            manager_email: managerEmail,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        }
+
+        if (sendMailAfterSave) {
+          await sendManagerCredentialsEmail(
+            managerEmail,
+            siteName,
+            siteId,
+            manager.uid,
+            effectiveManagerPassword
+          );
+          setStatus("Başvuru kaydedildi ve yöneticiye giriş bilgileri mail olarak gönderildi.", "ok");
+        } else {
+          setStatus(manager.createdNew ? "Başvuru güncellendi, yönetici hesabı oluşturuldu." : "Başvuru güncellendi, yönetici hesabı eşleştirildi.", "ok");
+        }
+        closeEditModal();
+        await loadApplications();
+      } catch (err) {
+        console.error(err);
+        setStatus(err && err.message ? err.message : (sendMailAfterSave ? "Mail gönderimi sırasında hata oluştu." : "Güncelleme sırasında hata oluştu."), "error");
+      } finally {
+        saveBtn.disabled = false;
+        mailBtn.disabled = false;
+        saveBtn.textContent = originalSaveText;
+        mailBtn.textContent = originalMailText;
+      }
+    }
+
     function wireBaseEvents() {
       document.getElementById("refreshBtn").addEventListener("click", loadApplications);
       document.getElementById("logoutBtn").addEventListener("click", async () => {
@@ -1222,97 +1436,10 @@
 
     document.getElementById("editForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const saveBtn = document.getElementById("saveBtn");
-      saveBtn.disabled = true;
-      saveBtn.textContent = "Kaydediliyor...";
-
-      const id = document.getElementById("editId").value;
-      if (!id) {
-        setStatus("Düzenlenecek kayıt bulunamadı.", "error");
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Kaydet";
-        return;
-      }
-
-      const siteName = document.getElementById("e_site_adi").value.trim();
-      const siteId = slugifySiteId(siteName);
-      const managerEmail = normalizeEmail(document.getElementById("e_manager_email").value);
-      const managerPassword = String(document.getElementById("e_manager_password").value || "");
-      if (!siteName || !siteId) {
-        setStatus("Site adı zorunlu. Geçerli bir site adı girin.", "error");
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Kaydet";
-        return;
-      }
-      if (!managerEmail) {
-        setStatus("Site yöneticisi e-posta alanı zorunlu.", "error");
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Kaydet";
-        return;
-      }
-      if (currentProfile.role === APARTYONET_ROLES.ADMIN && siteId !== currentProfile.siteId) {
-        setStatus("Admin sadece kendi site kaydını güncelleyebilir.", "error");
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Kaydet";
-        return;
-      }
-      if (managerPassword && managerPassword.length < 6) {
-        setStatus("Yönetici şifresi en az 6 karakter olmalı.", "error");
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Kaydet";
-        return;
-      }
-
-      const payload = {
-        ad_soyad: document.getElementById("e_ad_soyad").value.trim(),
-        email: document.getElementById("e_email").value.trim(),
-        telefon: document.getElementById("e_telefon").value.trim(),
-        site_adi: siteName,
-        siteId,
-        il: document.getElementById("e_il").value.trim(),
-        ilce: document.getElementById("e_ilce").value.trim(),
-        adres: document.getElementById("e_adres").value.trim(),
-        notlar: document.getElementById("e_notlar").value.trim(),
-        aylik_aidat: document.getElementById("e_aylik_aidat").value.trim(),
-        dukkan_aidat: document.getElementById("e_dukkan_aidat").value.trim(),
-        site_personel_list: normalizeExtraUsers(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-
-      try {
-        const manager = await provisionManagerAccount({
-          managerEmail,
-          managerPassword,
-          managerName: payload.ad_soyad,
-          siteId,
-          siteName
-        });
-        payload.manager_email = managerEmail;
-        payload.manager_uid = manager.uid;
-        payload.manager_provisioned_at = firebase.firestore.FieldValue.serverTimestamp();
-
-        await db.collection("basvurular").doc(id).update(payload);
-
-        const publishedRef = db.collection("published_sites").doc(siteId);
-        const publishedSnap = await publishedRef.get();
-        if (publishedSnap.exists) {
-          await publishedRef.set({
-            manager_uid: manager.uid,
-            manager_email: managerEmail,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true });
-        }
-
-        closeEditModal();
-        setStatus(manager.createdNew ? "Başvuru güncellendi, yönetici hesabı oluşturuldu." : "Başvuru güncellendi, yönetici hesabı eşleştirildi.", "ok");
-        await loadApplications();
-      } catch (err) {
-        console.error(err);
-        setStatus(err && err.message ? err.message : "Güncelleme sırasında hata oluştu.", "error");
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Kaydet";
-      }
+      await saveApplication({ sendMailAfterSave: false });
+    });
+    document.getElementById("sendManagerMailBtn").addEventListener("click", async () => {
+      await saveApplication({ sendMailAfterSave: true });
     });
 
     wireBaseEvents();

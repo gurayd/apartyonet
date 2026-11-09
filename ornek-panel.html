@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ApartYönet'in aidat, gider ve duyuru ekranlarını örnek bir siteyle deneyin.">
+  <title>Örnek Yönetim Paneli | ApartYönet</title>
+  <link rel="canonical" href="https://apartyonet.com/ornek-panel.html">
+  <script src="/js/brand-theme.js"></script>
+  <link rel="stylesheet" href="/css/brand.css">
+  <link rel="stylesheet" href="/css/ornek-panel.css">
+  <link rel="stylesheet" href="/css/interfaces.css">
+  <script type="module" src="/js/ornek-panel.mjs"></script>
+</head>
+<body class="ay-ui ay-sample">
+  <header class="ay-header"><div class="ay-shell ay-header-inner">
+    <a class="ay-brand" href="/"><img src="/assets/apartyonet-building-mark-transparent.svg" alt="" width="32" height="32">Apart<span>Yönet</span></a>
+    <div class="ay-header-actions"><a href="/basvuru.html">Kendi Sitem İçin Başvur</a><button class="ay-theme" data-brand-theme type="button" aria-label="Koyu tema" aria-pressed="false" hidden><span aria-hidden="true">☾</span></button></div>
+  </div></header>
+  <main class="shell">
+    <div class="intro">
+      <p class="kicker">ETKİLEŞİMLİ ÖRNEK PANEL</p>
+      <h1>Akasya Sitesi</h1>
+      <p>Dönem ve blok seçerek aidatları inceleyin. Yönetici ile daire sakini ekranları arasında geçiş yapabilirsiniz.</p>
+      <p class="sample">Temsili veriler · Gerçek kayıt veya ödeme işlemi yok</p>
+    </div>
+    <div class="controls">
+      <fieldset class="roles"><legend>Ekran</legend><label><input type="radio" name="role" value="manager" checked> Yönetici</label><label><input type="radio" name="role" value="resident"> Daire sakini</label></fieldset>
+      <label class="field">Dönem<select id="period"><option value="2026-10">Ekim 2026</option><option value="2026-09">Eylül 2026</option></select></label>
+    </div>
+    <section class="metrics" aria-label="Seçili dönemin özeti" aria-live="polite">
+      <div class="metric"><span id="expected-label">Beklenen aidat</span><strong id="expected">–</strong></div>
+      <div class="metric"><span id="paid-label">Tahsil edilen</span><strong id="paid">–</strong></div>
+      <div class="metric remaining"><span>Kalan tutar</span><strong id="remaining">–</strong></div>
+    </section>
+    <div class="workspace">
+      <section class="panel" aria-labelledby="records-title">
+        <div class="panel-head"><div><p class="kicker">AİDAT TAKİBİ</p><h2 id="records-title">Ödeme durumları</h2></div></div>
+        <div id="filters" class="filters">
+          <label class="field">Blok<select id="block"><option value="all">Tüm bloklar</option><option value="A">A Blok</option><option value="B">B Blok</option></select></label>
+          <label class="field">Durum<select id="status"><option value="all">Tüm durumlar</option><option value="paid">Ödendi</option><option value="partial">Kısmi ödeme</option><option value="open">Ödeme bekliyor</option></select></label>
+        </div>
+        <p id="row-count" class="muted" role="status"></p>
+        <div class="table-wrap"><table><thead><tr><th scope="col">Bölüm</th><th scope="col">Aidat</th><th scope="col">Ödenen</th><th scope="col">Durum</th></tr></thead><tbody id="records"></tbody></table></div>
+        <noscript>Örnek panelin etkileşimli ekranları için JavaScript'i etkinleştirin.</noscript>
+      </section>
+      <aside class="side">
+        <section class="panel" id="expenses"><div class="panel-head"><div><p class="kicker">GİDERLER</p><h2>Ortak giderler</h2></div><strong id="expense-total">–</strong></div><ul id="expense-list" class="entries"></ul></section>
+        <section class="panel"><div class="panel-head"><div><p class="kicker">BİLGİLENDİRME</p><h2>Duyurular</h2></div></div><ul class="entries notices"><li><strong>Asansör bakımı</strong><span>A Blok asansörü salı günü 10.00–12.00 arasında bakıma alınacak.</span></li><li><strong>Yönetim toplantısı</strong><span>Aylık gelir ve gider özeti ortak alandaki toplantıda paylaşılacak.</span></li></ul></section>
+      </aside>
+    </div>
+    <footer><a href="/">Ana sayfaya dön</a><a href="/fiyatlandirma.html">Fiyatlandırmayı incele</a><a href="/login.html">Mevcut hesabımla giriş</a></footer>
+  </main>
+</body>
+</html>

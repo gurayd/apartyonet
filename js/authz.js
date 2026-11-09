@@ -76,7 +76,7 @@ window.isBootstrapAdminEmail = function isBootstrapAdminEmail(email) {
 };
 
 window.ensureBootstrapAdminProfile = async function ensureBootstrapAdminProfile(db, user) {
-  if (!db || !user || !user.uid || !isBootstrapAdminEmail(user.email)) return null;
+  if (!db || !user || !user.uid || !isBootstrapAdminEmail(user.email) || !user.emailVerified) return null;
   const ref = db.collection("users").doc(user.uid);
   const snap = await ref.get();
   if (snap.exists) {
