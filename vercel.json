@@ -32,6 +32,11 @@
   ],
   "redirects": [
     {
+      "source": "/ornekdemohtml.html",
+      "destination": "/ornek-panel.html",
+      "permanent": false
+    },
+    {
       "source": "/",
       "has": [
         { "type": "host", "value": "www.apartyonet.com" }
