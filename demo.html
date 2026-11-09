@@ -4,22 +4,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ApartYönet | Demo Panel</title>
+  <script src="/js/brand-theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #090d14;
       --line: rgba(152, 175, 214, 0.22);
+      --border: rgba(152, 175, 214, 0.24);
       --text: #e8eefc;
       --muted: #9fb0cf;
       --primary: #2ea0ff;
       --primary-2: #1676d1;
       --card: rgba(14, 22, 37, 0.84);
       --panel: rgba(11, 18, 31, 0.78);
+      --surface-2: rgba(11, 18, 31, 0.58);
+      --input-bg: rgba(10, 16, 27, 0.75);
+      --input-text: #e8eefc;
+      --modal-overlay: rgba(3, 7, 15, 0.72);
+      --modal-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.96));
+      --panel-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
       --ok: #86efac;
       --warn: #fcd34d;
       --danger: #fca5a5;
+      --ghost-text: #d9e5ff;
+      --ghost-bg: rgba(17, 26, 43, 0.55);
+      --ghost-border: rgba(152, 175, 214, 0.35);
+      --top-shell-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.92));
+      --top-shell-border: rgba(152, 175, 214, 0.28);
+    }
+
+    html[data-theme="light"] {
+      --bg: #f3f6fb;
+      --line: rgba(15, 23, 42, 0.16);
+      --border: rgba(15, 23, 42, 0.16);
+      --text: #0f172a;
+      --muted: #475569;
+      --card: rgba(255, 255, 255, 0.94);
+      --panel: rgba(248, 251, 255, 0.9);
+      --surface-2: #f3f7ff;
+      --input-bg: #ffffff;
+      --input-text: #0f172a;
+      --modal-overlay: rgba(15, 23, 42, 0.34);
+      --modal-bg: linear-gradient(165deg, #ffffff, #f2f7ff);
+      --panel-bg: linear-gradient(165deg, #ffffff, #f2f7ff);
+      --ok: #15803d;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --ghost-text: #1e293b;
+      --ghost-bg: rgba(255, 255, 255, 0.9);
+      --ghost-border: rgba(15, 23, 42, 0.22);
+      --top-shell-bg: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.92));
+      --top-shell-border: rgba(152, 175, 214, 0.28);
     }
 
     * { box-sizing: border-box; }
@@ -44,6 +80,10 @@
         linear-gradient(180deg, #090d14, #070a12 48%, #06090f);
     }
 
+    html[data-theme="light"] body::before {
+      background: linear-gradient(180deg, #f3f6fb, #edf3fb 48%, #e6edf8);
+    }
+
     body::after {
       content: "";
       position: fixed;
@@ -57,15 +97,21 @@
       pointer-events: none;
     }
 
+    html[data-theme="light"] body::after {
+      background-image:
+        linear-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+    }
+
     .container {
       width: min(1280px, calc(100% - 28px));
       margin: 14px auto 24px;
     }
 
     .top {
-      border: 1px solid var(--line);
+      border: 1px solid var(--top-shell-border);
       border-radius: 16px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.92), var(--card));
+      background: var(--top-shell-bg);
       padding: 12px 14px;
       display: flex;
       justify-content: space-between;
@@ -82,6 +128,7 @@
       text-decoration: none;
       color: inherit;
       font-weight: 700;
+      color: #f8fbff;
     }
 
     .brand img { height: 34px; width: auto; display: block; }
@@ -105,12 +152,12 @@
 
     .btn:hover { transform: translateY(-1px); }
     .btn-primary { color: #fff; background: linear-gradient(135deg, var(--primary), var(--primary-2)); }
-    .btn-ghost { color: #d9e5ff; border-color: rgba(152, 175, 214, 0.35); background: rgba(17, 26, 43, 0.55); }
+    .btn-ghost { color: var(--ghost-text); border-color: var(--ghost-border); background: var(--ghost-bg); }
 
     .hero {
       border: 1px solid var(--line);
       border-radius: 16px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.92), var(--card));
+      background: var(--panel-bg);
       padding: 16px;
       margin-bottom: 10px;
     }
@@ -153,7 +200,7 @@
     .sidebar {
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+      background: var(--panel-bg);
       padding: 8px;
       height: fit-content;
       position: sticky;
@@ -174,16 +221,26 @@
       margin-bottom: 5px;
     }
 
+    html[data-theme="light"] .tab-btn {
+      color: #334155;
+    }
+
     .tab-btn:hover { background: rgba(46, 160, 255, 0.12); }
     .tab-btn.active {
       background: rgba(46, 160, 255, 0.2);
       border-color: rgba(46, 160, 255, 0.45);
     }
 
+    html[data-theme="light"] .tab-btn.active {
+      color: #1d4ed8;
+      border-color: #93c5fd;
+      background: #e7f0ff;
+    }
+
     .content {
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.9), var(--card));
+      background: var(--panel-bg);
       padding: 12px;
       min-height: 520px;
     }
@@ -201,9 +258,9 @@
 
     .sub-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
     .sub-tab {
-      border: 1px solid rgba(152, 175, 214, 0.3);
-      background: rgba(11, 18, 31, 0.8);
-      color: #d8e5ff;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--input-text);
       border-radius: 999px;
       padding: 6px 10px;
       font-size: 0.76rem;
@@ -211,6 +268,7 @@
       cursor: pointer;
     }
     .sub-tab.active { border-color: rgba(46, 160, 255, 0.6); color: #b9dcff; }
+    html[data-theme="light"] .sub-tab.active { color: #1d4ed8; border-color: #93c5fd; background: #e7f0ff; }
     .sub-pane { display: none; }
     .sub-pane.active { display: block; }
 
@@ -249,11 +307,11 @@
     .f select,
     .f textarea {
       width: 100%;
-      border: 1px solid rgba(152, 175, 214, 0.34);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 8px 9px;
-      background: rgba(10, 16, 27, 0.8);
-      color: #e8eefc;
+      background: var(--input-bg);
+      color: var(--input-text);
       font-size: 0.84rem;
       font-family: inherit;
     }
@@ -269,21 +327,21 @@
 
     table { width: 100%; border-collapse: collapse; min-width: 620px; }
     th, td {
-      border-bottom: 1px solid rgba(152, 175, 214, 0.2);
+      border-bottom: 1px solid var(--border);
       padding: 8px;
       font-size: 0.8rem;
       text-align: left;
     }
-    th { background: rgba(46, 160, 255, 0.15); color: #cde4ff; }
+    th { background: var(--table-head); color: var(--text); }
 
     .pill {
       display: inline-block;
-      border: 1px solid rgba(152, 175, 214, 0.3);
+      border: 1px solid var(--border);
       border-radius: 999px;
       padding: 4px 9px;
       font-size: 0.72rem;
-      color: #d8e5ff;
-      background: rgba(11, 18, 31, 0.78);
+      color: var(--input-text);
+      background: var(--surface-2);
       margin: 2px 4px 0 0;
     }
 
@@ -315,13 +373,31 @@
       border-color: rgba(252, 165, 165, 0.55);
     }
 
+    html[data-theme="light"] .badge.ok {
+      color: #166534;
+      background: #dcfce7;
+      border-color: #86efac;
+    }
+
+    html[data-theme="light"] .badge.warn {
+      color: #92400e;
+      background: #fef3c7;
+      border-color: #fcd34d;
+    }
+
+    html[data-theme="light"] .badge.error {
+      color: #b91c1c;
+      background: #fee2e2;
+      border-color: #fca5a5;
+    }
+
     .bars { display: grid; gap: 8px; margin-top: 8px; }
     .bar-row { display: grid; gap: 5px; }
     .bar-row label { font-size: 0.76rem; color: var(--muted); }
     .bar {
       height: 10px;
       border-radius: 999px;
-      background: rgba(152, 175, 214, 0.22);
+      background: var(--border);
       overflow: hidden;
     }
     .bar > span {
@@ -343,10 +419,10 @@
     }
 
     .unit-card {
-      border: 1px solid rgba(152, 175, 214, 0.22);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 9px;
-      background: rgba(11, 18, 31, 0.72);
+      background: var(--surface-2);
     }
 
     .unit-card strong {
@@ -373,7 +449,7 @@
       inset: 0;
       display: none;
       place-items: center;
-      background: rgba(3, 7, 15, 0.72);
+      background: var(--modal-overlay);
       z-index: 220;
       padding: 18px;
     }
@@ -382,12 +458,15 @@
 
     .modal-card {
       width: min(1180px, 100%);
+      height: min(880px, calc(100vh - 36px));
       max-height: calc(100vh - 36px);
-      overflow: auto;
+      overflow: hidden;
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: linear-gradient(165deg, rgba(17, 26, 43, 0.96), rgba(10, 16, 27, 0.96));
+      background: var(--modal-bg);
       padding: 14px;
+      display: flex;
+      flex-direction: column;
     }
 
     .modal-head {
@@ -420,11 +499,11 @@
     .modal-form textarea,
     .modal-form select {
       width: 100%;
-      border: 1px solid rgba(152, 175, 214, 0.3);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 9px 10px;
-      background: rgba(10, 16, 27, 0.75);
-      color: #e8eefc;
+      background: var(--input-bg);
+      color: var(--input-text);
       font-family: inherit;
       font-size: 0.88rem;
     }
@@ -451,7 +530,7 @@
     .unit-tabs {
       display: flex;
       gap: 8px;
-      border-bottom: 1px solid rgba(152, 175, 214, 0.2);
+      border-bottom: 1px solid var(--border);
       margin-bottom: 10px;
       flex-wrap: wrap;
     }
@@ -472,8 +551,31 @@
       border-bottom-color: #4f7cff;
     }
 
+    html[data-theme="light"] .unit-tab-btn {
+      color: #334155;
+    }
+
+    html[data-theme="light"] .unit-tab-btn.active {
+      color: #1d4ed8;
+      border-bottom-color: #2563eb;
+    }
+
     .unit-tab-pane { display: none; }
     .unit-tab-pane.active { display: block; }
+
+    #unitForm {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      flex: 1;
+    }
+
+    .unit-tab-pane {
+      height: clamp(320px, 60vh, 620px);
+      min-height: clamp(320px, 60vh, 620px);
+      overflow: auto;
+      padding-right: 4px;
+    }
 
     .split-grid {
       display: grid;
@@ -488,10 +590,10 @@
     }
 
     .subsection {
-      border: 1px solid rgba(152, 175, 214, 0.18);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 10px;
-      background: rgba(11, 18, 31, 0.58);
+      background: var(--surface-2);
     }
 
     .subsection-title {
@@ -515,10 +617,10 @@
     }
 
     .repeat-item {
-      border: 1px solid rgba(152, 175, 214, 0.18);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 8px;
-      background: rgba(11, 18, 31, 0.58);
+      background: var(--surface-2);
     }
 
     .repeat-item-head {
@@ -537,10 +639,10 @@
     }
 
     .note-row {
-      border: 1px solid rgba(152, 175, 214, 0.2);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 8px;
-      background: rgba(11, 18, 31, 0.58);
+      background: var(--surface-2);
     }
 
     .note-row small {
@@ -580,10 +682,10 @@
       display: flex;
       justify-content: space-between;
       gap: 12px;
-      border: 1px solid rgba(152, 175, 214, 0.25);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px;
-      background: rgba(11, 18, 31, 0.45);
+      background: var(--surface-2);
     }
 
     .staff-main {
@@ -593,7 +695,7 @@
 
     .staff-main strong {
       font-size: 0.96rem;
-      color: #e8f0ff;
+      color: var(--text);
     }
 
     .staff-meta {
@@ -602,7 +704,7 @@
     }
 
     .staff-empty {
-      border: 1px dashed rgba(152, 175, 214, 0.4);
+      border: 1px dashed var(--border);
       border-radius: 12px;
       padding: 14px;
       color: var(--text-soft);
@@ -619,8 +721,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="/js/authz.js"></script>
+  <link rel="stylesheet" href="/css/brand.css" />
+  <link rel="stylesheet" href="/css/interfaces.css" />
 </head>
-<body>
+<body class="ay-ui ay-panel ay-tenant">
   <div id="demoApp" class="container" style="display:none;">
     <header class="top">
       <a class="brand" href="/index.html">
@@ -845,7 +949,7 @@
             <div class="f" style="display:flex;align-items:flex-end;"><button id="changePasswordBtn" class="btn btn-primary" type="button">Şifreyi Güncelle</button></div>
           </div>
           <div class="muted" style="margin-top:6px;">Oturum süresi uzunsa, güvenlik için mevcut şifre istenebilir.</div>
-          <hr style="margin:14px 0; border:none; border-top:1px solid rgba(152, 175, 214, 0.2);" />
+          <hr style="margin:14px 0; border:none; border-top:1px solid var(--border);" />
           <div class="profile-grid">
             <div class="f"><label>İsim Soyisim</label><input id="p_fullName" type="text" placeholder="Örn. Ayşe Demir" /></div>
             <div class="f"><label>Telefon</label><input id="p_phone" type="text" placeholder="05xx xxx xx xx" /></div>
@@ -957,6 +1061,19 @@
                 <button id="addPersonBtn" type="button" class="btn btn-ghost">+ Kişi Ekle</button>
               </div>
               <div id="u_peopleList" class="repeat-list"></div>
+              <div id="u_personAddBox" class="subsection" style="display:none; margin-top:8px;">
+                <p class="subsection-title">Yeni Kişi</p>
+                <div class="modal-form">
+                  <div><label>Ad Soyad</label><input id="u_newPersonFullName" type="text" /></div>
+                  <div><label>Yakınlık</label><input id="u_newPersonRelation" type="text" /></div>
+                  <div><label>Telefon</label><input id="u_newPersonPhone" type="text" /></div>
+                  <div class="full"><label>Not</label><input id="u_newPersonNote" type="text" /></div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+                  <button id="cancelAddPersonBtn" type="button" class="btn btn-ghost">Vazgeç</button>
+                  <button id="confirmAddPersonBtn" type="button" class="btn btn-primary">Ekle</button>
+                </div>
+              </div>
             </div>
             <div class="subsection">
               <div class="list-header">
@@ -964,6 +1081,27 @@
                 <button id="addVehicleBtn" type="button" class="btn btn-ghost">+ Plaka Ekle</button>
               </div>
               <div id="u_vehicleList" class="repeat-list"></div>
+              <div id="u_vehicleAddBox" class="subsection" style="display:none; margin-top:8px;">
+                <p class="subsection-title">Yeni Araç</p>
+                <div class="modal-form">
+                  <div><label>Plaka</label><input id="u_newVehiclePlate" type="text" /></div>
+                  <div>
+                    <label>Tür</label>
+                    <select id="u_newVehicleType">
+                      <option value="binek">Binek</option>
+                      <option value="ticari">Ticari</option>
+                      <option value="kamyonet">Kamyonet</option>
+                      <option value="motorsiklet">Motorsiklet</option>
+                    </select>
+                  </div>
+                  <div><label>Renk</label><input id="u_newVehicleColor" type="text" /></div>
+                  <div class="full"><label>Not</label><input id="u_newVehicleNote" type="text" /></div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+                  <button id="cancelAddVehicleBtn" type="button" class="btn btn-ghost">Vazgeç</button>
+                  <button id="confirmAddVehicleBtn" type="button" class="btn btn-primary">Ekle</button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1893,15 +2031,11 @@
       root.innerHTML = list.map((p, idx) => `
         <div class="repeat-item">
           <div class="repeat-item-head">
-            <strong>Kişi ${idx + 1}</strong>
+            <strong>${escapeHtml(p.fullName || ("Kişi " + (idx + 1)))}</strong>
             <button type="button" class="btn btn-ghost" data-person-remove="${idx}">Sil</button>
           </div>
-          <div class="modal-form">
-            <div><label>Ad Soyad</label><input type="text" data-person-field="fullName" data-person-idx="${idx}" value="${escapeHtml(p.fullName || "")}" /></div>
-            <div><label>Yakınlık</label><input type="text" data-person-field="relation" data-person-idx="${idx}" value="${escapeHtml(p.relation || "")}" /></div>
-            <div><label>Telefon</label><input type="text" data-person-field="phone" data-person-idx="${idx}" value="${escapeHtml(p.phone || "")}" /></div>
-            <div class="full"><label>Not</label><input type="text" data-person-field="note" data-person-idx="${idx}" value="${escapeHtml(p.note || "")}" /></div>
-          </div>
+          <div class="muted">${escapeHtml(p.relation || "-")} • ${escapeHtml(p.phone || "-")}</div>
+          ${p.note ? `<div style="margin-top:6px;">${escapeHtml(p.note)}</div>` : ""}
         </div>
       `).join("");
     }
@@ -1917,15 +2051,11 @@
       root.innerHTML = list.map((v, idx) => `
         <div class="repeat-item">
           <div class="repeat-item-head">
-            <strong>Araç ${idx + 1}</strong>
+            <strong>${escapeHtml(v.plate || ("Araç " + (idx + 1)))}</strong>
             <button type="button" class="btn btn-ghost" data-vehicle-remove="${idx}">Sil</button>
           </div>
-          <div class="modal-form">
-            <div><label>Plaka</label><input type="text" data-vehicle-field="plate" data-vehicle-idx="${idx}" value="${escapeHtml(v.plate || "")}" /></div>
-            <div><label>Tür</label><input type="text" data-vehicle-field="type" data-vehicle-idx="${idx}" value="${escapeHtml(v.type || "")}" /></div>
-            <div><label>Renk</label><input type="text" data-vehicle-field="color" data-vehicle-idx="${idx}" value="${escapeHtml(v.color || "")}" /></div>
-            <div class="full"><label>Not</label><input type="text" data-vehicle-field="note" data-vehicle-idx="${idx}" value="${escapeHtml(v.note || "")}" /></div>
-          </div>
+          <div class="muted">${escapeHtml(v.type || "-")} • ${escapeHtml(v.color || "-")}</div>
+          ${v.note ? `<div style="margin-top:6px;">${escapeHtml(v.note)}</div>` : ""}
         </div>
       `).join("");
     }
@@ -2032,6 +2162,16 @@
       document.getElementById("u_noticeDate").value = editingUnitDraft.debt.noticeDate;
       document.getElementById("u_legalNote").value = editingUnitDraft.debt.legalNote;
       document.getElementById("u_newNoteText").value = "";
+      document.getElementById("u_personAddBox").style.display = "none";
+      document.getElementById("u_vehicleAddBox").style.display = "none";
+      document.getElementById("u_newPersonFullName").value = "";
+      document.getElementById("u_newPersonRelation").value = "";
+      document.getElementById("u_newPersonPhone").value = "";
+      document.getElementById("u_newPersonNote").value = "";
+      document.getElementById("u_newVehiclePlate").value = "";
+      document.getElementById("u_newVehicleType").value = "binek";
+      document.getElementById("u_newVehicleColor").value = "";
+      document.getElementById("u_newVehicleNote").value = "";
       renderPeopleList();
       renderVehicleList();
       renderNotesLog();
@@ -2041,28 +2181,6 @@
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
       await loadSensitiveForEditing(unitId);
-    }
-
-    function readPeopleFromDom() {
-      const items = [];
-      document.querySelectorAll("[data-person-idx]").forEach((input) => {
-        const idx = Number(input.getAttribute("data-person-idx"));
-        const field = input.getAttribute("data-person-field");
-        if (!items[idx]) items[idx] = {};
-        items[idx][field] = String(input.value || "").trim();
-      });
-      return items.filter((i) => i && (i.fullName || i.phone || i.relation));
-    }
-
-    function readVehiclesFromDom() {
-      const items = [];
-      document.querySelectorAll("[data-vehicle-idx]").forEach((input) => {
-        const idx = Number(input.getAttribute("data-vehicle-idx"));
-        const field = input.getAttribute("data-vehicle-field");
-        if (!items[idx]) items[idx] = {};
-        items[idx][field] = String(input.value || "").trim().toUpperCase();
-      });
-      return items.filter((i) => i && (i.plate || i.type || i.color));
     }
 
     async function saveUnitOccupant(event) {
@@ -2100,8 +2218,8 @@
         const legalNote = String(document.getElementById("u_legalNote").value || "").trim();
         const totalDebtValue = parseNumber(document.getElementById("u_totalDebt").value, 0);
         const totalDebtManual = document.getElementById("u_totalDebt").dataset.manual === "1";
-        const people = readPeopleFromDom();
-        const vehicles = readVehiclesFromDom();
+        const people = (editingUnitDraft && Array.isArray(editingUnitDraft.people)) ? editingUnitDraft.people : [];
+        const vehicles = (editingUnitDraft && Array.isArray(editingUnitDraft.vehicles)) ? editingUnitDraft.vehicles : [];
         const debtCalc = computeDebt({}, { principalDebt, paidAmount, dueDate }, legalInterestAnnualPct);
         const calculatedInterest = debtCalc.calculatedInterest;
         const totalDebt = totalDebtManual ? totalDebtValue : debtCalc.totalAuto;
@@ -2867,16 +2985,60 @@
         btn.addEventListener("click", () => activateUnitTab(btn.getAttribute("data-unit-tab")));
       });
       document.getElementById("addPersonBtn").addEventListener("click", () => {
-        if (!editingUnitDraft) return;
-        editingUnitDraft.people = editingUnitDraft.people || [];
-        editingUnitDraft.people.push({ id: `person_${Date.now()}`, fullName: "", relation: "", phone: "", note: "" });
-        renderPeopleList();
+        const box = document.getElementById("u_personAddBox");
+        box.style.display = box.style.display === "none" ? "block" : "none";
+        if (box.style.display !== "none") {
+          document.getElementById("u_newPersonFullName").focus();
+        }
       });
       document.getElementById("addVehicleBtn").addEventListener("click", () => {
+        const box = document.getElementById("u_vehicleAddBox");
+        box.style.display = box.style.display === "none" ? "block" : "none";
+        if (box.style.display !== "none") {
+          document.getElementById("u_newVehiclePlate").focus();
+        }
+      });
+      document.getElementById("confirmAddPersonBtn").addEventListener("click", () => {
         if (!editingUnitDraft) return;
+        const fullName = String(document.getElementById("u_newPersonFullName").value || "").trim();
+        const relation = String(document.getElementById("u_newPersonRelation").value || "").trim();
+        const phone = String(document.getElementById("u_newPersonPhone").value || "").trim();
+        const note = String(document.getElementById("u_newPersonNote").value || "").trim();
+        if (!fullName) {
+          setStateMessage("Kişi eklemek için ad soyad zorunlu.", "error");
+          return;
+        }
+        editingUnitDraft.people = editingUnitDraft.people || [];
+        editingUnitDraft.people.push({ id: `person_${Date.now()}`, fullName, relation, phone, note });
+        document.getElementById("u_newPersonFullName").value = "";
+        document.getElementById("u_newPersonRelation").value = "";
+        document.getElementById("u_newPersonPhone").value = "";
+        document.getElementById("u_newPersonNote").value = "";
+        renderPeopleList();
+      });
+      document.getElementById("cancelAddPersonBtn").addEventListener("click", () => {
+        document.getElementById("u_personAddBox").style.display = "none";
+      });
+      document.getElementById("confirmAddVehicleBtn").addEventListener("click", () => {
+        if (!editingUnitDraft) return;
+        const plate = String(document.getElementById("u_newVehiclePlate").value || "").trim().toUpperCase();
+        const type = String(document.getElementById("u_newVehicleType").value || "binek").trim();
+        const color = String(document.getElementById("u_newVehicleColor").value || "").trim();
+        const note = String(document.getElementById("u_newVehicleNote").value || "").trim();
+        if (!plate) {
+          setStateMessage("Araç eklemek için plaka zorunlu.", "error");
+          return;
+        }
         editingUnitDraft.vehicles = editingUnitDraft.vehicles || [];
-        editingUnitDraft.vehicles.push({ id: `vehicle_${Date.now()}`, plate: "", type: "", color: "", note: "" });
+        editingUnitDraft.vehicles.push({ id: `vehicle_${Date.now()}`, plate, type, color, note });
+        document.getElementById("u_newVehiclePlate").value = "";
+        document.getElementById("u_newVehicleType").value = "binek";
+        document.getElementById("u_newVehicleColor").value = "";
+        document.getElementById("u_newVehicleNote").value = "";
         renderVehicleList();
+      });
+      document.getElementById("cancelAddVehicleBtn").addEventListener("click", () => {
+        document.getElementById("u_vehicleAddBox").style.display = "none";
       });
       document.getElementById("u_peopleList").addEventListener("click", (e) => {
         const btn = e.target.closest("[data-person-remove]");

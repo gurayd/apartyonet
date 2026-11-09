@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap');
+
+:root {
+  color-scheme: light;
+  --ay-paper: #f8f8f2;
+  --ay-ink: #17283f;
+  --ay-muted: #465970;
+  --ay-line: #d9e0e4;
+  --ay-card: #fcfcf8;
+  --ay-tint: #ecf1fa;
+  --ay-blue: #174ebe;
+  --ay-action: #184db8;
+  --ay-navy: #122442;
+  --ay-lime: #e2f684;
+  --ay-drafting: #113d40;
+  --ay-drafting-line: #a1c8b7;
+  --ay-mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  --ay-green: #146249;
+  --ay-amber: #754200;
+  --ay-red: #a52932;
+  --ay-body: Manrope, sans-serif;
+  --ay-display: Outfit, Manrope, sans-serif;
+  --ay-shadow: 0 12px 32px #10243d0d;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ay-paper: #0d1828;
+  --ay-ink: #f0f4fb;
+  --ay-muted: #b1bfd2;
+  --ay-line: #34445b;
+  --ay-card: #142239;
+  --ay-tint: #162744;
+  --ay-blue: #a1bbff;
+  --ay-action: #2456bd;
+  --ay-green: #9fe6c0;
+  --ay-amber: #ffdc9c;
+  --ay-red: #ffb3b9;
+  --ay-shadow: 0 12px 32px #020c1f48;
+}

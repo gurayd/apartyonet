@@ -4,22 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ApartYönet | Rehberler</title>
-  <script>
-    (function initThemeEarly() {
-      try {
-        const key = "apartyonet_theme";
-        const saved = localStorage.getItem(key);
-        const fallback = "dark";
-        const pref = (saved === "light" || saved === "dark") ? saved : "";
-        document.documentElement.setAttribute("data-theme", pref || fallback);
-      } catch (_) {
-        document.documentElement.setAttribute("data-theme", "dark");
-      }
-    })();
-  </script>
+  <script src="/js/brand-theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #080c14;
@@ -344,40 +331,21 @@
       .grid { grid-template-columns: 1fr; }
     }
   </style>
+  <link rel="stylesheet" href="/css/brand.css">
+  <link rel="stylesheet" href="/css/interfaces.css">
 </head>
-<body data-disable-floating-theme="true">
-  <header class="top">
-    <div class="container top-inner">
-      <a class="brand" href="/index.html" aria-label="ApartYönet Anasayfa">
-        <img src="assets/apartyonet-logo-white-transparent.svg" alt="ApartYönet logo" />
-        <span>ApartYönet</span>
-      </a>
-      <nav id="topMenu" class="menu" aria-label="Üst menü">
-        <a href="/index.html#ozellikler">Özellikler</a>
-        <a href="/ornek-panel.html">Örnek Panel</a>
-        <a href="/rehberler.html">Rehberler</a>
-        <a href="/fiyatlandirma.html">Fiyatlandırma</a>
-      </nav>
-      <button id="menuToggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="topMenu" aria-label="Menüyü aç/kapat">
-        <span class="burger" aria-hidden="true"></span>
-      </button>
-      <div class="actions-head">
-        <div class="actions-top">
-          <a class="btn" style="color: var(--text); border: 1px solid var(--border); background: color-mix(in srgb, var(--surface-2) 78%, transparent);" href="/login.html">Giriş Yap</a>
-          <button id="themeToggleBtn" class="btn theme-btn" data-inline-theme-toggle type="button" aria-label="Temayı değiştir" style="color: var(--text); border: 1px solid var(--border); background: color-mix(in srgb, var(--surface-2) 78%, transparent);">
-            <span data-theme-icon aria-hidden="true">🌙</span>
-          </button>
-        </div>
-        <a class="btn btn-primary action-demo" href="/basvuru.html">Başvur</a>
-      </div>
-    </div>
-  </header>
+<body class="ay-ui ay-guides">
+  <header class="ay-header"><div class="ay-shell ay-header-inner">
+    <a class="ay-brand" href="/"><img src="/assets/apartyonet-building-mark-transparent.svg" alt="" width="32" height="32">Apart<span>Yönet</span></a>
+    <nav class="ay-nav" aria-label="Ana menü"><a href="/#ozellikler">Özellikler</a><a href="/fiyatlandirma.html">Fiyatlandırma</a><a href="/rehberler.html" aria-current="page">Rehberler</a></nav>
+    <div class="ay-header-actions"><a href="/login.html">Giriş Yap</a><button class="ay-theme" data-brand-theme type="button" aria-label="Koyu tema" aria-pressed="false" hidden><span aria-hidden="true">☾</span></button></div>
+  </div></header>
 
   <main class="container">
     <section class="hero">
-      <h1>Site Yönetimi Rehberleri</h1>
-      <p>ApartYönet için hazırlanmış kısa bilgi notlarını bu sayfada topladım.</p>
-      <div class="notice">Not: Bu sayfada yalnızca kendi özet içerik kartlarımız yer alır.</div>
+      <div class="ay-kicker">APARTYÖNET / KAYNAKLAR</div>
+      <h1>Yönetim rehberleri.</h1>
+      <p>İlk toplantıdan gider planına, apartman ve site yönetiminde sık karşılaşılan konular için kısa rehberler.</p>
     </section>
 
     <section class="grid" aria-label="Rehber kartları">
@@ -460,36 +428,5 @@
     </section>
   </main>
 
-  <script>
-    (function initMobileMenu() {
-      const root = document.querySelector(".top-inner");
-      const toggle = document.getElementById("menuToggle");
-      const menu = document.getElementById("topMenu");
-      if (!root || !toggle || !menu) return;
-
-      toggle.addEventListener("click", () => {
-        const open = root.classList.toggle("menu-open");
-        toggle.setAttribute("aria-expanded", open ? "true" : "false");
-      });
-
-      menu.querySelectorAll("a").forEach((link) => {
-        link.addEventListener("click", () => {
-          root.classList.remove("menu-open");
-          toggle.setAttribute("aria-expanded", "false");
-        });
-      });
-    })();
-
-    (function initInlineThemeToggle() {
-      const btn = document.getElementById("themeToggleBtn");
-      if (!btn) return;
-      btn.addEventListener("click", () => {
-        if (window.AppTheme && typeof window.AppTheme.toggleTheme === "function") {
-          window.AppTheme.toggleTheme();
-        }
-      });
-    })();
-  </script>
-  <script src="/js/theme.js"></script>
 </body>
 </html>

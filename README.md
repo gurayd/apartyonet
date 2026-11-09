@@ -5,6 +5,14 @@ Project: Apartman Yonetim Sistemi
 ## Deploy
 GitHub -> Vercel -> Custom Domain
 
+Canli proje: `gurayd/apartyonet` -> Vercel `apartyonet` -> `apartyonet.com`.
+Mevcut Vercel projesine baglanin; yeni proje veya domain olusturmayin.
+
+- `APARTYONET_CREDENTIALS_WEBHOOK`: mevcut Apps Script e-posta servisinin sunucuya ozel Vercel degiskeni. Degeri GitHub'a veya istemci koduna eklemeyin.
+- Yerel API kontrolu: `node --test tests/send-credentials.test.js`.
+- Alan adini degistirmeden bir surum hazirlamak icin: `vercel deploy --prod --skip-domain`. Giris, basvuru, ornek panel ve API rotalarini kontrol ettikten sonra `vercel promote <deployment-url>` kullanin.
+- Bu web yayini Firebase kurallarini degistirmez.
+
 ## Structure
 - `index.html` = landing page
 - `basvuru.html` = form
@@ -17,7 +25,7 @@ GitHub -> Vercel -> Custom Domain
 ## Vercel Routing
 Bu projede `vercel.json` ile su route yapisi kullanilir:
 - `/basvuru` -> `basvuru.html`
-- `/apartman-adi` gibi tek segment URL'ler -> `site.html`
+- `/apartman-adi` gibi tek segment URL'ler -> `demo.html`
 
 ## Firebase
 Bu repoda basvuru formu Firebase Firestore'a veri yazar.
@@ -53,9 +61,3 @@ const firebaseConfig = {
   projectId: "YOUR_PROJECT_ID"
 };
 ```
-
-## GitHub Deploy Talimati
-1. GitHub repo olustur
-2. Bu klasoru repo icine yukle
-3. Vercel -> Import Git Repository
-4. Domain bagla
